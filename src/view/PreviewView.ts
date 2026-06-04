@@ -58,6 +58,7 @@ export class WeChatPublisherPreviewView extends ItemView {
 	private articleEl!: HTMLElement;
 	private emptyEl!: HTMLElement;
 	private copyButton!: HTMLButtonElement;
+	private syncButton!: HTMLButtonElement;
 	private settingsButton!: HTMLButtonElement;
 	private settingsPanel!: HTMLElement;
 	private isSettingsOpen = false;
@@ -70,6 +71,7 @@ export class WeChatPublisherPreviewView extends ItemView {
 		private readonly getSettings: () => PluginSettings,
 		private readonly saveSettings: (settings: PluginSettings) => Promise<void>,
 		private readonly applyFormat: (action: MarkdownFormatAction) => void = () => {},
+		private readonly uploadDraft: () => void | Promise<void> = () => {},
 	) {
 		super(leaf);
 		this.navigation = false;
@@ -94,6 +96,18 @@ export class WeChatPublisherPreviewView extends ItemView {
 		const header = this.contentEl.createDiv({ cls: 'wechat-publisher-preview-header' });
 		header.createEl('h2', { text: '公众号预览' });
 		const actions = header.createDiv({ cls: 'wechat-publisher-preview-actions' });
+
+		this.syncButton = actions.createEl('button', {
+			cls: 'wechat-publisher-icon-button',
+			attr: {
+				'aria-label': '上传到公众号草稿箱',
+				title: '上传到公众号草稿箱',
+			},
+		}) as HTMLButtonElement;
+		setIcon(this.syncButton, 'upload-cloud');
+		this.syncButton.addEventListener('click', () => {
+			void this.uploadDraft();
+		});
 
 		this.settingsButton = actions.createEl('button', {
 			cls: 'wechat-publisher-icon-button',
@@ -168,12 +182,13 @@ export class WeChatPublisherPreviewView extends ItemView {
 	}
 
 	private renderArticle(): void {
-		if (!this.articleEl || !this.emptyEl || !this.copyButton) {
+		if (!this.articleEl || !this.emptyEl || !this.copyButton || !this.syncButton) {
 			return;
 		}
 
 		if (!this.article) {
 			this.copyButton.disabled = true;
+			this.syncButton.disabled = true;
 			this.articleEl.empty();
 			this.articleEl.hide();
 			this.emptyEl.show();
@@ -181,6 +196,7 @@ export class WeChatPublisherPreviewView extends ItemView {
 		}
 
 		this.copyButton.disabled = false;
+		this.syncButton.disabled = false;
 		this.emptyEl.hide();
 		this.articleEl.show();
 		this.articleEl.innerHTML = this.article.html;
@@ -230,6 +246,33 @@ export class WeChatPublisherPreviewView extends ItemView {
 		);
 		this.addText(content, '头像 URL', 'https://...', settings.avatarUrl, (value) =>
 			this.savePatch({ avatarUrl: value.trim() }),
+		);
+
+		content.createDiv({ cls: 'wechat-publisher-settings-divider' });
+		content.createEl('h4', { text: '公众号接口' });
+		content.createEl('p', {
+			cls: 'wechat-publisher-settings-help',
+			text: '用于上传到草稿箱。AppSecret 会明文保存在当前库的插件数据里。',
+		});
+		this.addText(content, 'AppID', '公众号 AppID', settings.wechatAppId, (value) =>
+			this.savePatch({ wechatAppId: value.trim() }),
+		);
+		this.addText(
+			content,
+			'AppSecret',
+			'公众号 AppSecret',
+			settings.wechatAppSecret,
+			(value) => this.savePatch({ wechatAppSecret: value.trim() }),
+			'password',
+		);
+		this.addText(content, '默认封面 media_id', '永久素材 media_id', settings.wechatThumbMediaId, (value) =>
+			this.savePatch({ wechatThumbMediaId: value.trim() }),
+		);
+		this.addText(content, '原文链接', 'https://...', settings.wechatSourceUrl, (value) =>
+			this.savePatch({ wechatSourceUrl: value.trim() }),
+		);
+		this.addToggle(content, '开启评论', '上传草稿时允许文章留言评论', settings.wechatNeedOpenComment, (value) =>
+			this.savePatch({ wechatNeedOpenComment: value }),
 		);
 
 		const clearButton = content.createEl('button', {
@@ -367,10 +410,11 @@ export class WeChatPublisherPreviewView extends ItemView {
 		placeholder: string,
 		value: string,
 		onChange: (value: string) => Promise<void>,
+		inputType: 'text' | 'password' = 'text',
 	): void {
 		const field = this.createField(container, label);
 		const input = field.createEl('input', {
-			type: 'text',
+			type: inputType,
 			attr: { placeholder },
 		});
 		input.value = value;

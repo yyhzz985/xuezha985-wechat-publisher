@@ -36,7 +36,7 @@ test('registers command and ribbon icon for previewing wechat html', () => {
 		() => DEFAULT_SETTINGS,
 	).register();
 
-	assert.deepEqual(registered.commandIds, ['copy-as-wechat-html', 'preview-wechat-html']);
+	assert.deepEqual(registered.commandIds, ['copy-as-wechat-html', 'preview-wechat-html', 'upload-wechat-draft']);
 	assert.deepEqual(registered.eventNames, ['editor-change', 'active-leaf-change']);
 	assert.equal(registered.ribbonIcon, 'panel-right-open');
 	assert.equal(registered.ribbonTitle, '打开公众号实时预览');
@@ -186,4 +186,68 @@ test('applies toolbar formatting to the last previewed markdown editor', () => {
 	controller.applyFormat('bold');
 
 	assert.equal(view.editor.replaced, '**重点**');
+});
+
+test('uploads full current markdown to wechat draft box', () => {
+	let activeView: unknown = null;
+	const commands: Record<string, { checkCallback: (checking: boolean) => boolean }> = {};
+	const uploads: Array<{ markdown: string; html: string }> = [];
+	const plugin = {
+		addCommand(command: { id: string; checkCallback: (checking: boolean) => boolean }) {
+			commands[command.id] = command;
+		},
+		addRibbonIcon() {},
+		registerEvent() {},
+		app: {
+			workspace: {
+				getActiveViewOfType() {
+					return activeView;
+				},
+				on() {
+					return {};
+				},
+			},
+		},
+	} as unknown as Plugin;
+
+	class FakeMarkdownView {
+		editor = {
+			getValue() {
+				return '## 标题\n\n正文';
+			},
+			getSelection() {
+				return '只选中这一句';
+			},
+		};
+	}
+
+	const controller = new PublisherController(
+		plugin,
+		FakeMarkdownView as unknown as typeof MarkdownView,
+		() => ({
+			...DEFAULT_SETTINGS,
+			wechatAppId: 'APPID',
+			wechatAppSecret: 'SECRET',
+			wechatThumbMediaId: 'THUMB',
+		}),
+		undefined,
+		undefined,
+		undefined,
+		undefined,
+		undefined,
+		{
+			async uploadDraft(article, markdown) {
+				uploads.push({ markdown, html: article.html });
+				return { mediaId: 'DRAFT_MEDIA_ID' };
+			},
+		},
+	);
+	controller.register();
+
+	activeView = new FakeMarkdownView();
+	commands['upload-wechat-draft'].checkCallback(false);
+
+	assert.equal(uploads.length, 1);
+	assert.equal(uploads[0].markdown, '## 标题\n\n正文');
+	assert.match(uploads[0].html, /正文/);
 });

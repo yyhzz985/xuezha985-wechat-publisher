@@ -31,6 +31,13 @@ export class SettingsRepository {
 			layoutTheme: this.normalizeLayoutTheme(merged.layoutTheme),
 			fontWeight: this.normalizeOption(merged.fontWeight, FONT_WEIGHT_OPTIONS, DEFAULT_SETTINGS.fontWeight),
 			subheadingStyle: this.normalizeOption(merged.subheadingStyle, SUBHEADING_STYLE_OPTIONS, DEFAULT_SETTINGS.subheadingStyle),
+			wechatAppId: this.normalizeText(merged.wechatAppId),
+			wechatAppSecret: this.normalizeText(merged.wechatAppSecret),
+			wechatThumbMediaId: this.normalizeText(merged.wechatThumbMediaId),
+			wechatSourceUrl: this.normalizeText(merged.wechatSourceUrl),
+			wechatNeedOpenComment: typeof merged.wechatNeedOpenComment === 'boolean'
+				? merged.wechatNeedOpenComment
+				: DEFAULT_SETTINGS.wechatNeedOpenComment,
 		};
 	}
 
@@ -58,5 +65,9 @@ export class SettingsRepository {
 			return defaultValue;
 		}
 		return options.some((option) => option.value === value) ? value as T : defaultValue;
+	}
+
+	private normalizeText(value: unknown): string {
+		return typeof value === 'string' ? value : '';
 	}
 }

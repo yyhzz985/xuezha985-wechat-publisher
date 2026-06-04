@@ -36,6 +36,11 @@ export interface PluginSettings {
 	layoutTheme: LayoutTheme;
 	fontWeight: FontWeight;
 	subheadingStyle: SubheadingStyle;
+	wechatAppId: string;
+	wechatAppSecret: string;
+	wechatThumbMediaId: string;
+	wechatSourceUrl: string;
+	wechatNeedOpenComment: boolean;
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -46,6 +51,11 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 	layoutTheme: 'green-blue',
 	fontWeight: 'medium',
 	subheadingStyle: 'number',
+	wechatAppId: '',
+	wechatAppSecret: '',
+	wechatThumbMediaId: '',
+	wechatSourceUrl: '',
+	wechatNeedOpenComment: true,
 };
 
 export const LAYOUT_THEME_GROUPS: LayoutThemeGroup[] = [

@@ -95,6 +95,58 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 					.onChange((value) => this.savePatch({ avatarUrl: value.trim() })),
 			);
 
+		containerEl.createEl('h3', { text: '公众号接口' });
+		containerEl.createEl('p', {
+			cls: 'wechat-publisher-setting-note',
+			text: '用于上传到草稿箱。AppSecret 会明文保存在当前库的插件数据里，微信后台还需要配置服务器 IP 白名单。',
+		});
+		new Setting(containerEl)
+			.setName('AppID')
+			.addText((text) =>
+				text
+					.setPlaceholder('公众号 AppID')
+					.setValue(settings.wechatAppId)
+					.onChange((value) => this.savePatch({ wechatAppId: value.trim() })),
+			);
+
+		new Setting(containerEl)
+			.setName('AppSecret')
+			.addText((text) => {
+				text.inputEl.type = 'password';
+				text
+					.setPlaceholder('公众号 AppSecret')
+					.setValue(settings.wechatAppSecret)
+					.onChange((value) => this.savePatch({ wechatAppSecret: value.trim() }));
+			});
+
+		new Setting(containerEl)
+			.setName('默认封面 media_id')
+			.setDesc('先在公众号后台上传一张永久图片素材，再填写它的 media_id。')
+			.addText((text) =>
+				text
+					.setPlaceholder('永久素材 media_id')
+					.setValue(settings.wechatThumbMediaId)
+					.onChange((value) => this.savePatch({ wechatThumbMediaId: value.trim() })),
+			);
+
+		new Setting(containerEl)
+			.setName('原文链接')
+			.addText((text) =>
+				text
+					.setPlaceholder('https://...')
+					.setValue(settings.wechatSourceUrl)
+					.onChange((value) => this.savePatch({ wechatSourceUrl: value.trim() })),
+			);
+
+		new Setting(containerEl)
+			.setName('开启评论')
+			.setDesc('上传草稿时允许文章留言评论')
+			.addToggle((toggle) =>
+				toggle
+					.setValue(settings.wechatNeedOpenComment)
+					.onChange((value) => this.savePatch({ wechatNeedOpenComment: value })),
+			);
+
 		new Setting(containerEl)
 			.setName('清空本地设置')
 			.addButton((button) =>

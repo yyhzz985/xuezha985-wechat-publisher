@@ -6,6 +6,13 @@ import { formatMarkdownSelection, type MarkdownFormatAction } from '../utils/mar
 import { type NoticeView, silentNoticeView } from '../view/NoticeView';
 
 type PreviewArticle = (article: FormattedWeChatArticle | null, reveal: boolean) => void | Promise<void>;
+type DraftService = {
+	uploadDraft(
+		article: FormattedWeChatArticle,
+		markdown: string,
+		settings: PluginSettings,
+	): Promise<{ mediaId: string }>;
+};
 
 export class PublisherController {
 	private lastPreviewMarkdown = '';
@@ -20,6 +27,11 @@ export class PublisherController {
 		private readonly isPreviewOpen: () => boolean = () => false,
 		private readonly formatService = new WeChatFormatService(),
 		private readonly clipboardService = new ClipboardService(),
+		private readonly draftService: DraftService = {
+			async uploadDraft() {
+				throw new Error('未配置公众号草稿上传服务');
+			},
+		},
 	) {}
 
 	register(): void {
@@ -51,6 +63,23 @@ export class PublisherController {
 
 				if (!checking) {
 					this.previewFromView(view);
+				}
+
+				return true;
+			},
+		});
+
+		this.plugin.addCommand({
+			id: 'upload-wechat-draft',
+			name: '上传到公众号草稿箱',
+			checkCallback: (checking) => {
+				const view = this.getCurrentMarkdownView();
+				if (!view) {
+					return false;
+				}
+
+				if (!checking) {
+					void this.uploadDraftFromView(view);
 				}
 
 				return true;
@@ -113,6 +142,16 @@ export class PublisherController {
 		this.updatePreviewFromView(view, false);
 	}
 
+	uploadDraft(): void {
+		const view = this.getCurrentMarkdownView();
+		if (!view) {
+			this.noticeView.showDraftError(new Error('请先打开一篇 Markdown 笔记'));
+			return;
+		}
+
+		void this.uploadDraftFromView(view);
+	}
+
 	private async copyFromView(view: MarkdownView): Promise<void> {
 		const markdown = this.readMarkdownForCopy(view);
 		if (!markdown.trim()) {
@@ -127,6 +166,24 @@ export class PublisherController {
 		} catch (error) {
 			console.error('[WeChat Publisher] copy failed', error);
 			this.noticeView.showError(error);
+		}
+	}
+
+	private async uploadDraftFromView(view: MarkdownView): Promise<void> {
+		const markdown = this.readMarkdownForPreview(view);
+		if (!markdown.trim()) {
+			this.noticeView.showEmpty();
+			return;
+		}
+
+		try {
+			const settings = this.getSettings();
+			const article = this.formatService.format(markdown, settings);
+			const result = await this.draftService.uploadDraft(article, markdown, settings);
+			this.noticeView.showDraftSuccess(result.mediaId);
+		} catch (error) {
+			console.error('[WeChat Publisher] draft upload failed', error);
+			this.noticeView.showDraftError(error);
 		}
 	}
 

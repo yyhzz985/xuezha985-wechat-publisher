@@ -1,7 +1,8 @@
-import { MarkdownView, Notice, Plugin, type WorkspaceLeaf } from 'obsidian';
+import { MarkdownView, Notice, Plugin, requestUrl, type WorkspaceLeaf } from 'obsidian';
 import { PublisherController } from './controller/PublisherController';
 import { SettingsRepository } from './repository/SettingsRepository';
 import { ClipboardService } from './service/ClipboardService';
+import { WeChatDraftService, type WeChatHttpClient } from './service/WeChatDraftService';
 import type { FormattedWeChatArticle } from './service/WeChatFormatService';
 import type { PluginSettings } from './settings';
 import { ObsidianNoticeView } from './view/NoticeView';
@@ -18,6 +19,7 @@ export default class WeChatPublisherPlugin extends Plugin {
 		this.settings = await this.settingsRepository.load();
 		const noticeView = new ObsidianNoticeView(Notice);
 		const clipboardService = new ClipboardService();
+		const draftService = new WeChatDraftService(this.createWeChatHttpClient());
 
 		this.publisherController = new PublisherController(
 			this,
@@ -28,6 +30,9 @@ export default class WeChatPublisherPlugin extends Plugin {
 				void this.updatePreviewPane(article, reveal);
 			},
 			() => this.isPreviewPaneOpen(),
+			undefined,
+			clipboardService,
+			draftService,
 		);
 
 		this.registerView(
@@ -39,6 +44,7 @@ export default class WeChatPublisherPlugin extends Plugin {
 				() => this.settings,
 				(settings) => this.saveSettings(settings),
 				(action) => this.publisherController.applyFormat(action),
+				() => this.publisherController.uploadDraft(),
 			),
 		);
 
@@ -51,6 +57,21 @@ export default class WeChatPublisherPlugin extends Plugin {
 				(settings) => this.saveSettings(settings),
 			),
 		);
+	}
+
+	private createWeChatHttpClient(): WeChatHttpClient {
+		return {
+			async requestJson(request) {
+				const hasBody = request.body !== undefined;
+				const response = await requestUrl({
+					url: request.url,
+					method: request.method,
+					body: hasBody ? JSON.stringify(request.body) : undefined,
+					headers: hasBody ? { 'Content-Type': 'application/json' } : undefined,
+				});
+				return response.json;
+			},
+		};
 	}
 
 	async saveSettings(settings: PluginSettings): Promise<void> {
