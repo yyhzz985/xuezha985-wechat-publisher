@@ -1,0 +1,5 @@
+node_modules/
+.obsidian/
+.playwright-mcp/
+.DS_Store
+npm-debug.log*

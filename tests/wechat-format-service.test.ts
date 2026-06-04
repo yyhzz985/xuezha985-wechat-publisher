@@ -1,0 +1,283 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { WeChatFormatService } from '../src/service/WeChatFormatService';
+import { DEFAULT_SETTINGS, LAYOUT_THEME_GROUPS } from '../src/settings';
+
+test('formats note content and removes yaml frontmatter', () => {
+	const service = new WeChatFormatService();
+	const result = service.format(`---
+title: Hidden
+---
+
+## 标题
+
+你好Obsidian 2026。
+`, {
+		...DEFAULT_SETTINGS,
+		codeTheme: 'dark',
+	});
+
+	assert.equal(result.html.includes('title: Hidden'), false);
+	assert.match(result.html, /标题/);
+	assert.match(result.html, /你好 Obsidian 2026/);
+	assert.match(result.plainText, /你好 Obsidian 2026/);
+});
+
+test('renders possible-bar fixed opening module', () => {
+	const service = new WeChatFormatService();
+	const result = service.format('正文', DEFAULT_SETTINGS);
+
+	assert.match(result.html, /class="wechat-markdown-root"/);
+	assert.match(result.html, /class="reading-time"/);
+	assert.match(result.html, /reading-time__card-author/);
+	assert.match(result.html, /border-right: 1px solid #66CCC5/);
+	assert.match(result.html, /background-image: url\('https:\/\/mp\.knb\.im\/jn\.png'\)/);
+	assert.match(result.html, /阿禅 Jason Ng/);
+	assert.match(result.html, /读完需要/);
+	assert.match(result.html, /速读仅需 1 分钟/);
+});
+
+test('renders possible-bar heading styles', () => {
+	const service = new WeChatFormatService();
+	const result = service.format(`# 顶部大标题
+
+## 第一章
+
+### 第一节
+
+#### 小标题
+
+## 第二章
+`, DEFAULT_SETTINGS);
+
+	assert.match(result.html, /<h1 style="margin: 1.6em 8px 1em; color: rgb\(41, 148, 128\); font-size: 22px/);
+	assert.match(result.html, /<strong style="color: rgb\(41, 148, 128\); font-weight: 600; margin-right: 8px">\/<\/strong>顶部大标题/);
+	assert.match(result.html, /class="h2-progress"[^>]*>1<\/p>/);
+	assert.match(result.html, /background: linear-gradient\(to right, rgb\(41, 148, 128\) 50%, rgb\(73, 200, 149\) 50%\)/);
+	assert.match(result.html, /class="h2-progress-title"/);
+	assert.match(result.html, /class="h3-progress"[^>]*>1\.1<\/p>/);
+	assert.match(result.html, /background: linear-gradient\(to right, rgb\(26, 149, 165\), rgb\(38, 198, 218\)\)/);
+	assert.match(result.html, /class="h3-progress-title"/);
+	assert.match(result.html, /<h4 style="margin: 1.6em 8px 0.6em; color: rgb\(62, 62, 62\); font-size: 17px/);
+});
+
+test('applies layout theme and font weight settings', () => {
+	const service = new WeChatFormatService();
+	const result = service.format('## Section\n\nBody text', {
+		...DEFAULT_SETTINGS,
+		layoutTheme: 'blue-indigo',
+		fontWeight: 'bold',
+	});
+
+	assert.match(result.html, /rgb\(32, 91, 195\)/);
+	assert.match(result.html, /font-weight: 500/);
+	assert.match(result.html, /font-weight: 700/);
+});
+
+test('exposes possible-bar theme groups with color previews', () => {
+	const themeLabels = LAYOUT_THEME_GROUPS.reduce<string[]>(
+		(labels, group) => labels.concat(group.options.map((option) => option.label)),
+		[],
+	);
+
+	assert.deepEqual(themeLabels, [
+		'绿蓝',
+		'黑白',
+		'蓝靛',
+		'红火',
+		'桃红',
+		'金黄',
+		'钢人',
+		'小丑',
+		'老爷',
+		'洛基',
+		'小虫',
+		'毒藤',
+	]);
+	assert.equal(LAYOUT_THEME_GROUPS[0].label, '颜色');
+	assert.equal(LAYOUT_THEME_GROUPS[1].label, '超英');
+	assert.equal(LAYOUT_THEME_GROUPS[0].options[0].swatch, 'linear-gradient(to right, rgb(41, 148, 128), rgb(73, 200, 149))');
+});
+
+test('applies possible-bar red theme colors', () => {
+	const service = new WeChatFormatService();
+	const result = service.format('## Section\n\nBody text', {
+		...DEFAULT_SETTINGS,
+		layoutTheme: 'red',
+	});
+
+	assert.match(result.html, /rgb\(187, 30, 30\)/);
+	assert.match(result.html, /rgb\(255, 73, 73\)/);
+});
+
+test('switches h2 and h3 subheading markers', () => {
+	const service = new WeChatFormatService();
+	const withNumber = service.format('## First\n\n### Subheading\n\n## Second', {
+		...DEFAULT_SETTINGS,
+		subheadingStyle: 'number',
+	});
+	const withoutNumber = service.format('## First\n\n### Subheading\n\n## Second', {
+		...DEFAULT_SETTINGS,
+		subheadingStyle: 'none',
+	});
+	const withEye = service.format('## First\n\n### Subheading\n\n## Second', {
+		...DEFAULT_SETTINGS,
+		subheadingStyle: 'eye',
+	});
+
+	assert.match(withNumber.html, /class="h2-progress"[^>]*>1<\/p>/);
+	assert.match(withNumber.html, /class="h3-progress"[^>]*>1\.1<\/p>/);
+	assert.equal(withoutNumber.html.includes('class="h3-progress"'), false);
+	assert.equal(withoutNumber.html.includes('class="h2-progress"'), false);
+	assert.equal(withoutNumber.html.includes('class="h2-eye-marker"'), false);
+	assert.equal(withoutNumber.html.includes('>1.1</p>'), false);
+	assert.equal(withoutNumber.html.includes('>1</p>'), false);
+	assert.match(withoutNumber.html, /background: linear-gradient\(to right, rgb\(41, 148, 128\) 50%, rgb\(73, 200, 149\) 50%\)/);
+	assert.match(withoutNumber.html, /background: linear-gradient\(to right, rgb\(26, 149, 165\), rgb\(38, 198, 218\)\)/);
+	assert.match(withEye.html, /class="h2-eye-marker"/);
+	assert.match(withEye.html, /&#128064;/);
+	assert.match(withEye.html, /width: 50%/);
+	assert.equal(withEye.html.includes('class="h2-progress"'), false);
+	assert.equal(withEye.html.includes('class="h3-progress"'), false);
+	assert.equal(withEye.html.includes('class="h3-eye-marker"'), false);
+	assert.match(withEye.html, /background: linear-gradient\(to right, rgb\(41, 148, 128\) 50%, rgb\(73, 200, 149\) 50%\)/);
+	assert.match(withEye.html, /background: linear-gradient\(to right, rgb\(26, 149, 165\), rgb\(38, 198, 218\)\)/);
+	assert.equal(withEye.html.includes('class="h3-eye-title"'), false);
+});
+
+test('keeps wechat links and rewrites external links', () => {
+	const service = new WeChatFormatService();
+	const result = service.format(
+		`[内链](https://mp.weixin.qq.com/s/example) 和 [外链](https://example.com/path)。`,
+		DEFAULT_SETTINGS,
+	);
+
+	assert.match(result.html, /href="https:\/\/mp\.weixin\.qq\.com\/s\/example"/);
+	assert.equal(result.html.includes('href="https://example.com/path"'), false);
+	assert.match(result.html, /外链（https:\/\/example\.com\/path）/);
+});
+
+test('adds reading meta when enabled', () => {
+	const service = new WeChatFormatService();
+	const result = service.format('# 正文\n\n内容', {
+		...DEFAULT_SETTINGS,
+		authorName: '阿禅',
+		avatarUrl: 'https://example.com/avatar.png',
+		showReadingTime: true,
+	});
+
+	assert.match(result.html, /阿禅/);
+	assert.match(result.html, /avatar\.png/);
+	assert.match(result.html, /分钟/);
+});
+
+test('escapes fenced code block html', () => {
+	const service = new WeChatFormatService();
+	const result = service.format('```html\n<div>hi</div>\n```', DEFAULT_SETTINGS);
+
+	assert.equal(result.html.includes('<div>hi</div>'), false);
+	assert.match(result.html, /&lt;div&gt;hi&lt;\/div&gt;/);
+});
+
+test('renders fenced code blocks with horizontal scrolling and line numbers', () => {
+	const service = new WeChatFormatService();
+	const result = service.format(`\`\`\`
+my-app/
+├── public/                         # 静态资源（图片、字体等），URL 直接访问
+├── src/                            # 源代码（推荐放这里）
+\`\`\`
+`, {
+		...DEFAULT_SETTINGS,
+		codeTheme: 'dark',
+	});
+
+	assert.match(result.html, /<section class="shiki github-dark"/);
+	assert.match(result.html, /overflow-x: scroll/);
+	assert.match(result.html, /tabindex="0"/);
+	assert.match(result.html, /font-size: 13px/);
+	assert.match(result.html, /line-height: 19px/);
+	assert.match(result.html, /letter-spacing: 0/);
+	assert.match(result.html, /white-space: nowrap/);
+	assert.match(result.html, /width: \d+px/);
+	assert.match(result.html, /min-width: 100%/);
+	assert.match(result.html, /word-break: keep-all/);
+	assert.match(result.html, /class="code-scroll-area"/);
+	assert.equal(result.html.includes('class="code-scrollbar-track"'), false);
+	assert.equal(result.html.includes('class="code-scrollbar-thumb"'), false);
+	assert.match(result.html, /1&nbsp;&nbsp;my-app\//);
+	assert.match(result.html, /2&nbsp;&nbsp;.*public\//);
+	assert.equal(result.html.includes('class="line-no"'), false);
+	assert.equal(result.html.includes('display: inline-block; min-width: max-content'), false);
+});
+
+test('renders knb special containers', () => {
+	const service = new WeChatFormatService();
+	const result = service.format(`:::intro
+这是一段摘要。
+:::
+
+:::highlight
+这是一句金句。
+:::
+
+:::warning
+注意这里。
+:::
+`, DEFAULT_SETTINGS);
+
+	assert.match(result.html, /container-intro/);
+	assert.match(result.html, /border-top: 1px dashed rgb\(41, 148, 128\)/);
+	assert.match(result.html, /这是一段摘要/);
+	assert.match(result.html, /knb-highlight/);
+	assert.match(result.html, /这是一句金句/);
+	assert.match(result.html, /knb-callout/);
+	assert.match(result.html, /注意/);
+});
+
+test('keeps markdown tables inside article margins', () => {
+	const service = new WeChatFormatService();
+	const result = service.format(`| 文件 | 作用 |
+| --- | --- |
+| \`next.config.ts\` | Next.js 开关总控——图片域名、重定向、环境变量等 |
+| \`tsconfig.json\` | TS 编译规则——路径别名（@/）、严格模式 |
+`, DEFAULT_SETTINGS);
+
+	assert.match(result.html, /class="knb-table-wrap"/);
+	assert.match(result.html, /margin: 1.2em 8px/);
+	assert.match(result.html, /box-sizing: border-box/);
+	assert.match(result.html, /table-layout: fixed/);
+	assert.match(result.html, /overflow-wrap: anywhere/);
+	assert.match(result.html, /word-break: break-word/);
+});
+
+test('renders toc marker from h2 headings', () => {
+	const service = new WeChatFormatService();
+	const result = service.format(`[TOC]
+
+## 第一章
+内容
+
+## 第二章
+更多内容
+`, DEFAULT_SETTINGS);
+
+	assert.match(result.html, /knb-toc/);
+	assert.match(result.html, /第一章/);
+	assert.match(result.html, /第二章/);
+});
+
+test('renders knb inline extensions and task list', () => {
+	const service = new WeChatFormatService();
+	const result = service.format(`普通段落有==高亮==、++下划线++、H~2~O 和 x^2^。
+
+- [x] 已完成
+- [ ] 待办
+`, DEFAULT_SETTINGS);
+
+	assert.match(result.html, /<mark/);
+	assert.match(result.html, /<u/);
+	assert.match(result.html, /<sub/);
+	assert.match(result.html, /<sup/);
+	assert.match(result.html, /✅/);
+	assert.match(result.html, /⬜/);
+});

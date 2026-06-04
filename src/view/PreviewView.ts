@@ -1,0 +1,408 @@
+import { ItemView, setIcon, type WorkspaceLeaf } from 'obsidian';
+import {
+	CODE_THEME_OPTIONS,
+	DEFAULT_SETTINGS,
+	FONT_WEIGHT_OPTIONS,
+	LAYOUT_THEME_GROUPS,
+	LAYOUT_THEME_OPTIONS,
+	SUBHEADING_STYLE_OPTIONS,
+	type CodeTheme,
+	type FontWeight,
+	type LayoutTheme,
+	type PluginSettings,
+	type SubheadingStyle,
+} from '../settings';
+import type { ClipboardService } from '../service/ClipboardService';
+import type { FormattedWeChatArticle } from '../service/WeChatFormatService';
+import type { MarkdownFormatAction } from '../utils/markdownEditUtils';
+import type { NoticeView } from './NoticeView';
+
+export const VIEW_TYPE_WECHAT_PUBLISHER_PREVIEW = 'wechat-publisher-preview';
+
+interface FormatTool {
+	action: MarkdownFormatAction;
+	label: string;
+	title: string;
+	icon?: string;
+}
+
+const BASIC_FORMAT_TOOLS: FormatTool[] = [
+	{ action: 'h1', label: 'H1', title: '一级标题' },
+	{ action: 'h2', label: 'H2', title: '二级标题' },
+	{ action: 'h3', label: 'H3', title: '三级标题' },
+	{ action: 'h4', label: 'H4', title: '四级标题' },
+	{ action: 'bold', label: 'B', title: '加粗', icon: 'bold' },
+	{ action: 'inlineCode', label: '<>', title: '行内代码', icon: 'code-2' },
+	{ action: 'bulletList', label: '', title: '无序列表', icon: 'list' },
+	{ action: 'orderedList', label: '', title: '有序列表', icon: 'list-ordered' },
+	{ action: 'link', label: '', title: '链接', icon: 'link' },
+	{ action: 'image', label: '', title: '图片', icon: 'image' },
+	{ action: 'quote', label: '', title: '引用', icon: 'quote' },
+	{ action: 'codeBlock', label: '', title: '代码块', icon: 'file-code' },
+];
+
+const SPECIAL_FORMAT_TOOLS: FormatTool[] = [
+	{ action: 'intro', label: '', title: '摘要', icon: 'book-open' },
+	{ action: 'highlight', label: '', title: '高亮', icon: 'sparkles' },
+	{ action: 'tip', label: '', title: '提示', icon: 'lightbulb' },
+	{ action: 'info', label: '', title: '说明', icon: 'info' },
+	{ action: 'note', label: '', title: '笔记', icon: 'file-text' },
+	{ action: 'warning', label: '', title: '注意', icon: 'triangle-alert' },
+	{ action: 'danger', label: '', title: '危险', icon: 'ban' },
+	{ action: 'say', label: '', title: '想说的话', icon: 'message-square' },
+	{ action: 'chat', label: '', title: '对话', icon: 'messages-square' },
+];
+
+export class WeChatPublisherPreviewView extends ItemView {
+	private article: FormattedWeChatArticle | null = null;
+	private articleEl!: HTMLElement;
+	private emptyEl!: HTMLElement;
+	private copyButton!: HTMLButtonElement;
+	private settingsButton!: HTMLButtonElement;
+	private settingsPanel!: HTMLElement;
+	private isSettingsOpen = false;
+	private isThemeDropdownOpen = false;
+
+	constructor(
+		leaf: WorkspaceLeaf,
+		private readonly clipboardService: ClipboardService,
+		private readonly noticeView: NoticeView,
+		private readonly getSettings: () => PluginSettings,
+		private readonly saveSettings: (settings: PluginSettings) => Promise<void>,
+		private readonly applyFormat: (action: MarkdownFormatAction) => void = () => {},
+	) {
+		super(leaf);
+		this.navigation = false;
+	}
+
+	getViewType(): string {
+		return VIEW_TYPE_WECHAT_PUBLISHER_PREVIEW;
+	}
+
+	getDisplayText(): string {
+		return '公众号实时预览';
+	}
+
+	getIcon(): string {
+		return 'panel-right-open';
+	}
+
+	async onOpen(): Promise<void> {
+		this.contentEl.empty();
+		this.contentEl.addClass('wechat-publisher-preview-view');
+
+		const header = this.contentEl.createDiv({ cls: 'wechat-publisher-preview-header' });
+		header.createEl('h2', { text: '公众号预览' });
+		const actions = header.createDiv({ cls: 'wechat-publisher-preview-actions' });
+
+		this.settingsButton = actions.createEl('button', {
+			cls: 'wechat-publisher-icon-button',
+			attr: { 'aria-label': '设置' },
+		}) as HTMLButtonElement;
+		setIcon(this.settingsButton, 'settings');
+		this.settingsButton.addEventListener('click', () => {
+			this.setSettingsOpen(!this.isSettingsOpen);
+		});
+
+		this.copyButton = actions.createEl('button', {
+			cls: 'mod-cta',
+			text: '复制到公众号',
+		}) as HTMLButtonElement;
+		this.copyButton.addEventListener('click', () => {
+			void this.copy();
+		});
+
+		const toolbar = this.contentEl.createDiv({ cls: 'wechat-publisher-format-toolbar' });
+		this.renderFormatToolbar(toolbar);
+
+		const body = this.contentEl.createDiv({ cls: 'wechat-publisher-preview-body' });
+		const shell = body.createDiv({ cls: 'wechat-publisher-phone-shell' });
+		this.emptyEl = shell.createDiv({
+			cls: 'wechat-publisher-preview-empty',
+			text: '暂无可预览内容',
+		});
+		this.articleEl = shell.createDiv({ cls: 'wechat-publisher-phone-article' });
+		this.settingsPanel = body.createDiv({ cls: 'wechat-publisher-inline-settings' });
+
+		this.renderSettingsPanel();
+		this.setSettingsOpen(false);
+		this.renderArticle();
+	}
+
+	private renderFormatToolbar(toolbar: HTMLElement): void {
+		this.renderFormatToolbarRow(toolbar, '基础格式', BASIC_FORMAT_TOOLS);
+		this.renderFormatToolbarRow(toolbar, '专有格式', SPECIAL_FORMAT_TOOLS);
+	}
+
+	private renderFormatToolbarRow(toolbar: HTMLElement, label: string, tools: FormatTool[]): void {
+		const row = toolbar.createDiv({ cls: 'wechat-publisher-format-toolbar-row' });
+		row.createSpan({ cls: 'wechat-publisher-format-toolbar-label', text: label });
+
+		tools.forEach((tool) => {
+			const button = row.createEl('button', {
+				cls: 'wechat-publisher-format-button',
+				attr: {
+					'aria-label': tool.title,
+					title: tool.title,
+				},
+			});
+			button.type = 'button';
+			if (tool.icon) {
+				setIcon(button, tool.icon);
+			} else {
+				button.setText(tool.label);
+			}
+			button.addEventListener('click', () => {
+				this.applyFormat(tool.action);
+			});
+		});
+	}
+
+	async onClose(): Promise<void> {
+		this.contentEl.empty();
+	}
+
+	updateArticle(article: FormattedWeChatArticle | null): void {
+		this.article = article;
+		this.renderArticle();
+	}
+
+	private renderArticle(): void {
+		if (!this.articleEl || !this.emptyEl || !this.copyButton) {
+			return;
+		}
+
+		if (!this.article) {
+			this.copyButton.disabled = true;
+			this.articleEl.empty();
+			this.articleEl.hide();
+			this.emptyEl.show();
+			return;
+		}
+
+		this.copyButton.disabled = false;
+		this.emptyEl.hide();
+		this.articleEl.show();
+		this.articleEl.innerHTML = this.article.html;
+	}
+
+	private setSettingsOpen(isOpen: boolean): void {
+		this.isSettingsOpen = isOpen;
+		this.contentEl.toggleClass('is-settings-open', isOpen);
+		this.settingsButton.toggleClass('is-active', isOpen);
+		this.settingsPanel.toggle(isOpen);
+	}
+
+	private renderSettingsPanel(): void {
+		if (!this.settingsPanel) {
+			return;
+		}
+
+		const settings = this.getSettings();
+		this.settingsPanel.empty();
+
+		const header = this.settingsPanel.createDiv({ cls: 'wechat-publisher-inline-settings-header' });
+		setIcon(header.createSpan(), 'settings');
+		header.createEl('h3', { text: '设置' });
+
+		const content = this.settingsPanel.createDiv({ cls: 'wechat-publisher-inline-settings-content' });
+		content.createEl('h4', { text: '排版' });
+		this.addThemeSelect(content, '主题', settings.layoutTheme, (value) =>
+			this.savePatch({ layoutTheme: value }),
+		);
+		this.addSegmentedControl(content, '字重', FONT_WEIGHT_OPTIONS, settings.fontWeight, (value) =>
+			this.savePatch({ fontWeight: value as FontWeight }),
+		);
+		this.addSegmentedControl(content, '小标题风格', SUBHEADING_STYLE_OPTIONS, settings.subheadingStyle, (value) =>
+			this.savePatch({ subheadingStyle: value as SubheadingStyle }),
+		);
+		this.addSelect(content, '代码主题', CODE_THEME_OPTIONS, settings.codeTheme, (value) =>
+			this.savePatch({ codeTheme: value as CodeTheme }),
+		);
+
+		content.createDiv({ cls: 'wechat-publisher-settings-divider' });
+		content.createEl('h4', { text: '时间模块' });
+		this.addToggle(content, '顶部插入时间模块', '头像 + 名字 + 阅读时间估算', settings.showReadingTime, (value) =>
+			this.savePatch({ showReadingTime: value }),
+		);
+		this.addText(content, '作者', '作者名', settings.authorName, (value) =>
+			this.savePatch({ authorName: value.trim() }),
+		);
+		this.addText(content, '头像 URL', 'https://...', settings.avatarUrl, (value) =>
+			this.savePatch({ avatarUrl: value.trim() }),
+		);
+
+		const clearButton = content.createEl('button', {
+			cls: 'wechat-publisher-clear-button',
+			text: '清空本地存储',
+		});
+		clearButton.type = 'button';
+		clearButton.addEventListener('click', () => {
+			this.isThemeDropdownOpen = false;
+			void this.saveSettings({ ...DEFAULT_SETTINGS }).then(() => this.renderSettingsPanel());
+		});
+	}
+
+	private addThemeSelect(
+		container: HTMLElement,
+		label: string,
+		value: LayoutTheme,
+		onChange: (value: LayoutTheme) => Promise<void>,
+	): void {
+		const selected = LAYOUT_THEME_OPTIONS.find((option) => option.value === value) ?? LAYOUT_THEME_OPTIONS[0];
+		const field = this.createField(container, label);
+		const wrapper = field.createDiv({ cls: 'wechat-publisher-theme-select' });
+		const trigger = wrapper.createEl('button', {
+			cls: 'wechat-publisher-theme-trigger',
+			attr: {
+				'aria-expanded': String(this.isThemeDropdownOpen),
+			},
+		});
+		trigger.type = 'button';
+		trigger.createSpan({
+			cls: 'wechat-publisher-theme-swatch',
+			attr: { style: `background: ${selected.swatch}` },
+		});
+		trigger.createSpan({ cls: 'wechat-publisher-theme-label', text: selected.label });
+		setIcon(trigger.createSpan({ cls: 'wechat-publisher-theme-chevron' }), 'chevron-down');
+		trigger.addEventListener('click', () => {
+			this.isThemeDropdownOpen = !this.isThemeDropdownOpen;
+			this.renderSettingsPanel();
+		});
+
+		if (!this.isThemeDropdownOpen) {
+			return;
+		}
+
+		const menu = wrapper.createDiv({ cls: 'wechat-publisher-theme-menu' });
+		LAYOUT_THEME_GROUPS.forEach((group) => {
+			menu.createDiv({ cls: 'wechat-publisher-theme-group-label', text: group.label });
+			group.options.forEach((option) => {
+				const optionButton = menu.createEl('button', {
+					cls: option.value === value ? 'wechat-publisher-theme-option is-active' : 'wechat-publisher-theme-option',
+				});
+				optionButton.type = 'button';
+				optionButton.createSpan({
+					cls: 'wechat-publisher-theme-swatch',
+					attr: { style: `background: ${option.swatch}` },
+				});
+				optionButton.createSpan({ cls: 'wechat-publisher-theme-label', text: option.label });
+				if (option.value === value) {
+					setIcon(optionButton.createSpan({ cls: 'wechat-publisher-theme-check' }), 'check');
+				}
+				optionButton.addEventListener('click', () => {
+					this.isThemeDropdownOpen = false;
+					void onChange(option.value).then(() => this.renderSettingsPanel());
+				});
+			});
+		});
+	}
+
+	private addSelect<T extends string>(
+		container: HTMLElement,
+		label: string,
+		options: Array<{ value: T; label: string }>,
+		value: T,
+		onChange: (value: T) => Promise<void>,
+	): void {
+		const field = this.createField(container, label);
+		const select = field.createEl('select');
+		options.forEach((option) => {
+			select.createEl('option', {
+				text: option.label,
+				value: option.value,
+			});
+		});
+		select.value = value;
+		select.addEventListener('change', () => {
+			this.isThemeDropdownOpen = false;
+			void onChange(select.value as T).then(() => this.renderSettingsPanel());
+		});
+	}
+
+	private addSegmentedControl<T extends string>(
+		container: HTMLElement,
+		label: string,
+		options: Array<{ value: T; label: string }>,
+		value: T,
+		onChange: (value: T) => Promise<void>,
+	): void {
+		const field = this.createField(container, label);
+		const group = field.createDiv({ cls: 'wechat-publisher-segmented-control' });
+		options.forEach((option) => {
+			const button = group.createEl('button', {
+				text: option.label,
+				cls: option.value === value ? 'is-active' : '',
+			});
+			button.type = 'button';
+			button.addEventListener('click', () => {
+				this.isThemeDropdownOpen = false;
+				void onChange(option.value).then(() => this.renderSettingsPanel());
+			});
+		});
+	}
+
+	private addToggle(
+		container: HTMLElement,
+		label: string,
+		desc: string,
+		value: boolean,
+		onChange: (value: boolean) => Promise<void>,
+	): void {
+		const field = container.createDiv({ cls: 'wechat-publisher-settings-toggle' });
+		const text = field.createDiv();
+		text.createEl('label', { text: label });
+		text.createEl('p', { text: desc });
+		const input = field.createEl('input', { type: 'checkbox' });
+		input.checked = value;
+		input.addEventListener('change', () => {
+			this.isThemeDropdownOpen = false;
+			void onChange(input.checked).then(() => this.renderSettingsPanel());
+		});
+	}
+
+	private addText(
+		container: HTMLElement,
+		label: string,
+		placeholder: string,
+		value: string,
+		onChange: (value: string) => Promise<void>,
+	): void {
+		const field = this.createField(container, label);
+		const input = field.createEl('input', {
+			type: 'text',
+			attr: { placeholder },
+		});
+		input.value = value;
+		input.addEventListener('input', () => {
+			this.isThemeDropdownOpen = false;
+			void onChange(input.value);
+		});
+	}
+
+	private createField(container: HTMLElement, label: string): HTMLElement {
+		const field = container.createDiv({ cls: 'wechat-publisher-settings-field' });
+		field.createEl('label', { text: label });
+		return field;
+	}
+
+	private async savePatch(patch: Partial<PluginSettings>): Promise<void> {
+		await this.saveSettings({
+			...this.getSettings(),
+			...patch,
+		});
+	}
+
+	private async copy(): Promise<void> {
+		if (!this.article) {
+			return;
+		}
+
+		try {
+			await this.clipboardService.copyArticle(this.article);
+			this.noticeView.showSuccess();
+		} catch (error) {
+			this.noticeView.showError(error);
+		}
+	}
+}

@@ -1,0 +1,30 @@
+{
+	"name": "obsidian-wechat-publisher",
+	"version": "0.1.0",
+	"description": "Copy Obsidian Markdown as WeChat Official Account styled HTML.",
+	"main": "main.js",
+	"type": "module",
+	"scripts": {
+		"dev": "node esbuild.config.mjs",
+		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"test": "node --import tsx --test tests/**/*.test.ts"
+	},
+	"keywords": [
+		"obsidian",
+		"wechat",
+		"markdown"
+	],
+	"license": "MIT",
+	"devDependencies": {
+		"@types/markdown-it": "^14.1.2",
+		"@types/node": "^22.15.17",
+		"builtin-modules": "^4.0.0",
+		"esbuild": "0.25.5",
+		"obsidian": "latest",
+		"tsx": "^4.20.6",
+		"typescript": "^5.8.3"
+	},
+	"dependencies": {
+		"markdown-it": "^14.1.0"
+	}
+}

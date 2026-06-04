@@ -1,0 +1,9 @@
+{
+	"id": "wechat-publisher",
+	"name": "WeChat Publisher",
+	"version": "0.1.0",
+	"minAppVersion": "1.0.0",
+	"description": "Copy the current note or selection as WeChat Official Account styled HTML.",
+	"author": "Local",
+	"isDesktopOnly": false
+}
