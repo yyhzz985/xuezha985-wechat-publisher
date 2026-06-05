@@ -38,6 +38,9 @@ type BlockState = {
 	push(type: string, tag: string, nesting: number): Token;
 };
 
+type ChatRoleIconMap = Map<string, number>;
+const CHAT_ICON_VARIANT_COUNT = 6;
+
 const CONTAINER_TITLES: Record<string, { icon: string; title: string }> = {
 	tip: { icon: '💡', title: '提示' },
 	info: { icon: 'ℹ️', title: '说明' },
@@ -77,6 +80,7 @@ export class WeChatFormatService {
 			linkify: false,
 			typographer: false,
 		});
+		const chatRoleIcons: ChatRoleIconMap = new Map();
 
 		this.registerContainerRule(md);
 		this.registerTocRule(md);
@@ -191,7 +195,7 @@ export class WeChatFormatService {
 		md.renderer.rules.fence = (tokens, index) => this.renderCodeBlock(tokens[index].content, settings.codeTheme, styles);
 		md.renderer.rules.code_block = md.renderer.rules.fence as RenderRule;
 		md.renderer.rules.knb_container = (tokens, index) =>
-			this.renderContainer(tokens[index].info, tokens[index].content, md, styles);
+			this.renderContainer(tokens[index].info, tokens[index].content, md, styles, chatRoleIcons);
 		md.renderer.rules.knb_toc = () => this.renderToc(tocEntries, styles);
 
 		return md;
@@ -305,7 +309,13 @@ export class WeChatFormatService {
 		].join('');
 	}
 
-	private renderContainer(type: string, content: string, md: MarkdownIt, styles: WeChatStyleSet): string {
+	private renderContainer(
+		type: string,
+		content: string,
+		md: MarkdownIt,
+		styles: WeChatStyleSet,
+		chatRoleIcons: ChatRoleIconMap,
+	): string {
 		if (type === 'intro') {
 			return `<section class="container-intro" style="${styles.introStyle}">${this.renderIntroContent(content, md, styles)}</section>`;
 		}
@@ -319,7 +329,7 @@ export class WeChatFormatService {
 			].join('');
 		}
 		if (type === 'chat') {
-			return this.renderChat(content, styles);
+			return this.renderChat(content, styles, chatRoleIcons);
 		}
 
 		const title = CONTAINER_TITLES[type] ?? CONTAINER_TITLES.info;
@@ -331,7 +341,7 @@ export class WeChatFormatService {
 		].join('');
 	}
 
-	private renderChat(content: string, styles: WeChatStyleSet): string {
+	private renderChat(content: string, styles: WeChatStyleSet, chatRoleIcons: ChatRoleIconMap): string {
 		const rows = content
 			.split(/\r?\n/)
 			.map((line) => line.trim())
@@ -340,9 +350,10 @@ export class WeChatFormatService {
 				const match = line.match(/^([^:：]{1,16})[:：]\s*(.+)$/);
 				const name = match ? match[1] : '说';
 				const text = match ? match[2] : line;
+				const iconIndex = this.getChatRoleIconIndex(name, chatRoleIcons);
 				return [
 					'<section style="margin:0 0 0.5em;">',
-					`<p class="knb-chat-speaker" style="${styles.chatSpeakerStyle}">💬 ${this.renderPlainInline(name)}</p>`,
+					`<p class="knb-chat-speaker" style="${styles.chatSpeakerStyle}">${this.renderChatIcon(iconIndex, styles)}${this.renderPlainInline(name)}</p>`,
 					`<p style="${styles.chatTextStyle}">${this.renderText(text, styles)}</p>`,
 					'</section>',
 				].join('');
@@ -350,6 +361,28 @@ export class WeChatFormatService {
 			.join('');
 
 		return `<section class="knb-chat" style="${styles.chatStyle}">${rows}</section>`;
+	}
+
+	private getChatRoleIconIndex(name: string, chatRoleIcons: ChatRoleIconMap): number {
+		const existing = chatRoleIcons.get(name);
+		if (existing !== undefined) {
+			return existing;
+		}
+
+		const next = chatRoleIcons.size % CHAT_ICON_VARIANT_COUNT;
+		chatRoleIcons.set(name, next);
+		return next;
+	}
+
+	private renderChatIcon(iconIndex: number, styles: WeChatStyleSet): string {
+		const dots = iconIndex === 1 || iconIndex === 3 || iconIndex === 5
+			? ''
+			: [
+				`<span style="${styles.chatIconDotStyle}"></span>`,
+				`<span style="${styles.chatIconDotStyle}"></span>`,
+				`<span style="${styles.chatIconDotStyle}"></span>`,
+			].join('');
+		return `<span class="knb-chat-icon knb-chat-icon-${iconIndex}" style="${styles.chatIconStyle(iconIndex)}">${dots}</span>`;
 	}
 
 	private renderToc(entries: TocEntry[], styles: WeChatStyleSet): string {

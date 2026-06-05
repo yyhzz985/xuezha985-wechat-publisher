@@ -91,6 +91,15 @@ export function calloutStyle(_type: string): string {
 export const chatStyle = 'margin: 1.4em 8px; padding: 0;';
 export const chatSpeakerStyle = 'margin: 0.7em 0 0.15em; color: rgb(41, 148, 128); font-size: 14px; line-height: 1.5; font-weight: 700; letter-spacing: 1px;';
 export const chatTextStyle = 'margin: 0 0 0.55em; color: rgb(43, 43, 43); font-size: 15px; line-height: 1.8; letter-spacing: 1px; text-align: left;';
+export const chatIconDotStyle = 'display: inline-block; width: 2px; height: 2px; margin: 0 1px; border-radius: 50%; background: currentColor; vertical-align: middle;';
+
+export function chatIconStyle(variant: number): string {
+	const radius = ['3px', '3px', '2px', '50%', '1px', '0'][variant] ?? '3px';
+	const width = variant === 3 ? '11px' : '12px';
+	const tail = variant === 1 ? 'border-bottom-color: transparent;' : '';
+	const tilt = variant === 5 ? 'transform: rotate(-3deg);' : '';
+	return `position: relative; display: inline-block; width: ${width}; height: 9px; margin: 0 5px 0 0; border: 1.5px solid rgb(43, 43, 43); border-radius: ${radius}; color: rgb(43, 43, 43); text-align: center; line-height: 5px; vertical-align: -1px; box-sizing: border-box; ${tail} ${tilt}`;
+}
 
 export const readingTimeStyle = 'text-align: center; margin: 0 8px 1.6em; font-size: 0; box-sizing: border-box;';
 export const readingAuthorCardStyle = 'display: inline-block; vertical-align: middle; padding: 8px 5px; width: 50%; box-sizing: border-box; text-align: center; border-right: 1px solid #66CCC5;';
@@ -171,6 +180,8 @@ export interface WeChatStyleSet {
 	chatStyle: string;
 	chatSpeakerStyle: string;
 	chatTextStyle: string;
+	chatIconStyle(variant: number): string;
+	chatIconDotStyle: string;
 	readingTimeStyle: string;
 	readingAuthorCardStyle: string;
 	readingAuthorNameStyle: string;
@@ -354,6 +365,8 @@ export function createWeChatStyles(settings: PluginSettings): WeChatStyleSet {
 		chatStyle,
 		chatSpeakerStyle: withHeadingWeight(applyPalette(chatSpeakerStyle, palette), headingWeight),
 		chatTextStyle: withContentWeight(applyPalette(chatTextStyle, palette), contentWeight),
+		chatIconStyle,
+		chatIconDotStyle,
 		readingTimeStyle,
 		readingAuthorCardStyle: applyPalette(readingAuthorCardStyle, palette),
 		readingAuthorNameStyle: applyPalette(readingAuthorNameStyle, palette),

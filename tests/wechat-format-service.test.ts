@@ -231,6 +231,9 @@ test('renders knb special containers', () => {
 :::chat
 阿禅: 第一句
 朋友: 回复
+阿禅: 第二句
+朋友1: 回复
+朋友1: 再回复
 :::
 `, DEFAULT_SETTINGS);
 
@@ -249,8 +252,14 @@ test('renders knb special containers', () => {
 	assert.match(result.html, /💬 说/);
 	assert.match(result.html, /注意/);
 	assert.match(result.html, /class="knb-chat-speaker"/);
+	assert.match(result.html, /class="knb-chat-icon knb-chat-icon-0"/);
+	assert.match(result.html, /class="knb-chat-icon knb-chat-icon-1"/);
+	assert.match(result.html, /class="knb-chat-icon knb-chat-icon-2"/);
 	assert.match(result.html, /阿禅/);
 	assert.match(result.html, /朋友/);
+	assert.match(result.html, /朋友 1/);
+	assert.equal((result.html.match(/class="knb-chat-icon knb-chat-icon-0"/g) ?? []).length, 2);
+	assert.equal((result.html.match(/class="knb-chat-icon knb-chat-icon-2"/g) ?? []).length, 2);
 });
 
 test('keeps markdown tables inside article margins', () => {
