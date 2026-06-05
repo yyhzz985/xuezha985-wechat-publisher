@@ -1,4 +1,4 @@
-import { App, Modal } from 'obsidian';
+import { App, Modal, setIcon } from 'obsidian';
 import type { ClipboardService } from '../service/ClipboardService';
 import type { FormattedWeChatArticle } from '../service/WeChatFormatService';
 import type { NoticeView } from './NoticeView';
@@ -21,9 +21,14 @@ export class PreviewModal extends Modal {
 		const header = contentEl.createDiv({ cls: 'wechat-publisher-preview-header' });
 		header.createEl('h2', { text: '公众号排版预览' });
 		const copyButton = header.createEl('button', {
-			cls: 'mod-cta',
-			text: '复制到公众号',
+			cls: 'wechat-publisher-icon-button wechat-publisher-copy-button',
+			attr: {
+				'aria-label': '复制到公众号',
+				title: '复制到公众号',
+			},
 		});
+		copyButton.type = 'button';
+		setIcon(copyButton, 'copy');
 		copyButton.addEventListener('click', () => {
 			void this.copy();
 		});

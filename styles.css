@@ -47,7 +47,7 @@
 .wechat-publisher-preview-actions {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 4px;
 }
 
 .wechat-publisher-preview-view .wechat-publisher-preview-header button {
@@ -63,9 +63,9 @@
 .wechat-publisher-format-toolbar-row {
 	display: flex;
 	align-items: center;
-	gap: 6px;
-	min-height: 40px;
-	padding: 5px 10px;
+	gap: 4px;
+	min-height: 34px;
+	padding: 3px 8px;
 	overflow-x: auto;
 	border-top: 1px solid var(--background-modifier-border);
 	box-sizing: border-box;
@@ -80,12 +80,12 @@
 	align-items: center;
 	justify-content: center;
 	flex: 0 0 auto;
-	height: 26px;
-	padding: 0 9px;
+	height: 23px;
+	padding: 0 8px;
 	border-radius: 999px;
 	background: var(--background-secondary);
 	color: var(--text-normal);
-	font-size: 12px;
+	font-size: 11px;
 	font-weight: 600;
 	white-space: nowrap;
 }
@@ -100,14 +100,15 @@
 	align-items: center;
 	justify-content: center;
 	flex: 0 0 auto;
-	width: 30px;
-	height: 30px;
+	width: 24px;
+	height: 24px;
 	padding: 0;
-	border: 0;
-	border-radius: 6px;
+	border: 1px solid transparent;
+	border-radius: 5px;
 	background: transparent;
 	color: var(--text-normal);
-	font-size: 13px;
+	box-shadow: none;
+	font-size: 12px;
 	font-weight: 700;
 	line-height: 1;
 	cursor: pointer;
@@ -115,25 +116,40 @@
 
 .wechat-publisher-format-button:hover {
 	background: var(--background-secondary);
+	border-color: var(--background-modifier-border);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 .wechat-publisher-format-button svg {
-	width: 17px;
-	height: 17px;
+	width: 14px;
+	height: 14px;
 }
 
 .wechat-publisher-icon-button {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 32px;
-	height: 32px;
+	width: 28px;
+	height: 28px;
 	padding: 0;
-	border: 1px solid var(--background-modifier-border);
-	border-radius: 6px;
-	background: var(--background-primary);
+	border: 1px solid transparent;
+	border-radius: 5px;
+	background: transparent;
 	color: var(--text-muted);
+	box-shadow: none;
 	cursor: pointer;
+}
+
+.wechat-publisher-icon-button:hover {
+	background: var(--background-secondary);
+	border-color: var(--background-modifier-border);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+	color: var(--text-normal);
+}
+
+.wechat-publisher-icon-button svg {
+	width: 15px;
+	height: 15px;
 }
 
 .wechat-publisher-icon-button.is-active {

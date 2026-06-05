@@ -105,6 +105,7 @@ export class WeChatPublisherPreviewView extends ItemView {
 				title: '上传到公众号草稿箱',
 			},
 		}) as HTMLButtonElement;
+		this.syncButton.type = 'button';
 		setIcon(this.syncButton, 'upload-cloud');
 		this.syncButton.addEventListener('click', () => {
 			void this.uploadDraft();
@@ -112,17 +113,26 @@ export class WeChatPublisherPreviewView extends ItemView {
 
 		this.settingsButton = actions.createEl('button', {
 			cls: 'wechat-publisher-icon-button',
-			attr: { 'aria-label': '设置' },
+			attr: {
+				'aria-label': '设置',
+				title: '设置',
+			},
 		}) as HTMLButtonElement;
+		this.settingsButton.type = 'button';
 		setIcon(this.settingsButton, 'settings');
 		this.settingsButton.addEventListener('click', () => {
 			this.setSettingsOpen(!this.isSettingsOpen);
 		});
 
 		this.copyButton = actions.createEl('button', {
-			cls: 'mod-cta',
-			text: '复制到公众号',
+			cls: 'wechat-publisher-icon-button wechat-publisher-copy-button',
+			attr: {
+				'aria-label': '复制到公众号',
+				title: '复制到公众号',
+			},
 		}) as HTMLButtonElement;
+		this.copyButton.type = 'button';
+		setIcon(this.copyButton, 'copy');
 		this.copyButton.addEventListener('click', () => {
 			void this.copy();
 		});
