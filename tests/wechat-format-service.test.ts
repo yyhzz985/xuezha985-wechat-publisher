@@ -255,6 +255,8 @@ test('renders knb special containers', () => {
 	assert.match(result.html, /class="knb-chat-icon knb-chat-icon-0"/);
 	assert.match(result.html, /class="knb-chat-icon knb-chat-icon-1"/);
 	assert.match(result.html, /class="knb-chat-icon knb-chat-icon-2"/);
+	assert.match(result.html, /class="knb-chat-icon-tail"/);
+	assert.match(result.html, /overflow: visible/);
 	assert.match(result.html, /阿禅/);
 	assert.match(result.html, /朋友/);
 	assert.match(result.html, /朋友 1/);

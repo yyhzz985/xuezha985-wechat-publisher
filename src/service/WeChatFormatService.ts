@@ -382,7 +382,8 @@ export class WeChatFormatService {
 				`<span style="${styles.chatIconDotStyle}"></span>`,
 				`<span style="${styles.chatIconDotStyle}"></span>`,
 			].join('');
-		return `<span class="knb-chat-icon knb-chat-icon-${iconIndex}" style="${styles.chatIconStyle(iconIndex)}">${dots}</span>`;
+		const tail = `<span class="knb-chat-icon-tail" style="${styles.chatIconTailStyle}"></span>`;
+		return `<span class="knb-chat-icon knb-chat-icon-${iconIndex}" style="${styles.chatIconStyle(iconIndex)}">${dots}${tail}</span>`;
 	}
 
 	private renderToc(entries: TocEntry[], styles: WeChatStyleSet): string {

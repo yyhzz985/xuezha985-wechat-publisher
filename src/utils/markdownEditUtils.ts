@@ -67,7 +67,7 @@ export function formatMarkdownSelection(action: MarkdownFormatAction, selection:
 		case 'say':
 			return formatContainer('say', text || '想说的话');
 		case 'chat':
-			return formatContainer('chat', text ? `我: ${text}` : '我: 对话内容');
+			return formatContainer('chat', text ? `我: ${text}` : '我: 对话内容\n你: 对话内容');
 		case 'codeBlock':
 			return `\`\`\`\n${text || '代码'}\n\`\`\``;
 	}

@@ -14,4 +14,5 @@ test('uses practical snippets when toolbar actions have no selection', () => {
 	assert.equal(formatMarkdownSelection('h3', ''), '### 三级标题');
 	assert.equal(formatMarkdownSelection('link', ''), '[链接文字](https://)');
 	assert.equal(formatMarkdownSelection('codeBlock', ''), '```\n代码\n```');
+	assert.equal(formatMarkdownSelection('chat', ''), ':::chat\n我: 对话内容\n你: 对话内容\n:::');
 });
