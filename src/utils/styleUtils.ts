@@ -62,31 +62,35 @@ export const hrStyle = 'margin: 2em 8px; border: 0; border-top: 1px dashed rgb(4
 export const introStyle = 'margin: 1.6em 8px 2em; padding: 0.9em 0.4em; border: 0; border-top: 1px dashed rgb(41, 148, 128); border-bottom: 1px dashed rgb(41, 148, 128); border-radius: 0; background: transparent;';
 export const introParagraphStyle = 'margin: 0.3em 0; color: rgb(60, 90, 80); font-size: 15px; line-height: 1.85; letter-spacing: 0.04em; text-align: left;';
 
-export const highlightStyle = 'position: relative; margin: 1.6em 8px; padding: 1em; border-left: 4px solid rgb(41, 148, 128); background: rgba(102, 204, 197, 0.08); color: rgb(43, 43, 43); font-size: 15px; line-height: 28px;';
+export const highlightStyle = 'position: relative; margin: 1.8em 8px; padding: 0.8em 0.6em 1em; border: 0; background: transparent; color: rgb(41, 148, 128); font-size: 16px; line-height: 1.8; text-align: center; box-sizing: border-box;';
+export const highlightQuoteLeftStyle = 'display: block; margin: 0 0 0.35em; color: rgb(41, 148, 128); font-size: 30px; line-height: 1; text-align: left; font-weight: 700;';
+export const highlightQuoteRightStyle = 'display: block; margin: 0.35em 0 0; color: rgb(41, 148, 128); font-size: 30px; line-height: 1; text-align: right; font-weight: 700;';
+export const highlightParagraphStyle = 'margin: 0; color: rgb(41, 148, 128); font-size: 16px; line-height: 1.8; font-weight: 600; letter-spacing: 1px; text-align: center;';
 
-export const tocStyle = 'margin: 1.6em 8px 2em; padding: 0.9em 0.8em; border: 1px dashed rgb(41, 148, 128); color: rgb(43, 43, 43);';
+export const tocStyle = 'margin: 1.6em 8px 2em; padding: 0.6em 0; border: 0; color: rgb(43, 43, 43);';
+export const tocTitleStyle = 'margin: 0 0 0.8em; color: rgb(41, 148, 128); font-size: 14px; line-height: 1.5; font-weight: 700; letter-spacing: 1px;';
+export const tocRowStyle = 'margin: 0 0 0.7em; padding: 0; box-sizing: border-box;';
+export const tocLineStyle = 'margin: 0 0 0.2em; color: rgb(43, 43, 43); font-size: 14px; line-height: 1.5; letter-spacing: 0;';
+export const tocIndexStyle = 'display: inline-block; min-width: 1.4em; margin-right: 0.45em; color: rgb(41, 148, 128); font-weight: 700;';
+export const tocTrackStyle = 'height: 3px; background: #efefef; overflow: hidden; line-height: 0; font-size: 0;';
+export const tocFillStyle = 'display: block; height: 3px; background: linear-gradient(to right, rgb(41, 148, 128), rgb(73, 200, 149)); line-height: 0; font-size: 0;';
 
 export const tableWrapStyle = 'margin: 1.2em 8px; max-width: 100%; overflow-x: auto; box-sizing: border-box;';
 export const tableStyle = 'width: 100%; max-width: 100%; border-collapse: collapse; table-layout: fixed; color: rgb(43, 43, 43); font-size: 15px; line-height: 28px; letter-spacing: 1px;';
 export const tableHeaderCellStyle = 'padding: 8px 10px; border: 1px solid #d9d9d9; background: #f7f7f7; color: rgb(62, 62, 62); font-weight: 600; text-align: left; vertical-align: top; overflow-wrap: anywhere; word-break: break-word; box-sizing: border-box;';
 export const tableCellStyle = 'padding: 8px 10px; border: 1px solid #d9d9d9; color: rgb(43, 43, 43); text-align: left; vertical-align: top; overflow-wrap: anywhere; word-break: break-word; box-sizing: border-box;';
 
-export const calloutBaseStyle = 'margin: 1.4em 8px; padding: 0.8em 1em; font-size: 15px; line-height: 28px;';
+export const calloutBaseStyle = 'margin: 1.4em 8px; padding: 0.85em 1em; border: 1px solid #66CCC5; border-radius: 8px; background: transparent; color: rgb(43, 43, 43); font-size: 15px; line-height: 28px; box-sizing: border-box;';
+export const calloutTitleStyle = 'margin: 0 0 0.45em; color: rgb(41, 148, 128); font-size: 15px; line-height: 1.5; font-weight: 700; letter-spacing: 1px;';
+export const calloutParagraphStyle = 'margin: 0.35em 0; color: rgb(43, 43, 43); font-size: 15px; line-height: 28px; letter-spacing: 1px; text-align: left;';
 
-export function calloutStyle(type: string): string {
-	const map: Record<string, string> = {
-		tip: 'background: rgba(102, 204, 197, 0.08); border-left: 4px solid #66CCC5; color: rgb(43, 43, 43);',
-		info: 'background: rgba(26, 149, 165, 0.08); border-left: 4px solid rgb(26, 149, 165); color: rgb(43, 43, 43);',
-		note: 'background: rgba(41, 148, 128, 0.08); border-left: 4px solid rgb(41, 148, 128); color: rgb(43, 43, 43);',
-		warning: 'background: rgba(245, 158, 11, 0.1); border-left: 4px solid #f59e0b; color: rgb(43, 43, 43);',
-		danger: 'background: rgba(239, 68, 68, 0.08); border-left: 4px solid #ef4444; color: rgb(43, 43, 43);',
-	};
-	return `${calloutBaseStyle} ${map[type] ?? map.info}`;
+export function calloutStyle(_type: string): string {
+	return calloutBaseStyle;
 }
 
-export const sayStyle = 'margin: 1.6em 8px; padding: 1em; border-left: 4px solid rgb(41, 148, 128); color: rgb(43, 43, 43); font-size: 15px; line-height: 28px;';
-
 export const chatStyle = 'margin: 1.4em 8px; padding: 0;';
+export const chatSpeakerStyle = 'margin: 0.7em 0 0.15em; color: rgb(41, 148, 128); font-size: 14px; line-height: 1.5; font-weight: 700; letter-spacing: 1px;';
+export const chatTextStyle = 'margin: 0 0 0.55em; color: rgb(43, 43, 43); font-size: 15px; line-height: 1.8; letter-spacing: 1px; text-align: left;';
 
 export const readingTimeStyle = 'text-align: center; margin: 0 8px 1.6em; font-size: 0; box-sizing: border-box;';
 export const readingAuthorCardStyle = 'display: inline-block; vertical-align: middle; padding: 8px 5px; width: 50%; box-sizing: border-box; text-align: center; border-right: 1px solid #66CCC5;';
@@ -147,14 +151,26 @@ export interface WeChatStyleSet {
 	introStyle: string;
 	introParagraphStyle: string;
 	highlightStyle: string;
+	highlightQuoteLeftStyle: string;
+	highlightQuoteRightStyle: string;
+	highlightParagraphStyle: string;
 	tocStyle: string;
+	tocTitleStyle: string;
+	tocRowStyle: string;
+	tocLineStyle: string;
+	tocIndexStyle: string;
+	tocTrackStyle: string;
+	tocFillStyle: string;
 	tableWrapStyle: string;
 	tableStyle: string;
 	tableHeaderCellStyle: string;
 	tableCellStyle: string;
 	calloutStyle(type: string): string;
-	sayStyle: string;
+	calloutTitleStyle: string;
+	calloutParagraphStyle: string;
 	chatStyle: string;
+	chatSpeakerStyle: string;
+	chatTextStyle: string;
 	readingTimeStyle: string;
 	readingAuthorCardStyle: string;
 	readingAuthorNameStyle: string;
@@ -318,14 +334,26 @@ export function createWeChatStyles(settings: PluginSettings): WeChatStyleSet {
 		introStyle: applyPalette(introStyle, palette),
 		introParagraphStyle: applyPalette(introParagraphStyle, palette),
 		highlightStyle: withContentWeight(applyPalette(highlightStyle, palette), contentWeight),
+		highlightQuoteLeftStyle: applyPalette(highlightQuoteLeftStyle, palette),
+		highlightQuoteRightStyle: applyPalette(highlightQuoteRightStyle, palette),
+		highlightParagraphStyle: withHeadingWeight(applyPalette(highlightParagraphStyle, palette), headingWeight),
 		tocStyle: applyPalette(tocStyle, palette),
+		tocTitleStyle: withHeadingWeight(applyPalette(tocTitleStyle, palette), headingWeight),
+		tocRowStyle,
+		tocLineStyle: withContentWeight(applyPalette(tocLineStyle, palette), contentWeight),
+		tocIndexStyle: withHeadingWeight(applyPalette(tocIndexStyle, palette), headingWeight),
+		tocTrackStyle,
+		tocFillStyle: applyPalette(tocFillStyle, palette),
 		tableWrapStyle,
 		tableStyle: withContentWeight(applyPalette(tableStyle, palette), contentWeight),
 		tableHeaderCellStyle: withHeadingWeight(applyPalette(tableHeaderCellStyle, palette), headingWeight),
 		tableCellStyle: withContentWeight(applyPalette(tableCellStyle, palette), contentWeight),
 		calloutStyle: (type: string) => applyPalette(calloutStyle(type), palette),
-		sayStyle: withContentWeight(applyPalette(sayStyle, palette), contentWeight),
+		calloutTitleStyle: withHeadingWeight(applyPalette(calloutTitleStyle, palette), headingWeight),
+		calloutParagraphStyle: withContentWeight(applyPalette(calloutParagraphStyle, palette), contentWeight),
 		chatStyle,
+		chatSpeakerStyle: withHeadingWeight(applyPalette(chatSpeakerStyle, palette), headingWeight),
+		chatTextStyle: withContentWeight(applyPalette(chatTextStyle, palette), contentWeight),
 		readingTimeStyle,
 		readingAuthorCardStyle: applyPalette(readingAuthorCardStyle, palette),
 		readingAuthorNameStyle: applyPalette(readingAuthorNameStyle, palette),

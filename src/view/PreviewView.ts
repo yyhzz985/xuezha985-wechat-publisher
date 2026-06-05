@@ -42,6 +42,7 @@ const BASIC_FORMAT_TOOLS: FormatTool[] = [
 ];
 
 const SPECIAL_FORMAT_TOOLS: FormatTool[] = [
+	{ action: 'toc', label: '', title: '全能导航', icon: 'map' },
 	{ action: 'intro', label: '', title: '摘要', icon: 'book-open' },
 	{ action: 'highlight', label: '', title: '高亮', icon: 'sparkles' },
 	{ action: 'tip', label: '', title: '提示', icon: 'lightbulb' },

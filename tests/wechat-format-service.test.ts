@@ -223,15 +223,34 @@ test('renders knb special containers', () => {
 :::warning
 注意这里。
 :::
+
+:::say
+这里是一段独白。
+:::
+
+:::chat
+阿禅: 第一句
+朋友: 回复
+:::
 `, DEFAULT_SETTINGS);
 
 	assert.match(result.html, /container-intro/);
 	assert.match(result.html, /border-top: 1px dashed rgb\(41, 148, 128\)/);
 	assert.match(result.html, /这是一段摘要/);
 	assert.match(result.html, /knb-highlight/);
+	assert.match(result.html, /class="knb-highlight-quote-left"/);
+	assert.match(result.html, /class="knb-highlight-text"/);
 	assert.match(result.html, /这是一句金句/);
 	assert.match(result.html, /knb-callout/);
+	assert.match(result.html, /border: 1px solid #66CCC5/);
+	assert.match(result.html, /border-radius: 8px/);
+	assert.match(result.html, /knb-callout-warning/);
+	assert.match(result.html, /knb-callout-say/);
+	assert.match(result.html, /💬 说/);
 	assert.match(result.html, /注意/);
+	assert.match(result.html, /class="knb-chat-speaker"/);
+	assert.match(result.html, /阿禅/);
+	assert.match(result.html, /朋友/);
 });
 
 test('keeps markdown tables inside article margins', () => {
@@ -262,8 +281,13 @@ test('renders toc marker from h2 headings', () => {
 `, DEFAULT_SETTINGS);
 
 	assert.match(result.html, /knb-toc/);
+	assert.match(result.html, /全文导航/);
+	assert.match(result.html, /class="knb-toc-index"/);
+	assert.match(result.html, /class="knb-toc-track"/);
+	assert.match(result.html, /class="knb-toc-fill"/);
 	assert.match(result.html, /第一章/);
 	assert.match(result.html, /第二章/);
+	assert.equal(result.html.includes('字</span>'), false);
 });
 
 test('renders knb inline extensions and task list', () => {

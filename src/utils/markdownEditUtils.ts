@@ -10,6 +10,7 @@ export type MarkdownFormatAction =
 	| 'link'
 	| 'image'
 	| 'quote'
+	| 'toc'
 	| 'intro'
 	| 'highlight'
 	| 'tip'
@@ -47,6 +48,8 @@ export function formatMarkdownSelection(action: MarkdownFormatAction, selection:
 			return `![${text || '图片描述'}](https://)`;
 		case 'quote':
 			return prefixLines(text || '引用内容', '> ');
+		case 'toc':
+			return '[TOC]';
 		case 'intro':
 			return formatContainer('intro', text || '摘要内容');
 		case 'highlight':

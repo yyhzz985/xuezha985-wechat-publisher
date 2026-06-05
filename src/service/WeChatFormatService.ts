@@ -44,6 +44,7 @@ const CONTAINER_TITLES: Record<string, { icon: string; title: string }> = {
 	note: { icon: '📝', title: '笔记' },
 	warning: { icon: '⚠️', title: '注意' },
 	danger: { icon: '⛔', title: '危险' },
+	say: { icon: '💬', title: '说' },
 };
 
 export class WeChatFormatService {
@@ -264,11 +265,15 @@ export class WeChatFormatService {
 	}
 
 	private renderIntroContent(content: string, md: MarkdownIt, styles: WeChatStyleSet): string {
+		return this.renderInlineParagraphs(content, md, styles.introParagraphStyle);
+	}
+
+	private renderInlineParagraphs(content: string, md: MarkdownIt, paragraphStyle: string): string {
 		return content
 			.split(/\n{2,}/)
 			.map((paragraph) => paragraph.trim())
 			.filter(Boolean)
-			.map((paragraph) => `<p style="${styles.introParagraphStyle}">${md.renderInline(paragraph)}</p>`)
+			.map((paragraph) => `<p style="${paragraphStyle}">${md.renderInline(paragraph)}</p>`)
 			.join('\n');
 	}
 
@@ -305,17 +310,25 @@ export class WeChatFormatService {
 			return `<section class="container-intro" style="${styles.introStyle}">${this.renderIntroContent(content, md, styles)}</section>`;
 		}
 		if (type === 'highlight') {
-			return `<section class="knb-highlight" style="${styles.highlightStyle}"><span style="opacity:.35;font-size:30px;line-height:0;">“</span>${md.render(content)}<span style="opacity:.35;font-size:30px;line-height:0;float:right;">”</span></section>`;
-		}
-		if (type === 'say') {
-			return `<section class="knb-say" style="${styles.sayStyle}">${md.render(content)}</section>`;
+			return [
+				`<section class="knb-highlight" style="${styles.highlightStyle}">`,
+				`<span class="knb-highlight-quote-left" style="${styles.highlightQuoteLeftStyle}">“</span>`,
+				`<section class="knb-highlight-text">${this.renderInlineParagraphs(content, md, styles.highlightParagraphStyle)}</section>`,
+				`<span class="knb-highlight-quote-right" style="${styles.highlightQuoteRightStyle}">”</span>`,
+				'</section>',
+			].join('');
 		}
 		if (type === 'chat') {
 			return this.renderChat(content, styles);
 		}
 
 		const title = CONTAINER_TITLES[type] ?? CONTAINER_TITLES.info;
-		return `<section class="knb-callout knb-callout-${escapeHtml(type)}" style="${styles.calloutStyle(type)}"><p style="margin:0 0 8px;font-weight:700;">${title.icon} ${title.title}</p>${md.render(content)}</section>`;
+		return [
+			`<section class="knb-callout knb-callout-${escapeHtml(type)}" style="${styles.calloutStyle(type)}">`,
+			`<p style="${styles.calloutTitleStyle}">${title.icon} ${title.title}</p>`,
+			this.renderInlineParagraphs(content, md, styles.calloutParagraphStyle),
+			'</section>',
+		].join('');
 	}
 
 	private renderChat(content: string, styles: WeChatStyleSet): string {
@@ -328,9 +341,9 @@ export class WeChatFormatService {
 				const name = match ? match[1] : '说';
 				const text = match ? match[2] : line;
 				return [
-					'<section style="display:flex;gap:10px;margin:10px 0;">',
-					`<span style="flex:0 0 auto;min-width:42px;color:#6b7280;font-size:13px;font-weight:700;">${this.renderPlainInline(name)}</span>`,
-					`<span style="display:block;flex:1;padding:10px 12px;border-radius:12px;background:#f3f4f6;color:#374151;line-height:1.75;">${this.renderText(text, styles)}</span>`,
+					'<section style="margin:0 0 0.5em;">',
+					`<p class="knb-chat-speaker" style="${styles.chatSpeakerStyle}">💬 ${this.renderPlainInline(name)}</p>`,
+					`<p style="${styles.chatTextStyle}">${this.renderText(text, styles)}</p>`,
 					'</section>',
 				].join('');
 			})
@@ -348,18 +361,15 @@ export class WeChatFormatService {
 			.map((entry, index) => {
 				const width = Math.max(14, Math.round((entry.length / max) * 100));
 				return [
-					'<section style="margin:0 0 12px;">',
-					'<section style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 6px;">',
-					`<span style="font-weight:700;color:#111827;">${String(index + 1).padStart(2, '0')}. ${this.renderPlainInline(entry.title)}</span>`,
-					`<span style="color:#9ca3af;font-size:12px;">${entry.length} 字</span>`,
-					'</section>',
-					`<section style="height:6px;border-radius:999px;background:#e5e7eb;overflow:hidden;"><span style="display:block;width:${width}%;height:6px;border-radius:999px;background:#111827;"></span></section>`,
+					`<section style="${styles.tocRowStyle}">`,
+					`<p style="${styles.tocLineStyle}"><span class="knb-toc-index" style="${styles.tocIndexStyle}">${index + 1}</span>${this.renderPlainInline(entry.title)}</p>`,
+					`<section class="knb-toc-track" style="${styles.tocTrackStyle}"><span class="knb-toc-fill" style="${styles.tocFillStyle} width:${width}%;"></span></section>`,
 					'</section>',
 				].join('');
 			})
 			.join('');
 
-		return `<section class="knb-toc" style="${styles.tocStyle}"><p style="margin:0 0 14px;color:#6b7280;font-size:13px;font-weight:700;letter-spacing:.08em;">全文导航</p>${rows}</section>`;
+		return `<section class="knb-toc" style="${styles.tocStyle}"><p style="${styles.tocTitleStyle}">全文导航</p>${rows}</section>`;
 	}
 
 	private extractToc(markdown: string): TocEntry[] {

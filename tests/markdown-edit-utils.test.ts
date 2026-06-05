@@ -7,6 +7,7 @@ test('formats selected markdown text for toolbar actions', () => {
 	assert.equal(formatMarkdownSelection('bold', '重点'), '**重点**');
 	assert.equal(formatMarkdownSelection('quote', '第一行\n第二行'), '> 第一行\n> 第二行');
 	assert.equal(formatMarkdownSelection('intro', '摘要'), ':::intro\n摘要\n:::');
+	assert.equal(formatMarkdownSelection('toc', ''), '[TOC]');
 });
 
 test('uses practical snippets when toolbar actions have no selection', () => {
