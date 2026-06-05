@@ -254,14 +254,13 @@ test('renders knb special containers', () => {
 	assert.match(result.html, /class="knb-chat-speaker"/);
 	assert.match(result.html, /class="knb-chat-icon knb-chat-icon-0"/);
 	assert.match(result.html, /class="knb-chat-icon knb-chat-icon-1"/);
-	assert.match(result.html, /class="knb-chat-icon knb-chat-icon-2"/);
-	assert.match(result.html, /class="knb-chat-icon-tail"/);
-	assert.match(result.html, /overflow: visible/);
+	assert.match(result.html, />💬<\/span>/);
+	assert.match(result.html, />🗨️<\/span>/);
 	assert.match(result.html, /阿禅/);
 	assert.match(result.html, /朋友/);
 	assert.match(result.html, /朋友 1/);
-	assert.equal((result.html.match(/class="knb-chat-icon knb-chat-icon-0"/g) ?? []).length, 2);
-	assert.equal((result.html.match(/class="knb-chat-icon knb-chat-icon-2"/g) ?? []).length, 2);
+	assert.equal((result.html.match(/>💬<\/span>/g) ?? []).length, 4);
+	assert.equal((result.html.match(/>🗨️<\/span>/g) ?? []).length, 1);
 });
 
 test('keeps markdown tables inside article margins', () => {

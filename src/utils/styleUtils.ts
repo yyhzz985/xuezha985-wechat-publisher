@@ -91,16 +91,7 @@ export function calloutStyle(_type: string): string {
 export const chatStyle = 'margin: 1.4em 8px; padding: 0;';
 export const chatSpeakerStyle = 'margin: 0.7em 0 0.15em; color: rgb(41, 148, 128); font-size: 14px; line-height: 1.7; font-weight: 700; letter-spacing: 1px;';
 export const chatTextStyle = 'margin: 0 0 0.55em; color: rgb(43, 43, 43); font-size: 15px; line-height: 1.8; letter-spacing: 1px; text-align: left;';
-export const chatIconDotStyle = 'display: inline-block; width: 2px; height: 2px; margin: 0 1px; border-radius: 50%; background: currentColor; vertical-align: 1px;';
-export const chatIconTailStyle = 'position: absolute; left: 2px; bottom: -4px; display: block; width: 5px; height: 4px; border-left: 1.5px solid rgb(43, 43, 43); border-bottom: 1.5px solid rgb(43, 43, 43); border-bottom-left-radius: 4px; background: transparent; box-sizing: border-box;';
-
-export function chatIconStyle(variant: number): string {
-	const radius = ['4px', '4px', '3px', '50%', '2px', '1px'][variant] ?? '4px';
-	const width = variant === 3 ? '13px' : '14px';
-	const tail = variant === 1 ? 'border-bottom-color: rgb(43, 43, 43);' : '';
-	const tilt = variant === 5 ? 'transform: rotate(-3deg);' : '';
-	return `position: relative; display: inline-block; width: ${width}; height: 11px; margin: 0 6px 0 0; border: 1.5px solid rgb(43, 43, 43); border-radius: ${radius}; color: rgb(43, 43, 43); text-align: center; line-height: 7px; vertical-align: -1px; box-sizing: border-box; overflow: visible; ${tail} ${tilt}`;
-}
+export const chatIconStyle = 'display: inline-block; margin: 0 5px 0 0; color: rgb(43, 43, 43); font-size: 13px; line-height: 1; vertical-align: -1px;';
 
 export const readingTimeStyle = 'text-align: center; margin: 0 8px 1.6em; font-size: 0; box-sizing: border-box;';
 export const readingAuthorCardStyle = 'display: inline-block; vertical-align: middle; padding: 8px 5px; width: 50%; box-sizing: border-box; text-align: center; border-right: 1px solid #66CCC5;';
@@ -181,9 +172,7 @@ export interface WeChatStyleSet {
 	chatStyle: string;
 	chatSpeakerStyle: string;
 	chatTextStyle: string;
-	chatIconStyle(variant: number): string;
-	chatIconDotStyle: string;
-	chatIconTailStyle: string;
+	chatIconStyle: string;
 	readingTimeStyle: string;
 	readingAuthorCardStyle: string;
 	readingAuthorNameStyle: string;
@@ -368,8 +357,6 @@ export function createWeChatStyles(settings: PluginSettings): WeChatStyleSet {
 		chatSpeakerStyle: withHeadingWeight(applyPalette(chatSpeakerStyle, palette), headingWeight),
 		chatTextStyle: withContentWeight(applyPalette(chatTextStyle, palette), contentWeight),
 		chatIconStyle,
-		chatIconDotStyle,
-		chatIconTailStyle,
 		readingTimeStyle,
 		readingAuthorCardStyle: applyPalette(readingAuthorCardStyle, palette),
 		readingAuthorNameStyle: applyPalette(readingAuthorNameStyle, palette),

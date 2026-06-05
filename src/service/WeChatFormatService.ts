@@ -39,7 +39,8 @@ type BlockState = {
 };
 
 type ChatRoleIconMap = Map<string, number>;
-const CHAT_ICON_VARIANT_COUNT = 6;
+const CHAT_ICON_SYMBOLS = ['💬', '🗨️'];
+const CHAT_ICON_VARIANT_COUNT = CHAT_ICON_SYMBOLS.length;
 
 const CONTAINER_TITLES: Record<string, { icon: string; title: string }> = {
 	tip: { icon: '💡', title: '提示' },
@@ -375,15 +376,8 @@ export class WeChatFormatService {
 	}
 
 	private renderChatIcon(iconIndex: number, styles: WeChatStyleSet): string {
-		const dots = iconIndex === 1 || iconIndex === 3 || iconIndex === 5
-			? ''
-			: [
-				`<span style="${styles.chatIconDotStyle}"></span>`,
-				`<span style="${styles.chatIconDotStyle}"></span>`,
-				`<span style="${styles.chatIconDotStyle}"></span>`,
-			].join('');
-		const tail = `<span class="knb-chat-icon-tail" style="${styles.chatIconTailStyle}"></span>`;
-		return `<span class="knb-chat-icon knb-chat-icon-${iconIndex}" style="${styles.chatIconStyle(iconIndex)}">${dots}${tail}</span>`;
+		const icon = CHAT_ICON_SYMBOLS[iconIndex] ?? CHAT_ICON_SYMBOLS[0];
+		return `<span class="knb-chat-icon knb-chat-icon-${iconIndex}" style="${styles.chatIconStyle}">${icon}</span>`;
 	}
 
 	private renderToc(entries: TocEntry[], styles: WeChatStyleSet): string {
