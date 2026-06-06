@@ -1,6 +1,7 @@
 import type { MarkdownView, Plugin } from 'obsidian';
 import type { PluginSettings } from '../settings';
 import { ClipboardService } from '../service/ClipboardService';
+import type { LocalImageAsset } from '../service/WeChatDraftService';
 import { type FormattedWeChatArticle, WeChatFormatService } from '../service/WeChatFormatService';
 import { formatMarkdownSelection, type MarkdownFormatAction } from '../utils/markdownEditUtils';
 import { type NoticeView, silentNoticeView } from '../view/NoticeView';
@@ -13,6 +14,7 @@ type DraftService = {
 		settings: PluginSettings,
 		context?: { sourcePath?: string },
 	): Promise<{ mediaId: string }>;
+	uploadCoverImage(asset: LocalImageAsset, settings: PluginSettings): Promise<{ mediaId: string; url: string }>;
 };
 
 export class PublisherController {
@@ -31,6 +33,9 @@ export class PublisherController {
 		private readonly draftService: DraftService = {
 			async uploadDraft() {
 				throw new Error('未配置公众号草稿上传服务');
+			},
+			async uploadCoverImage() {
+				throw new Error('未配置封面图上传服务');
 			},
 		},
 	) {}
@@ -153,6 +158,11 @@ export class PublisherController {
 		void this.uploadDraftFromView(view);
 	}
 
+	async uploadCoverImage(file: File): Promise<{ mediaId: string; url: string }> {
+		const asset = await this.fileToImageAsset(file);
+		return this.draftService.uploadCoverImage(asset, this.getSettings());
+	}
+
 	private async copyFromView(view: MarkdownView): Promise<void> {
 		const markdown = this.readMarkdownForCopy(view);
 		if (!markdown.trim()) {
@@ -239,5 +249,37 @@ export class PublisherController {
 
 	private getCurrentMarkdownView(): MarkdownView | null {
 		return this.plugin.app.workspace.getActiveViewOfType(this.markdownViewType) ?? this.lastMarkdownView;
+	}
+
+	private async fileToImageAsset(file: File): Promise<LocalImageAsset> {
+		const mimeType = this.getSupportedImageMimeType(file);
+		return {
+			fileName: file.name,
+			mimeType,
+			data: await file.arrayBuffer(),
+		};
+	}
+
+	private getSupportedImageMimeType(file: File): string {
+		if (this.isSupportedImageMimeType(file.type)) {
+			return file.type;
+		}
+
+		const extension = file.name.split('.').pop()?.toLowerCase();
+		if (extension === 'jpg' || extension === 'jpeg') {
+			return 'image/jpeg';
+		}
+		if (extension === 'png') {
+			return 'image/png';
+		}
+		if (extension === 'gif') {
+			return 'image/gif';
+		}
+
+		throw new Error('封面图只支持 JPG、PNG、GIF');
+	}
+
+	private isSupportedImageMimeType(mimeType: string): boolean {
+		return mimeType === 'image/jpeg' || mimeType === 'image/png' || mimeType === 'image/gif';
 	}
 }

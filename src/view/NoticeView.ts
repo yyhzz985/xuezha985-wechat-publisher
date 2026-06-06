@@ -1,9 +1,11 @@
 export interface NoticeView {
 	showSuccess(): void;
 	showDraftSuccess(mediaId: string): void;
+	showCoverSuccess(mediaId: string): void;
 	showEmpty(): void;
 	showError(error: unknown): void;
 	showDraftError(error: unknown): void;
+	showCoverError(error: unknown): void;
 }
 
 type NoticeConstructor = new (message: string) => unknown;
@@ -19,6 +21,10 @@ export class ObsidianNoticeView implements NoticeView {
 		new this.NoticeType(`已上传到公众号草稿箱：${mediaId}`);
 	}
 
+	showCoverSuccess(mediaId: string): void {
+		new this.NoticeType(`已上传封面图：${mediaId}`);
+	}
+
 	showEmpty(): void {
 		new this.NoticeType('当前笔记没有可复制内容');
 	}
@@ -32,12 +38,19 @@ export class ObsidianNoticeView implements NoticeView {
 		const message = error instanceof Error ? error.message : String(error);
 		new this.NoticeType(`上传草稿失败：${message}`);
 	}
+
+	showCoverError(error: unknown): void {
+		const message = error instanceof Error ? error.message : String(error);
+		new this.NoticeType(`上传封面图失败：${message}`);
+	}
 }
 
 export const silentNoticeView: NoticeView = {
 	showSuccess() {},
 	showDraftSuccess() {},
+	showCoverSuccess() {},
 	showEmpty() {},
 	showError() {},
 	showDraftError() {},
+	showCoverError() {},
 };

@@ -47,6 +47,7 @@ export default class WeChatPublisherPlugin extends Plugin {
 				(settings) => this.saveSettings(settings),
 				(action) => this.publisherController.applyFormat(action),
 				() => this.publisherController.uploadDraft(),
+				(file) => this.publisherController.uploadCoverImage(file),
 			),
 		);
 
@@ -57,6 +58,8 @@ export default class WeChatPublisherPlugin extends Plugin {
 				this,
 				() => this.settings,
 				(settings) => this.saveSettings(settings),
+				(file) => this.publisherController.uploadCoverImage(file),
+				noticeView,
 			),
 		);
 	}

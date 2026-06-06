@@ -11,6 +11,7 @@ import {
 	type PluginSettings,
 	type SubheadingStyle,
 } from '../settings';
+import { type NoticeView, silentNoticeView } from './NoticeView';
 
 export class WeChatPublisherSettingTab extends PluginSettingTab {
 	constructor(
@@ -18,6 +19,10 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 		plugin: Plugin,
 		private readonly getSettings: () => PluginSettings,
 		private readonly saveSettings: (settings: PluginSettings) => Promise<void>,
+		private readonly uploadCoverImage: (file: File) => Promise<{ mediaId: string; url: string }> = async () => {
+			throw new Error('未配置封面图上传服务');
+		},
+		private readonly noticeView: NoticeView = silentNoticeView,
 	) {
 		super(app, plugin);
 	}
@@ -121,13 +126,25 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('默认封面 media_id')
-			.setDesc('先在公众号后台上传一张永久图片素材，再填写它的 media_id。')
+			.setDesc('可手填，也可点击上传封面图自动生成。')
 			.addText((text) =>
 				text
 					.setPlaceholder('永久素材 media_id')
 					.setValue(settings.wechatThumbMediaId)
 					.onChange((value) => this.savePatch({ wechatThumbMediaId: value.trim() })),
 			);
+
+		new Setting(containerEl)
+			.setName('上传封面图')
+			.setDesc('选择 JPG、PNG 或 GIF，插件会上传为公众号永久图片素材并写回 media_id。')
+			.addButton((button) => {
+				button
+					.setButtonText('上传封面图')
+					.onClick(() => {
+						this.pickCoverImage();
+					});
+				button.buttonEl.addClass('wechat-publisher-upload-cover-button');
+			});
 
 		new Setting(containerEl)
 			.setName('原文链接')
@@ -184,5 +201,30 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 			...this.getSettings(),
 			...patch,
 		});
+	}
+
+	private pickCoverImage(): void {
+		const input = document.createElement('input');
+		input.type = 'file';
+		input.accept = 'image/jpeg,image/png,image/gif';
+		input.addEventListener('change', () => {
+			const file = input.files?.[0];
+			if (!file) {
+				return;
+			}
+			void this.uploadSelectedCover(file);
+		});
+		input.click();
+	}
+
+	private async uploadSelectedCover(file: File): Promise<void> {
+		try {
+			const result = await this.uploadCoverImage(file);
+			await this.savePatch({ wechatThumbMediaId: result.mediaId });
+			this.noticeView.showCoverSuccess(result.mediaId);
+			this.display();
+		} catch (error) {
+			this.noticeView.showCoverError(error);
+		}
 	}
 }

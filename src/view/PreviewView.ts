@@ -73,6 +73,9 @@ export class WeChatPublisherPreviewView extends ItemView {
 		private readonly saveSettings: (settings: PluginSettings) => Promise<void>,
 		private readonly applyFormat: (action: MarkdownFormatAction) => void = () => {},
 		private readonly uploadDraft: () => void | Promise<void> = () => {},
+		private readonly uploadCoverImage: (file: File) => Promise<{ mediaId: string; url: string }> = async () => {
+			throw new Error('未配置封面图上传服务');
+		},
 	) {
 		super(leaf);
 		this.navigation = false;
@@ -279,6 +282,7 @@ export class WeChatPublisherPreviewView extends ItemView {
 		this.addText(content, '默认封面 media_id', '永久素材 media_id', settings.wechatThumbMediaId, (value) =>
 			this.savePatch({ wechatThumbMediaId: value.trim() }),
 		);
+		this.addCoverUpload(content);
 		this.addText(content, '原文链接', 'https://...', settings.wechatSourceUrl, (value) =>
 			this.savePatch({ wechatSourceUrl: value.trim() }),
 		);
@@ -439,6 +443,42 @@ export class WeChatPublisherPreviewView extends ItemView {
 		const field = container.createDiv({ cls: 'wechat-publisher-settings-field' });
 		field.createEl('label', { text: label });
 		return field;
+	}
+
+	private addCoverUpload(container: HTMLElement): void {
+		const button = container.createEl('button', {
+			cls: 'wechat-publisher-upload-cover-button',
+			text: '上传封面图',
+		});
+		button.type = 'button';
+		button.addEventListener('click', () => {
+			this.pickCoverImage();
+		});
+	}
+
+	private pickCoverImage(): void {
+		const input = document.createElement('input');
+		input.type = 'file';
+		input.accept = 'image/jpeg,image/png,image/gif';
+		input.addEventListener('change', () => {
+			const file = input.files?.[0];
+			if (!file) {
+				return;
+			}
+			void this.uploadSelectedCover(file);
+		});
+		input.click();
+	}
+
+	private async uploadSelectedCover(file: File): Promise<void> {
+		try {
+			const result = await this.uploadCoverImage(file);
+			await this.savePatch({ wechatThumbMediaId: result.mediaId });
+			this.noticeView.showCoverSuccess(result.mediaId);
+			this.renderSettingsPanel();
+		} catch (error) {
+			this.noticeView.showCoverError(error);
+		}
 	}
 
 	private async savePatch(patch: Partial<PluginSettings>): Promise<void> {

@@ -138,3 +138,45 @@ test('uploads local article images before adding draft', async () => {
 		],
 	});
 });
+
+test('uploads cover image as permanent material and returns media id', async () => {
+	const requests: Array<{
+		url: string;
+		method: string;
+		bodyBytes?: ArrayBuffer;
+		headers?: Record<string, string>;
+	}> = [];
+	const httpClient: WeChatHttpClient = {
+		async requestJson(request) {
+			requests.push(request);
+			if (request.url.includes('/cgi-bin/token')) {
+				return { access_token: 'ACCESS_TOKEN', expires_in: 7200 };
+			}
+			return { errcode: 0, errmsg: 'ok', media_id: 'COVER_MEDIA_ID', url: 'https://mmbiz.qpic.cn/cover.jpg' };
+		},
+	};
+	const service = new WeChatDraftService(httpClient);
+
+	const result = await service.uploadCoverImage(
+		{
+			fileName: 'cover.jpg',
+			mimeType: 'image/jpeg',
+			data: new Uint8Array([4, 5, 6]).buffer,
+		},
+		{
+			...DEFAULT_SETTINGS,
+			wechatAppId: 'APPID',
+			wechatAppSecret: 'SECRET',
+		},
+	);
+
+	assert.deepEqual(result, {
+		mediaId: 'COVER_MEDIA_ID',
+		url: 'https://mmbiz.qpic.cn/cover.jpg',
+	});
+	assert.equal(requests.length, 2);
+	assert.match(requests[1].url, /\/cgi-bin\/material\/add_material\?access_token=ACCESS_TOKEN&type=image/);
+	assert.equal(requests[1].method, 'POST');
+	assert.match(requests[1].headers?.['Content-Type'] ?? '', /^multipart\/form-data; boundary=/);
+	assert.ok(requests[1].bodyBytes instanceof ArrayBuffer);
+});

@@ -240,6 +240,9 @@ test('uploads full current markdown to wechat draft box', () => {
 				uploads.push({ markdown, html: article.html });
 				return { mediaId: 'DRAFT_MEDIA_ID' };
 			},
+			async uploadCoverImage() {
+				return { mediaId: 'COVER_MEDIA_ID', url: '' };
+			},
 		},
 	);
 	controller.register();

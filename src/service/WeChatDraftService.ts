@@ -21,6 +21,11 @@ export interface WeChatDraftResult {
 	mediaId: string;
 }
 
+export interface WeChatCoverImageResult {
+	mediaId: string;
+	url: string;
+}
+
 export interface LocalImageAsset {
 	fileName: string;
 	mimeType: string;
@@ -53,6 +58,11 @@ interface ArticleImageUploadResponse extends WeChatErrorResponse {
 	url?: string;
 }
 
+interface MaterialAddResponse extends WeChatErrorResponse {
+	media_id?: string;
+	url?: string;
+}
+
 export class WeChatDraftService {
 	constructor(
 		private readonly httpClient: WeChatHttpClient,
@@ -65,16 +75,44 @@ export class WeChatDraftService {
 		settings: PluginSettings,
 		context: DraftUploadContext = {},
 	): Promise<WeChatDraftResult> {
-		this.assertSettings(settings);
+		this.assertDraftSettings(settings);
 		const accessToken = await this.getAccessToken(settings);
 		const articleWithImages = await this.uploadLocalArticleImages(accessToken, article, context);
 		const response = await this.addDraft(accessToken, articleWithImages, markdown, settings);
 		return { mediaId: response.media_id };
 	}
 
-	private assertSettings(settings: PluginSettings): void {
+	async uploadCoverImage(asset: LocalImageAsset, settings: PluginSettings): Promise<WeChatCoverImageResult> {
+		this.assertApiSettings(settings);
+		const accessToken = await this.getAccessToken(settings);
+		const multipart = this.createMultipartBody(asset);
+		const response = await this.httpClient.requestJson({
+			url: `${WECHAT_API_BASE}/cgi-bin/material/add_material?access_token=${encodeURIComponent(accessToken)}&type=image`,
+			method: 'POST',
+			bodyBytes: multipart.bodyBytes,
+			headers: {
+				'Content-Type': multipart.contentType,
+			},
+		}) as MaterialAddResponse;
+		this.assertWeChatOk(response, `上传封面图失败：${asset.fileName}`);
+		if (!response.media_id) {
+			throw new Error(`上传封面图失败：微信没有返回 media_id（${asset.fileName}）`);
+		}
+		return {
+			mediaId: response.media_id,
+			url: response.url ?? '',
+		};
+	}
+
+	private assertApiSettings(settings: PluginSettings): void {
+		if (!settings.wechatAppId.trim() || !settings.wechatAppSecret.trim()) {
+			throw new Error('请先填写公众号 AppID 和 AppSecret');
+		}
+	}
+
+	private assertDraftSettings(settings: PluginSettings): void {
 		if (!settings.wechatAppId.trim() || !settings.wechatAppSecret.trim() || !settings.wechatThumbMediaId.trim()) {
-			throw new Error('请先填写公众号 AppID、AppSecret 和默认封面 media_id');
+			throw new Error('请先填写公众号 AppID、AppSecret 和默认封面 media_id，默认封面可点击上传封面图自动生成');
 		}
 	}
 

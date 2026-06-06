@@ -69,3 +69,13 @@
 - 测试：新增 Obsidian 图片渲染断言、正文图片上传替换断言；`npm test` 已通过，`npm run build` 已通过。
 - Review 查 Bug：上传前会直接暴露缺配置、读不到图片、图片格式不支持、微信接口失败；不做静默降级。图片读取在 Repository 层，上传流程仍在 Service 层。
 - 第一性原理分析：草稿箱能不能真正常用，核心不是继续抠样式，而是正文图片必须变成微信可访问 URL。先处理本地图片，比一次性处理所有外链和压缩逻辑更小、更稳。
+
+## 2026-06-06 封面图自动上传
+
+- 在右侧预览设置面板和 Obsidian 插件设置页新增“上传封面图”按钮。
+- 选择 JPG、PNG 或 GIF 后，插件调用微信公众号永久素材接口 `material/add_material?type=image`，拿到 `media_id` 后自动写回“默认封面 media_id”。
+- 草稿上传仍要求 `AppID`、`AppSecret`、默认封面 `media_id` 三项完整；封面上传只要求 `AppID` 和 `AppSecret`。
+- 新增 `WeChatDraftService.uploadCoverImage`、`PublisherController.uploadCoverImage`，View 只负责选文件和提示，保持五层职责不混杂。
+- 测试：新增封面永久素材上传、设置入口和主入口接线断言；`npm test` 已通过，`npm run build` 已通过；构建产物已同步到 X-Note 插件目录。
+- Review 查 Bug：没有把封面图当正文图片上传；没有静默降级；上传失败直接提示微信返回错误；只允许微信支持的图片格式。
+- 第一性原理分析：用户卡在 `media_id` 获取上，最简单稳妥的方案不是继续解释后台入口，而是让插件直接上传封面图并写回配置。
