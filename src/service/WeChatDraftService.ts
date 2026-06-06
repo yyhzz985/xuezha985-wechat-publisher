@@ -272,7 +272,18 @@ export class WeChatDraftService {
 
 	private assertWeChatOk(response: WeChatErrorResponse, fallback: string): void {
 		if (typeof response.errcode === 'number' && response.errcode !== 0) {
-			throw new Error(`${fallback}：${response.errcode} ${response.errmsg ?? ''}`.trim());
+			const errmsg = response.errmsg ?? '';
+			if (response.errcode === 40164 && /not in whitelist/i.test(errmsg)) {
+				const ip = this.extractFirstIpv4(errmsg);
+				const ipText = ip ? `当前电脑公网 IP ${ip}` : '当前电脑公网 IP';
+				const addText = ip ? `添加 ${ip}` : '添加当前公网 IP';
+				throw new Error(`${fallback}：${ipText} 不在公众号 IP 白名单。请到微信公众平台 > 设置与开发 > 基本配置 > IP 白名单，${addText} 后重试。原始错误：${response.errcode} ${errmsg}`);
+			}
+			throw new Error(`${fallback}：${response.errcode} ${errmsg}`.trim());
 		}
+	}
+
+	private extractFirstIpv4(value: string): string | null {
+		return value.match(/\b(?:\d{1,3}\.){3}\d{1,3}\b/)?.[0] ?? null;
 	}
 }

@@ -180,3 +180,30 @@ test('uploads cover image as permanent material and returns media id', async () 
 	assert.match(requests[1].headers?.['Content-Type'] ?? '', /^multipart\/form-data; boundary=/);
 	assert.ok(requests[1].bodyBytes instanceof ArrayBuffer);
 });
+
+test('explains access token ip whitelist errors', async () => {
+	const service = new WeChatDraftService({
+		async requestJson() {
+			return {
+				errcode: 40164,
+				errmsg: 'invalid ip 180.113.103.94 ipv6 ::ffff:180.113.103.94, not in whitelist rid: 6a2391b9',
+			};
+		},
+	});
+
+	await assert.rejects(
+		() => service.uploadCoverImage(
+			{
+				fileName: 'cover.jpg',
+				mimeType: 'image/jpeg',
+				data: new Uint8Array([4, 5, 6]).buffer,
+			},
+			{
+				...DEFAULT_SETTINGS,
+				wechatAppId: 'APPID',
+				wechatAppSecret: 'SECRET',
+			},
+		),
+		/当前电脑公网 IP 180\.113\.103\.94 不在公众号 IP 白名单/,
+	);
+});
