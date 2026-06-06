@@ -147,7 +147,7 @@
 - 已部署授权 Worker：`https://wechat-publisher-license.237219265.workers.dev`。
 - Wrangler 自动创建 KV 命名空间 `wechat-publisher-license-licenses`，ID 已写入 `worker/wrangler.jsonc`：`dae49a951f8343469f185dfd3e5e1fd6`。
 - 修复 `issue-license.ps1` 两个 Windows 兼容问题：旧版 .NET 没有 `RandomNumberGenerator.Fill`；`Set-Content -Encoding UTF8` 会写 BOM，导致 Worker `JSON.parse` 失败。
-- 已发放并验证测试 Key：`PRO-UKVNJXQ1CSNTKBT7`，有效期至 `2027-06-06T06:52:13.321Z`。
+- 已发放并验证测试 Key：`PRO-***`，有效期至 `2027-06-06T06:52:13.321Z`。
 - 验证：直接请求 `/v1/licenses/verify` 返回 `active:true`、`plan:pro`、`features:["wechat_upload"]`。
 - Review 查 Bug：先发现 KV 内容 JSON 无效，再改用临时无 BOM JSON 文件上传；没有修改插件授权逻辑和微信上传逻辑。
 - 第一性原理分析：Pro 授权链路真正可用的最低验证标准是“Worker 部署成功 + KV 有有效 key + 插件同款请求能返回 active:true”。本次已完成这个闭环。
@@ -172,3 +172,20 @@
 - 将 `worker/licenses-*.csv` 加入 `.gitignore`，避免真实卡密误提交。
 - Review 查 Bug：上一轮超时可能已经写入了一些没有 CSV 记录的 Key，本次不使用那些未知 Key；以后以成功生成的 CSV 为准。
 - 第一性原理分析：批量发卡的目标是拿到一批可交付、可追踪的 Key。必须先保证“上传成功”和“CSV 留档”一致，所以一次性 bulk 写入成功后再导出 CSV，比循环单条写入更简单、更稳。
+
+## 2026-06-06 自动收款发卡与 D1 授权
+
+- 将授权 Worker 从 KV 版升级为 D1 版，新增 `licenses`、`license_activations`、`orders`、`payment_events`、`license_events` 表。
+- License 数据库存储改为 `SHA-256(secret + licenseKey)`，并使用 D1 记录设备绑定；默认一个 Key 绑定 1 台设备。
+- 新增面包多 Pay 自动发卡链路：`/buy` 购买页、`/v1/orders/create` 创建订单、`/v1/pay/mbd/webhook` 接收通知、`/order/:orderNo` 展示支付结果和 License Key。
+- Webhook 不直接信任支付通知；收到通知后会再查面包多订单，确认已支付、金额正确、订单未处理过才发 Key。
+- 新增 Worker Admin API 和 `worker/scripts/issue-license.ps1` 管理脚本，支持批量发 Key、禁用 Key、延长有效期、重置设备绑定。
+- 插件端 Pro 设置继续只让用户填写 `License Key`，新增“购买 Pro”按钮，打开 Worker 购买页；授权状态显示 `设备 used/max`。
+- 删除危险的“清空本地存储/清空本地设置”入口，保留“恢复排版默认”，只重置主题、字重、小标题风格、代码主题和时间模块，不动公众号 API、头像、封面和 License。
+- 插件默认头像改为 `https://xuezha985.oss-cn-beijing.aliyuncs.com/img/IMG_6890.JPG`。
+- 将 `worker/.admin-token.local`、`worker/.dev.vars*`、`worker/.env*` 加入 `.gitignore`，避免把本地密钥提交到仓库。
+- 已对远端 D1 执行 `0001_license_orders.sql` 迁移，保留已有 103 个 License 和 4 个设备绑定，只新增订单、支付事件等自动发卡表。
+- 测试：新增 D1 授权、设备绑定、订单创建、Webhook 幂等、Pro 购买入口、危险清理入口移除等断言；`npm test` 已通过，`npm run build` 已通过。
+- 部署说明：已复用 Cloudflare D1 数据库 `wechat-publisher-license-db`，`database_id` 为 `d05e216a-2d98-4bc8-bb3b-780771bcc5e0`；正式部署 D1 版 Worker 前，还需要按 `worker/README.md` 配置 `ADMIN_TOKEN`、`LICENSE_HASH_SECRET`、`MBD_APP_ID`、`MBD_APP_KEY`、`MBD_PRO_YEAR_AMOUNT_CENTS`、`PUBLIC_BASE_URL`。
+- Review 查 Bug：自动发卡不会把公众号 AppSecret 或文章正文发到授权服务；免费用户仍可预览和复制；上传草稿、上传封面、上传头像会先校验 Pro，失败时不会调用微信接口。
+- 第一性原理分析：用户要的是“自动收款后自动发 Key，插件只填 Key”。所以前台不做复杂商城，插件也不暴露授权服务 URL；订单、授权、设备绑定都放到 Worker + D1，范围最小且便于以后接发卡工具。

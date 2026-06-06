@@ -31,7 +31,7 @@ test('renders possible-bar fixed opening module', () => {
 	assert.match(result.html, /class="reading-time"/);
 	assert.match(result.html, /reading-time__card-author/);
 	assert.match(result.html, /border-right: 1px solid #66CCC5/);
-	assert.match(result.html, /<img class="reading-time__avatar" src="https:\/\/mp\.knb\.im\/jn\.png"/);
+	assert.match(result.html, /<img class="reading-time__avatar" src="https:\/\/xuezha985\.oss-cn-beijing\.aliyuncs\.com\/img\/IMG_6890\.JPG"/);
 	assert.equal(result.html.includes('background-image'), false);
 	assert.match(result.html, /阿禅 Jason Ng/);
 	assert.match(result.html, /读完需要/);

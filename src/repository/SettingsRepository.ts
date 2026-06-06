@@ -96,12 +96,24 @@ export class SettingsRepository {
 			return null;
 		}
 
-		return {
+		const normalized: EntitlementCache = {
 			plan,
 			expiresAt: cache.expiresAt,
 			checkedAt: cache.checkedAt,
 			features: this.normalizeFeatures(cache.features),
 		};
+		const maxDevices = this.normalizeOptionalNumber(cache.maxDevices);
+		const usedDevices = this.normalizeOptionalNumber(cache.usedDevices);
+		if (maxDevices !== undefined) {
+			normalized.maxDevices = maxDevices;
+		}
+		if (usedDevices !== undefined) {
+			normalized.usedDevices = usedDevices;
+		}
+		if (typeof cache.deviceBound === 'boolean') {
+			normalized.deviceBound = cache.deviceBound;
+		}
+		return normalized;
 	}
 
 	private normalizeFeatures(value: unknown): ProFeature[] {
@@ -109,6 +121,10 @@ export class SettingsRepository {
 			return [];
 		}
 		return value.filter((feature): feature is ProFeature => feature === 'wechat_upload');
+	}
+
+	private normalizeOptionalNumber(value: unknown): number | undefined {
+		return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
 	}
 
 	private createDeviceId(): string {

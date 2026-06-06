@@ -92,6 +92,7 @@ export class WeChatPublisherPreviewView extends ItemView {
 			features: [],
 			expiresAt: '',
 		}),
+		private readonly openPurchasePage: () => void = () => {},
 	) {
 		super(leaf);
 		this.navigation = false;
@@ -282,6 +283,7 @@ export class WeChatPublisherPreviewView extends ItemView {
 			this.savePatch({ licenseKey: value.trim(), entitlementCache: null }),
 		);
 		this.addLicenseRefresh(content);
+		this.addPurchaseProButton(content);
 
 		content.createDiv({ cls: 'wechat-publisher-settings-divider' });
 		content.createEl('h4', { text: '公众号接口' });
@@ -311,16 +313,20 @@ export class WeChatPublisherPreviewView extends ItemView {
 			this.savePatch({ wechatNeedOpenComment: value }),
 		);
 
-		const clearButton = content.createEl('button', {
+		const resetLayoutButton = content.createEl('button', {
 			cls: 'wechat-publisher-clear-button',
-			text: '清空本地存储',
+			text: '恢复排版默认',
 		});
-		clearButton.type = 'button';
-		clearButton.addEventListener('click', () => {
+		resetLayoutButton.type = 'button';
+		resetLayoutButton.addEventListener('click', () => {
 			this.isThemeDropdownOpen = false;
 			void this.saveSettings({
-				...DEFAULT_SETTINGS,
-				deviceId: this.getSettings().deviceId,
+				...this.getSettings(),
+				layoutTheme: DEFAULT_SETTINGS.layoutTheme,
+				fontWeight: DEFAULT_SETTINGS.fontWeight,
+				subheadingStyle: DEFAULT_SETTINGS.subheadingStyle,
+				codeTheme: DEFAULT_SETTINGS.codeTheme,
+				showReadingTime: DEFAULT_SETTINGS.showReadingTime,
 			}).then(() => this.renderSettingsPanel());
 		});
 	}
@@ -471,8 +477,11 @@ export class WeChatPublisherPreviewView extends ItemView {
 
 	private addLicenseStatus(container: HTMLElement): void {
 		const status = this.getEntitlementStatus();
+		const deviceText = status.active && status.maxDevices
+			? `，设备 ${status.usedDevices ?? 0}/${status.maxDevices}`
+			: '';
 		const text = status.active
-			? `授权状态：Pro，有效期至 ${status.expiresAt}`
+			? `授权状态：Pro，有效期至 ${status.expiresAt}${deviceText}`
 			: `授权状态：Free${status.message ? `，${status.message}` : ''}`;
 		container.createEl('p', {
 			cls: status.active ? 'wechat-publisher-license-status is-pro' : 'wechat-publisher-license-status',
@@ -495,6 +504,18 @@ export class WeChatPublisherPreviewView extends ItemView {
 					button.disabled = false;
 					this.renderSettingsPanel();
 				});
+		});
+	}
+
+	private addPurchaseProButton(container: HTMLElement): void {
+		const button = container.createEl('button', {
+			cls: 'wechat-publisher-license-check-button',
+			text: '购买 Pro',
+		});
+		button.type = 'button';
+		button.addEventListener('click', () => {
+			this.isThemeDropdownOpen = false;
+			this.openPurchasePage();
 		});
 	}
 

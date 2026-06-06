@@ -17,12 +17,16 @@ export type SubheadingStyle = 'number' | 'eye' | 'none';
 export type ProFeature = 'wechat_upload';
 
 export const DEFAULT_LICENSE_SERVER_URL = 'https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify';
+export const DEFAULT_PRO_PURCHASE_URL = 'https://wechat-publisher-license.237219265.workers.dev/buy';
 
 export interface EntitlementCache {
 	plan: 'free' | 'pro';
 	expiresAt: string;
 	checkedAt: string;
 	features: ProFeature[];
+	maxDevices?: number;
+	usedDevices?: number;
+	deviceBound?: boolean;
 }
 
 export interface LayoutThemeOption {
@@ -59,7 +63,7 @@ export interface PluginSettings {
 
 export const DEFAULT_SETTINGS: PluginSettings = {
 	authorName: '',
-	avatarUrl: '',
+	avatarUrl: 'https://xuezha985.oss-cn-beijing.aliyuncs.com/img/IMG_6890.JPG',
 	showReadingTime: true,
 	codeTheme: 'dark',
 	layoutTheme: 'green-blue',

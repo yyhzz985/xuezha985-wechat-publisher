@@ -1,114 +1,106 @@
 param(
-	[string]$Key = "",
+	[ValidateSet("issue", "reset-device", "disable", "extend")]
+	[string]$Action = "issue",
 	[int]$Count = 1,
 	[int]$Days = 365,
-	[string]$Note = ""
+	[string]$Note = "",
+	[string]$LicenseKey = "",
+	[string]$ServerUrl = "https://wechat-publisher-license.237219265.workers.dev",
+	[string]$AdminToken = ""
 )
 
 $ErrorActionPreference = "Stop"
 
-if ($Key.Trim() -and $Count -ne 1) {
-	throw "Use -Key only when -Count is 1."
-}
 if ($Count -lt 1) {
 	throw "Count must be greater than 0."
 }
+if ($Action -ne "issue" -and -not $LicenseKey.Trim()) {
+	throw "LicenseKey is required for $Action."
+}
 
-function New-LicenseKey {
-	$bytes = New-Object byte[] 12
-	$rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
-	try {
-		$rng.GetBytes($bytes)
-	} finally {
-		$rng.Dispose()
+function Get-AdminToken {
+	param([string]$ExplicitToken)
+
+	if ($ExplicitToken.Trim()) {
+		return $ExplicitToken.Trim()
 	}
-	$token = [Convert]::ToBase64String($bytes).Replace("+", "").Replace("/", "").Replace("=", "").ToUpperInvariant()
-	return "PRO-$token"
+	if ($env:ADMIN_TOKEN) {
+		return $env:ADMIN_TOKEN.Trim()
+	}
+
+	$tokenPath = Join-Path $PSScriptRoot "..\.admin-token.local"
+	if (Test-Path -LiteralPath $tokenPath) {
+		return (Get-Content -LiteralPath $tokenPath -Raw).Trim()
+	}
+
+	throw "ADMIN_TOKEN is required. Pass -AdminToken, set env:ADMIN_TOKEN, or create worker/.admin-token.local."
 }
 
-function New-LicenseRecord {
-	param(
-		[string]$LicenseKey,
-		[string]$ExpiresAt,
-		[string]$LicenseNote
-	)
-
-	return @{
-		active = $true
-		plan = "pro"
-		features = @("wechat_upload")
-		expiresAt = $ExpiresAt
-		note = $LicenseNote
-	} | ConvertTo-Json -Compress
-}
-
-function Write-Utf8NoBom {
+function Invoke-AdminApi {
 	param(
 		[string]$Path,
-		[string]$Content
+		[hashtable]$Body,
+		[string]$Token
 	)
 
-	$utf8NoBom = New-Object -TypeName System.Text.UTF8Encoding -ArgumentList $false
-	[System.IO.File]::WriteAllText($Path, $Content, $utf8NoBom)
+	$baseUrl = $ServerUrl.TrimEnd("/")
+	return Invoke-RestMethod `
+		-Method Post `
+		-Uri "$baseUrl$Path" `
+		-Headers @{ Authorization = "Bearer $Token" } `
+		-ContentType "application/json" `
+		-Body ($Body | ConvertTo-Json -Depth 6)
 }
 
-$batchId = (Get-Date).ToUniversalTime().ToString("yyyyMMdd-HHmmss", [System.Globalization.CultureInfo]::InvariantCulture)
-$csvPath = Join-Path (Get-Location) "licenses-$batchId.csv"
-$bulkPath = Join-Path ([System.IO.Path]::GetTempPath()) "wechat-publisher-licenses-$batchId.json"
-$issued = @()
-$bulkEntries = @()
+$token = Get-AdminToken -ExplicitToken $AdminToken
 
-Push-Location (Join-Path $PSScriptRoot "..")
-try {
+if ($Action -eq "issue") {
+	$batchId = (Get-Date).ToUniversalTime().ToString("yyyyMMdd-HHmmss", [System.Globalization.CultureInfo]::InvariantCulture)
+	$csvPath = Join-Path (Get-Location) "licenses-$batchId.csv"
+	$issued = @()
+
 	for ($index = 1; $index -le $Count; $index += 1) {
-		if ($Key.Trim()) {
-			$licenseKey = $Key.Trim()
-		} else {
-			$licenseKey = New-LicenseKey
-		}
-		$expiresAt = (Get-Date).ToUniversalTime().AddDays($Days).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", [System.Globalization.CultureInfo]::InvariantCulture)
 		if ($Count -eq 1) {
 			$licenseNote = $Note
 		} else {
 			$licenseNote = "$Note batch=$batchId item=$index".Trim()
 		}
-		$record = New-LicenseRecord -LicenseKey $licenseKey -ExpiresAt $expiresAt -LicenseNote $licenseNote
+		$result = Invoke-AdminApi `
+			-Path "/v1/admin/licenses/issue" `
+			-Token $token `
+			-Body @{
+				days = $Days
+				note = $licenseNote
+			}
 
-		$bulkEntries += [pscustomobject]@{
-			key = "license:$licenseKey"
-			value = $record
-		}
 		$issued += [pscustomobject]@{
-			licenseKey = $licenseKey
-			expiresAt = $expiresAt
+			licenseKey = $result.licenseKey
+			expiresAt = $result.expiresAt
+			maxDevices = $result.maxDevices
 			note = $licenseNote
 		}
 	}
 
-	$bulkJson = @($bulkEntries) | ConvertTo-Json -Depth 6
-	Write-Utf8NoBom -Path $bulkPath -Content $bulkJson
-	try {
-		npx wrangler kv bulk put $bulkPath --binding LICENSES --remote
-		if ($LASTEXITCODE -ne 0) {
-			exit $LASTEXITCODE
-		}
-	} finally {
-		if (Test-Path -LiteralPath $bulkPath) {
-			Remove-Item -LiteralPath $bulkPath -Force
-		}
-	}
-
 	$issued | Export-Csv -LiteralPath $csvPath -NoTypeInformation -Encoding UTF8
-} finally {
-	Pop-Location
+	Write-Host ""
+	if ($Count -eq 1) {
+		Write-Host "License Key: $($issued[0].licenseKey)"
+		Write-Host "Expires At : $($issued[0].expiresAt)"
+	} else {
+		Write-Host "Issued $Count license keys."
+		Write-Host "CSV: $csvPath"
+	}
+	Write-Host "Send License Key values to users."
+	return
 }
 
-Write-Host ""
-if ($Count -eq 1) {
-	Write-Host "License Key: $($issued[0].licenseKey)"
-	Write-Host "Expires At : $($issued[0].expiresAt)"
-} else {
-	Write-Host "Issued $Count license keys."
-	Write-Host "CSV: $csvPath"
+$actionPath = "/v1/admin/licenses/$Action"
+$body = @{
+	licenseKey = $LicenseKey.Trim()
 }
-Write-Host "Send License Key values to users."
+if ($Action -eq "extend") {
+	$body.days = $Days
+}
+
+$response = Invoke-AdminApi -Path $actionPath -Token $token -Body $body
+$response | ConvertTo-Json -Depth 6

@@ -4,3 +4,6 @@ node_modules/
 .DS_Store
 npm-debug.log*
 worker/licenses-*.csv
+worker/.admin-token.local
+worker/.dev.vars*
+worker/.env*

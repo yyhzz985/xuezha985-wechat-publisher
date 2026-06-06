@@ -61,7 +61,8 @@ export class ObsidianNoticeView implements NoticeView {
 
 	showLicenseSuccess(status: EntitlementStatus): void {
 		if (status.active) {
-			new this.NoticeType(`Pro 授权校验成功，有效期至：${status.expiresAt}`);
+			const deviceText = status.maxDevices ? `，设备 ${status.usedDevices ?? 0}/${status.maxDevices}` : '';
+			new this.NoticeType(`Pro 授权校验成功，有效期至：${status.expiresAt}${deviceText}`);
 			return;
 		}
 		new this.NoticeType(status.message ?? '当前 License 未开通 Pro');

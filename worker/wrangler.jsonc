@@ -2,10 +2,11 @@
 	"name": "wechat-publisher-license",
 	"main": "src/index.ts",
 	"compatibility_date": "2026-06-01",
-	"kv_namespaces": [
+	"d1_databases": [
 		{
-			"binding": "LICENSES",
-			"id": "dae49a951f8343469f185dfd3e5e1fd6"
+			"binding": "DB",
+			"database_name": "wechat-publisher-license-db",
+			"database_id": "d05e216a-2d98-4bc8-bb3b-780771bcc5e0"
 		}
 	]
 }

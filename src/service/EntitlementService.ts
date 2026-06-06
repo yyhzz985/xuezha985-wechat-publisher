@@ -8,6 +8,9 @@ export interface EntitlementStatus {
 	features: ProFeature[];
 	expiresAt: string;
 	message?: string;
+	maxDevices?: number;
+	usedDevices?: number;
+	deviceBound?: boolean;
 }
 
 export interface LicenseVerifyRequest {
@@ -24,6 +27,9 @@ export interface LicenseVerifyResponse {
 	features: string[];
 	expiresAt: string;
 	message?: string;
+	maxDevices?: number;
+	usedDevices?: number;
+	deviceBound?: boolean;
 }
 
 export interface LicenseHttpClient {
@@ -129,6 +135,9 @@ export class EntitlementService {
 			plan: cache.plan,
 			features: cache.features,
 			expiresAt: cache.expiresAt,
+			maxDevices: cache.maxDevices,
+			usedDevices: cache.usedDevices,
+			deviceBound: cache.deviceBound,
 		};
 	}
 
@@ -140,6 +149,9 @@ export class EntitlementService {
 			features,
 			expiresAt: response.expiresAt,
 			message: response.message,
+			maxDevices: response.maxDevices,
+			usedDevices: response.usedDevices,
+			deviceBound: response.deviceBound,
 		};
 	}
 
@@ -147,12 +159,22 @@ export class EntitlementService {
 		if (!status.active) {
 			return null;
 		}
-		return {
+		const cache: EntitlementCache = {
 			plan: status.plan,
 			expiresAt: status.expiresAt,
 			checkedAt: this.now().toISOString(),
 			features: status.features,
 		};
+		if (status.maxDevices !== undefined) {
+			cache.maxDevices = status.maxDevices;
+		}
+		if (status.usedDevices !== undefined) {
+			cache.usedDevices = status.usedDevices;
+		}
+		if (status.deviceBound !== undefined) {
+			cache.deviceBound = status.deviceBound;
+		}
+		return cache;
 	}
 
 	private allowsFeature(status: EntitlementStatus, feature: ProFeature): boolean {

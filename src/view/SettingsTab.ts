@@ -38,6 +38,7 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 			features: [],
 			expiresAt: '',
 		}),
+		private readonly openPurchasePage: () => void = () => {},
 		private readonly noticeView: NoticeView = silentNoticeView,
 	) {
 		super(app, plugin);
@@ -151,6 +152,7 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 							.finally(() => this.display());
 					}),
 			);
+		this.addPurchaseProButton(containerEl);
 
 		containerEl.createEl('h3', { text: '公众号接口' });
 		containerEl.createEl('p', {
@@ -217,14 +219,19 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName('清空本地设置')
+			.setName('恢复排版默认')
+			.setDesc('只恢复主题、字重、小标题风格、代码主题和时间模块，不影响公众号接口和 Pro 授权。')
 			.addButton((button) =>
 				button
-					.setButtonText('清空本地存储')
+					.setButtonText('恢复排版默认')
 					.onClick(() => {
 						void this.saveSettings({
-							...DEFAULT_SETTINGS,
-							deviceId: this.getSettings().deviceId,
+							...this.getSettings(),
+							layoutTheme: DEFAULT_SETTINGS.layoutTheme,
+							fontWeight: DEFAULT_SETTINGS.fontWeight,
+							subheadingStyle: DEFAULT_SETTINGS.subheadingStyle,
+							codeTheme: DEFAULT_SETTINGS.codeTheme,
+							showReadingTime: DEFAULT_SETTINGS.showReadingTime,
 						}).then(() => this.display());
 					}),
 			);
@@ -258,9 +265,21 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 		});
 	}
 
+	private addPurchaseProButton(containerEl: HTMLElement): void {
+		new Setting(containerEl)
+			.setName('购买 Pro')
+			.setDesc('打开购买页面，付款成功后复制 License Key 回来激活。')
+			.addButton((button) =>
+				button
+					.setButtonText('购买 Pro')
+					.onClick(() => this.openPurchasePage()),
+			);
+	}
+
 	private formatLicenseStatus(status: EntitlementStatus): string {
 		if (status.active) {
-			return `Pro，有效期至 ${status.expiresAt}`;
+			const deviceText = status.maxDevices ? `，设备 ${status.usedDevices ?? 0}/${status.maxDevices}` : '';
+			return `Pro，有效期至 ${status.expiresAt}${deviceText}`;
 		}
 		return status.message ? `Free，${status.message}` : 'Free';
 	}

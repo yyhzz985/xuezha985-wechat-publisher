@@ -1,40 +1,74 @@
-# 公众号排版插件 Pro 授权 Worker
+# 公众号排版器 Pro 授权与自动发卡 Worker
 
-这个 Worker 只做 License 校验，不接收公众号 AppSecret，也不接收文章正文。
+这个 Worker 负责三件事：
 
-## 部署
+- 校验插件里的 `License Key`。
+- 接收面包多 Pay 付款成功通知，自动生成 Pro Key。
+- 管理 Key 的设备绑定、禁用、延期、解绑。
 
-1. 登录 Cloudflare：
+插件仍然只让用户填写一个 `License Key`。公众号 AppSecret 和文章正文不会发到这个 Worker。
 
-```bash
-npx wrangler login
+## 1. 创建 D1
+
+```powershell
+cd E:\AI_project\ob-kenengba\worker
+npx wrangler d1 create wechat-publisher-license-db
 ```
 
-2. 部署 Worker。
+把命令输出里的 `database_id` 填到 `wrangler.jsonc` 的 `d1_databases[0].database_id`。
 
-`wrangler.jsonc` 里只写了 `LICENSES` 绑定，没有手填 KV ID。Wrangler 会在部署时自动创建 KV，并把 ID 写回配置。
+## 2. 配置 Secrets
 
-```bash
+```powershell
+npx wrangler secret put ADMIN_TOKEN
+npx wrangler secret put LICENSE_HASH_SECRET
+npx wrangler secret put MBD_APP_ID
+npx wrangler secret put MBD_APP_KEY
+npx wrangler secret put MBD_PRO_YEAR_AMOUNT_CENTS
+npx wrangler secret put PUBLIC_BASE_URL
+```
+
+说明：
+
+- `ADMIN_TOKEN`：你本地管理脚本调用 Worker Admin API 的口令。
+- `LICENSE_HASH_SECRET`：用于 License 哈希和加密，随机长字符串即可。
+- `MBD_APP_ID`、`MBD_APP_KEY`：面包多 Pay 控制台里获取。
+- `MBD_PRO_YEAR_AMOUNT_CENTS`：Pro 年费金额，单位是分，例如 `9900`。
+- `PUBLIC_BASE_URL`：Worker 公开地址，例如 `https://wechat-publisher-license.237219265.workers.dev`。
+
+本地调试可以把这些写到 `worker/.dev.vars`，不要提交。
+
+## 3. 初始化数据库并部署
+
+```powershell
+npx wrangler d1 migrations apply wechat-publisher-license-db --remote
 npx wrangler deploy
 ```
 
-3. 插件已经内置当前授权地址，普通用户不用填写授权服务 URL。
-
-当前内置地址是：
+部署后，在面包多 Pay 控制台设置 Webhook URL：
 
 ```text
-https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify
+https://你的-worker域名/v1/pay/mbd/webhook
 ```
 
-## 手工发放 License
+## 4. 自动购买链路
 
-发一个 Key：
+插件里的“购买 Pro”会打开：
 
-```powershell
-.\scripts\issue-license.ps1 -Days 365 -Note "张三"
+```text
+https://wechat-publisher-license.237219265.workers.dev/buy
 ```
 
-脚本会自动生成一个 `PRO-...`，写入 Cloudflare KV。你把输出里的 `License Key` 发给用户即可。
+用户付款后：
+
+1. 面包多发送 Webhook。
+2. Worker 反查面包多订单，确认已支付、金额正确、未退款。
+3. Worker 生成 `PRO-...`，写入 D1。
+4. 用户在订单页复制 Key，回到插件里激活。
+
+## 5. 管理 Key
+
+先把 `ADMIN_TOKEN` 放到环境变量，或写入 `worker/.admin-token.local`。
 
 批量发 Key：
 
@@ -42,13 +76,22 @@ https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify
 .\scripts\issue-license.ps1 -Count 100 -Days 365 -Note "2026-06 批次"
 ```
 
-用户在插件里填写：
+解绑设备：
 
-- `License Key`：你发给他的 `PRO-...`
+```powershell
+.\scripts\issue-license.ps1 -Action reset-device -LicenseKey "PRO-xxxx"
+```
 
-批量脚本会生成 `licenses-YYYYMMDD-HHMMSS.csv`。以后接发卡工具时，把 CSV 里的 `licenseKey` 列导入发卡工具即可。
-CSV 里是真实卡密，已经被 `.gitignore` 忽略，不要提交到 Git。
+禁用 Key：
 
-有效期由 `-Days` 控制。`-Days 365` 就是一年；如果要一个月，用 `-Days 30`。
+```powershell
+.\scripts\issue-license.ps1 -Action disable -LicenseKey "PRO-xxxx"
+```
 
-第一版只防普通用户误用，不做强 DRM。会改插件源码的人可以绕过本地限制。
+延期：
+
+```powershell
+.\scripts\issue-license.ps1 -Action extend -LicenseKey "PRO-xxxx" -Days 365
+```
+
+CSV 卡密文件会输出到当前目录，已被 `.gitignore` 忽略，不要提交。

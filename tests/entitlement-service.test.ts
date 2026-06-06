@@ -12,6 +12,9 @@ const PRO_CACHE: EntitlementCache = {
 	expiresAt: '2026-06-10T00:00:00.000Z',
 	checkedAt: '2026-06-06T00:00:00.000Z',
 	features: ['wechat_upload'],
+	maxDevices: 1,
+	usedDevices: 1,
+	deviceBound: true,
 };
 
 function createService(
@@ -61,6 +64,9 @@ test('allows pro feature from fresh cached entitlement', async () => {
 		plan: 'pro',
 		features: ['wechat_upload'],
 		expiresAt: '2026-06-10T00:00:00.000Z',
+		maxDevices: 1,
+		usedDevices: 1,
+		deviceBound: true,
 	});
 });
 
@@ -87,6 +93,9 @@ test('refreshes license and saves pro cache when no fresh cache exists', async (
 					plan: 'pro',
 					features: ['wechat_upload'],
 					expiresAt: '2026-06-10T00:00:00.000Z',
+					maxDevices: 1,
+					usedDevices: 1,
+					deviceBound: true,
 				};
 			},
 		},
@@ -100,6 +109,9 @@ test('refreshes license and saves pro cache when no fresh cache exists', async (
 		expiresAt: '2026-06-10T00:00:00.000Z',
 		checkedAt: '2026-06-06T12:00:00.000Z',
 		features: ['wechat_upload'],
+		maxDevices: 1,
+		usedDevices: 1,
+		deviceBound: true,
 	});
 });
 
