@@ -130,3 +130,13 @@
 - 测试：新增授权服务、设置归一化、Controller 拦截、设置入口、Worker 校验测试；`npm test` 已通过，`npm run build` 已通过；构建产物已同步到 X-Note 插件目录。
 - Review 查 Bug：授权服务只接收 License、设备 ID、插件 ID、版本和功能名，不接收公众号 AppSecret 或文章内容；上传入口在调用微信接口前拦截，免费用户不会触发微信上传请求。
 - 第一性原理分析：本地 Obsidian 插件无法防会改代码的人，第一版只防普通用户误用和未授权使用高级上传功能。最简单稳健的方案是“本地缓存 + 远端校验 + 上传入口统一拦截”，不做复杂 DRM。
+
+## 2026-06-06 Worker 部署与发 Key 简化
+
+- 检查 Wrangler：本机可运行 `wrangler 4.98.0`，但当前没有 Cloudflare 登录态，也没有 `CLOUDFLARE_API_TOKEN` 环境变量，所以不能直接创建线上资源。
+- 将 `worker/wrangler.jsonc` 的 KV 配置改为只声明 `LICENSES` 绑定，让 Wrangler 部署时自动创建 KV 并写回 ID，减少手工复制配置。
+- 新增 `worker/scripts/issue-license.ps1`：登录 Cloudflare 后运行脚本即可自动生成 `PRO-...`，并写入远端 KV。
+- 更新 `worker/README.md`：说明插件里 `License Key` 填发给用户的 key，`授权服务 URL` 填 Worker 的 `/v1/licenses/verify` 地址。
+- 验证：`npm test` 已通过；`npx wrangler deploy --dry-run` 已通过；`issue-license.ps1` PowerShell 语法检查已通过。
+- Review 查 Bug：发 Key 脚本只写 License 记录，不接触微信公众号配置；脚本输出改为英文，避免 Windows PowerShell 中文编码导致脚本解析失败。
+- 第一性原理分析：用户要的是能快速部署和发 key，不是理解 Cloudflare 所有概念。最简单稳的路径是 Wrangler 登录后“一键部署 + 一键发 key”，把 KV ID 手工配置步骤去掉。
