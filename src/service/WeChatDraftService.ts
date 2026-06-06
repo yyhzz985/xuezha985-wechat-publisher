@@ -15,6 +15,12 @@ export interface WeChatHttpRequest {
 
 export interface WeChatHttpClient {
 	requestJson(request: WeChatHttpRequest): Promise<unknown>;
+	requestBytes?(request: WeChatHttpRequest): Promise<WeChatHttpBytesResponse>;
+}
+
+export interface WeChatHttpBytesResponse {
+	data: ArrayBuffer;
+	mimeType?: string;
 }
 
 export interface WeChatDraftResult {
@@ -77,7 +83,7 @@ export class WeChatDraftService {
 	): Promise<WeChatDraftResult> {
 		this.assertDraftSettings(settings);
 		const accessToken = await this.getAccessToken(settings);
-		const articleWithImages = await this.uploadLocalArticleImages(accessToken, article, context);
+		const articleWithImages = await this.uploadArticleImages(accessToken, article, context);
 		const response = await this.addDraft(accessToken, articleWithImages, markdown, settings);
 		return { mediaId: response.media_id };
 	}
@@ -163,49 +169,57 @@ export class WeChatDraftService {
 		return { media_id: response.media_id };
 	}
 
-	private async uploadLocalArticleImages(
+	private async uploadArticleImages(
 		accessToken: string,
 		article: FormattedWeChatArticle,
 		context: DraftUploadContext,
 	): Promise<FormattedWeChatArticle> {
-		const localSources = this.extractLocalImageSources(article.html);
-		if (localSources.length === 0) {
+		const imageSources = this.extractArticleImageSources(article.html);
+		if (imageSources.length === 0) {
 			return article;
-		}
-		if (!this.localImageResolver) {
-			throw new Error('正文包含本地图片，但插件没有配置本地图片读取服务');
 		}
 
 		const uploadedUrls = new Map<string, string>();
-		for (const src of localSources) {
-			const asset = await this.localImageResolver.resolve(src, context.sourcePath ?? '');
-			if (!asset) {
-				throw new Error(`无法读取正文图片：${src}`);
-			}
+		for (const src of imageSources) {
+			const asset = await this.resolveArticleImageSource(src, context);
 			uploadedUrls.set(src, await this.uploadArticleImage(accessToken, asset));
 		}
 
 		return {
 			...article,
-			html: this.replaceImageSources(article.html, uploadedUrls),
+			html: this.replaceArticleImageSources(article.html, uploadedUrls),
 		};
 	}
 
-	private extractLocalImageSources(html: string): string[] {
+	private extractArticleImageSources(html: string): string[] {
 		const sources = new Set<string>();
 		const imagePattern = /<img\b[^>]*\bsrc="([^"]*)"[^>]*>/gi;
 		let match: RegExpExecArray | null;
 		while ((match = imagePattern.exec(html)) !== null) {
 			const src = this.decodeHtmlAttribute(match[1]).trim();
-			if (src && this.isLocalImageSource(src)) {
+			if (this.shouldUploadArticleImageSource(src)) {
+				sources.add(src);
+			}
+		}
+
+		const cssUrlPattern = /\burl\(\s*(['"]?)([^'")]+)\1\s*\)/gi;
+		while ((match = cssUrlPattern.exec(html)) !== null) {
+			const src = this.decodeHtmlAttribute(match[2]).trim();
+			if (this.shouldUploadArticleImageSource(src)) {
 				sources.add(src);
 			}
 		}
 		return Array.from(sources);
 	}
 
-	private replaceImageSources(html: string, uploadedUrls: Map<string, string>): string {
-		return html.replace(/(<img\b[^>]*\bsrc=")([^"]*)("[^>]*>)/gi, (match, prefix: string, escapedSrc: string, suffix: string) => {
+	private replaceArticleImageSources(html: string, uploadedUrls: Map<string, string>): string {
+		const htmlWithImageTags = html.replace(/(<img\b[^>]*\bsrc=")([^"]*)("[^>]*>)/gi, (match, prefix: string, escapedSrc: string, suffix: string) => {
+			const src = this.decodeHtmlAttribute(escapedSrc).trim();
+			const uploadedUrl = uploadedUrls.get(src);
+			return uploadedUrl ? `${prefix}${escapeHtml(uploadedUrl)}${suffix}` : match;
+		});
+
+		return htmlWithImageTags.replace(/(\burl\(\s*['"]?)([^'")]+)(['"]?\s*\))/gi, (match, prefix: string, escapedSrc: string, suffix: string) => {
 			const src = this.decodeHtmlAttribute(escapedSrc).trim();
 			const uploadedUrl = uploadedUrls.get(src);
 			return uploadedUrl ? `${prefix}${escapeHtml(uploadedUrl)}${suffix}` : match;
@@ -214,6 +228,98 @@ export class WeChatDraftService {
 
 	private isLocalImageSource(src: string): boolean {
 		return !/^(https?:|data:|\/\/)/i.test(src);
+	}
+
+	private shouldUploadArticleImageSource(src: string): boolean {
+		if (!src || /^data:/i.test(src) || /^\/\//.test(src)) {
+			return false;
+		}
+		if (/^https?:\/\//i.test(src)) {
+			return !this.isWeChatHostedImageSource(src);
+		}
+		return this.isLocalImageSource(src);
+	}
+
+	private isWeChatHostedImageSource(src: string): boolean {
+		try {
+			const host = new URL(src).hostname.toLowerCase();
+			return host === 'mmbiz.qpic.cn' || host.endsWith('.mmbiz.qpic.cn');
+		} catch {
+			return false;
+		}
+	}
+
+	private async resolveArticleImageSource(src: string, context: DraftUploadContext): Promise<LocalImageAsset> {
+		if (/^https?:\/\//i.test(src)) {
+			return this.fetchRemoteArticleImage(src);
+		}
+		if (!this.localImageResolver) {
+			throw new Error('正文包含本地图片，但插件没有配置本地图片读取服务');
+		}
+		const asset = await this.localImageResolver.resolve(src, context.sourcePath ?? '');
+		if (!asset) {
+			throw new Error(`无法读取正文图片：${src}`);
+		}
+		return asset;
+	}
+
+	private async fetchRemoteArticleImage(src: string): Promise<LocalImageAsset> {
+		if (!this.httpClient.requestBytes) {
+			throw new Error(`正文包含外链图片，但插件没有配置外链图片下载服务：${src}`);
+		}
+		const response = await this.httpClient.requestBytes({
+			url: src,
+			method: 'GET',
+		});
+		const mimeType = this.getSupportedRemoteImageMimeType(response.mimeType, src);
+		return {
+			fileName: this.getRemoteImageFileName(src, mimeType),
+			mimeType,
+			data: response.data,
+		};
+	}
+
+	private getSupportedRemoteImageMimeType(mimeType: string | undefined, src: string): string {
+		const normalized = mimeType?.split(';')[0].trim().toLowerCase();
+		if (normalized === 'image/jpeg' || normalized === 'image/png' || normalized === 'image/gif') {
+			return normalized;
+		}
+
+		const extension = this.getUrlPathExtension(src);
+		if (extension === 'jpg' || extension === 'jpeg') {
+			return 'image/jpeg';
+		}
+		if (extension === 'png') {
+			return 'image/png';
+		}
+		if (extension === 'gif') {
+			return 'image/gif';
+		}
+
+		throw new Error(`外链图片格式不支持：${src}`);
+	}
+
+	private getRemoteImageFileName(src: string, mimeType: string): string {
+		const urlPath = this.getUrlPathName(src);
+		const baseName = urlPath.split('/').pop() || 'image';
+		if (/\.(jpe?g|png|gif)$/i.test(baseName)) {
+			return baseName;
+		}
+		const extension = mimeType === 'image/jpeg' ? 'jpg' : mimeType.slice('image/'.length);
+		return `${baseName}.${extension}`;
+	}
+
+	private getUrlPathExtension(src: string): string {
+		const fileName = this.getUrlPathName(src).split('/').pop() ?? '';
+		return fileName.split('.').pop()?.toLowerCase() ?? '';
+	}
+
+	private getUrlPathName(src: string): string {
+		try {
+			return decodeURIComponent(new URL(src).pathname);
+		} catch {
+			return src.split(/[?#]/)[0];
+		}
 	}
 
 	private async uploadArticleImage(accessToken: string, asset: LocalImageAsset): Promise<string> {

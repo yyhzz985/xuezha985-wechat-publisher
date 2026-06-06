@@ -77,6 +77,8 @@ test('uploads local article images before adding draft', async () => {
 		bodyBytes?: ArrayBuffer;
 		headers?: Record<string, string>;
 	}> = [];
+	const remoteRequests: string[] = [];
+	let uploadedImageIndex = 0;
 	const httpClient: WeChatHttpClient = {
 		async requestJson(request) {
 			requests.push(request);
@@ -84,9 +86,23 @@ test('uploads local article images before adding draft', async () => {
 				return { access_token: 'ACCESS_TOKEN', expires_in: 7200 };
 			}
 			if (request.url.includes('/cgi-bin/media/uploadimg')) {
-				return { errcode: 0, errmsg: 'ok', url: 'https://mmbiz.qpic.cn/photo.png' };
+				uploadedImageIndex += 1;
+				return {
+					errcode: 0,
+					errmsg: 'ok',
+					url: uploadedImageIndex === 1
+						? 'https://mmbiz.qpic.cn/photo.png'
+						: 'https://mmbiz.qpic.cn/remote.png',
+				};
 			}
 			return { errcode: 0, errmsg: 'ok', media_id: 'DRAFT_MEDIA_ID' };
+		},
+		async requestBytes(request) {
+			remoteRequests.push(request.url);
+			return {
+				data: new Uint8Array([7, 8, 9]).buffer,
+				mimeType: 'image/png',
+			};
 		},
 	};
 	const resolvedImages: string[] = [];
@@ -117,19 +133,21 @@ test('uploads local article images before adding draft', async () => {
 	);
 
 	assert.deepEqual(resolvedImages, ['folder/note.md:attachments/photo.png']);
-	assert.equal(requests.length, 3);
+	assert.deepEqual(remoteRequests, ['https://example.com/remote.png']);
+	assert.equal(requests.length, 4);
 	assert.match(requests[1].url, /\/cgi-bin\/media\/uploadimg\?access_token=ACCESS_TOKEN/);
 	assert.equal(requests[1].method, 'POST');
 	assert.match(requests[1].headers?.['Content-Type'] ?? '', /^multipart\/form-data; boundary=/);
 	assert.ok(requests[1].bodyBytes instanceof ArrayBuffer);
-	assert.deepEqual(requests[2].body, {
+	assert.match(requests[2].url, /\/cgi-bin\/media\/uploadimg\?access_token=ACCESS_TOKEN/);
+	assert.deepEqual(requests[3].body, {
 		articles: [
 			{
 				article_type: 'news',
 				title: '标题',
 				author: DEFAULT_SETTINGS.authorName,
 				digest: '正文',
-				content: '<section><img src="https://mmbiz.qpic.cn/photo.png"><img src="https://example.com/remote.png"><img src="https://mmbiz.qpic.cn/photo.png"></section>',
+				content: '<section><img src="https://mmbiz.qpic.cn/photo.png"><img src="https://mmbiz.qpic.cn/remote.png"><img src="https://mmbiz.qpic.cn/photo.png"></section>',
 				content_source_url: '',
 				thumb_media_id: 'THUMB_MEDIA_ID',
 				need_open_comment: 1,
@@ -137,6 +155,56 @@ test('uploads local article images before adding draft', async () => {
 			},
 		],
 	});
+});
+
+test('uploads reading avatar background images before adding draft', async () => {
+	const requests: Array<{
+		url: string;
+		method: string;
+		body?: unknown;
+		bodyBytes?: ArrayBuffer;
+		headers?: Record<string, string>;
+	}> = [];
+	const remoteRequests: string[] = [];
+	const httpClient: WeChatHttpClient = {
+		async requestJson(request) {
+			requests.push(request);
+			if (request.url.includes('/cgi-bin/token')) {
+				return { access_token: 'ACCESS_TOKEN', expires_in: 7200 };
+			}
+			if (request.url.includes('/cgi-bin/media/uploadimg')) {
+				return { errcode: 0, errmsg: 'ok', url: 'https://mmbiz.qpic.cn/avatar.jpg' };
+			}
+			return { errcode: 0, errmsg: 'ok', media_id: 'DRAFT_MEDIA_ID' };
+		},
+		async requestBytes(request) {
+			remoteRequests.push(request.url);
+			return {
+				data: new Uint8Array([9, 8, 7]).buffer,
+				mimeType: 'image/jpeg',
+			};
+		},
+	};
+	const service = new WeChatDraftService(httpClient);
+
+	await service.uploadDraft(
+		{
+			html: '<section style="background-image: url(\'https://example.com/avatar.jpg\'); background-size: cover;"><br></section>',
+			plainText: '正文',
+		},
+		'# 标题\n\n正文',
+		{
+			...DEFAULT_SETTINGS,
+			wechatAppId: 'APPID',
+			wechatAppSecret: 'SECRET',
+			wechatThumbMediaId: 'THUMB_MEDIA_ID',
+		},
+	);
+
+	assert.deepEqual(remoteRequests, ['https://example.com/avatar.jpg']);
+	assert.match(requests[1].url, /\/cgi-bin\/media\/uploadimg\?access_token=ACCESS_TOKEN/);
+	assert.match(JSON.stringify(requests[2].body), /https:\/\/mmbiz\.qpic\.cn\/avatar\.jpg/);
+	assert.equal(JSON.stringify(requests[2].body).includes('https://example.com/avatar.jpg'), false);
 });
 
 test('uploads cover image as permanent material and returns media id', async () => {

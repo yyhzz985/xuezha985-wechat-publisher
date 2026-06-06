@@ -76,6 +76,18 @@ export default class WeChatPublisherPlugin extends Plugin {
 				});
 				return response.json;
 			},
+			async requestBytes(request) {
+				const response = await requestUrl({
+					url: request.url,
+					method: request.method,
+					body: request.bodyBytes,
+					headers: request.headers,
+				});
+				return {
+					data: response.arrayBuffer,
+					mimeType: response.headers['content-type'] ?? response.headers['Content-Type'],
+				};
+			},
 		};
 	}
 
