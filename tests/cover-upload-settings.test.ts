@@ -15,8 +15,23 @@ test('exposes cover upload button in both settings surfaces', () => {
 	assert.match(settingsTab, /accept\s*=\s*'image\/jpeg,image\/png,image\/gif'/);
 });
 
+test('exposes avatar upload button in both settings surfaces', () => {
+	assert.match(previewView, /上传头像图/);
+	assert.match(settingsTab, /上传头像图/);
+	assert.match(previewView, /wechat-publisher-upload-avatar-button/);
+	assert.match(settingsTab, /wechat-publisher-upload-avatar-button/);
+	assert.match(previewView, /avatarUrl: result\.url/);
+	assert.match(settingsTab, /avatarUrl: result\.url/);
+});
+
 test('wires cover upload through controller and draft service', () => {
 	assert.match(main, /uploadCoverImage\(file\)/);
 	assert.match(main, /publisherController\.uploadCoverImage\(file\)/);
+	assert.match(main, /WeChatDraftService/);
+});
+
+test('wires avatar upload through controller and draft service', () => {
+	assert.match(main, /uploadAvatarImage\(file\)/);
+	assert.match(main, /publisherController\.uploadAvatarImage\(file\)/);
 	assert.match(main, /WeChatDraftService/);
 });

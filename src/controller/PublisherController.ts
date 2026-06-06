@@ -15,6 +15,7 @@ type DraftService = {
 		context?: { sourcePath?: string },
 	): Promise<{ mediaId: string }>;
 	uploadCoverImage(asset: LocalImageAsset, settings: PluginSettings): Promise<{ mediaId: string; url: string }>;
+	uploadAvatarImage(asset: LocalImageAsset, settings: PluginSettings): Promise<{ url: string }>;
 };
 
 export class PublisherController {
@@ -36,6 +37,9 @@ export class PublisherController {
 			},
 			async uploadCoverImage() {
 				throw new Error('未配置封面图上传服务');
+			},
+			async uploadAvatarImage() {
+				throw new Error('未配置头像图上传服务');
 			},
 		},
 	) {}
@@ -163,6 +167,11 @@ export class PublisherController {
 		return this.draftService.uploadCoverImage(asset, this.getSettings());
 	}
 
+	async uploadAvatarImage(file: File): Promise<{ url: string }> {
+		const asset = await this.fileToImageAsset(file);
+		return this.draftService.uploadAvatarImage(asset, this.getSettings());
+	}
+
 	private async copyFromView(view: MarkdownView): Promise<void> {
 		const markdown = this.readMarkdownForCopy(view);
 		if (!markdown.trim()) {
@@ -276,7 +285,7 @@ export class PublisherController {
 			return 'image/gif';
 		}
 
-		throw new Error('封面图只支持 JPG、PNG、GIF');
+		throw new Error('图片只支持 JPG、PNG、GIF');
 	}
 
 	private isSupportedImageMimeType(mimeType: string): boolean {

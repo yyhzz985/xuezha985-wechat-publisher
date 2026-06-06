@@ -22,6 +22,9 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 		private readonly uploadCoverImage: (file: File) => Promise<{ mediaId: string; url: string }> = async () => {
 			throw new Error('未配置封面图上传服务');
 		},
+		private readonly uploadAvatarImage: (file: File) => Promise<{ url: string }> = async () => {
+			throw new Error('未配置头像图上传服务');
+		},
 		private readonly noticeView: NoticeView = silentNoticeView,
 	) {
 		super(app, plugin);
@@ -99,6 +102,18 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 					.setValue(settings.avatarUrl)
 					.onChange((value) => this.savePatch({ avatarUrl: value.trim() })),
 			);
+
+		new Setting(containerEl)
+			.setName('上传头像图')
+			.setDesc('选择 JPG、PNG 或 GIF，插件会上传为公众号正文图片并写回头像 URL。')
+			.addButton((button) => {
+				button
+					.setButtonText('上传头像图')
+					.onClick(() => {
+						this.pickAvatarImage();
+					});
+				button.buttonEl.addClass('wechat-publisher-upload-avatar-button');
+			});
 
 		containerEl.createEl('h3', { text: '公众号接口' });
 		containerEl.createEl('p', {
@@ -217,6 +232,20 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 		input.click();
 	}
 
+	private pickAvatarImage(): void {
+		const input = document.createElement('input');
+		input.type = 'file';
+		input.accept = 'image/jpeg,image/png,image/gif';
+		input.addEventListener('change', () => {
+			const file = input.files?.[0];
+			if (!file) {
+				return;
+			}
+			void this.uploadSelectedAvatar(file);
+		});
+		input.click();
+	}
+
 	private async uploadSelectedCover(file: File): Promise<void> {
 		try {
 			const result = await this.uploadCoverImage(file);
@@ -225,6 +254,17 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 			this.display();
 		} catch (error) {
 			this.noticeView.showCoverError(error);
+		}
+	}
+
+	private async uploadSelectedAvatar(file: File): Promise<void> {
+		try {
+			const result = await this.uploadAvatarImage(file);
+			await this.savePatch({ avatarUrl: result.url });
+			this.noticeView.showAvatarSuccess(result.url);
+			this.display();
+		} catch (error) {
+			this.noticeView.showAvatarError(error);
 		}
 	}
 }

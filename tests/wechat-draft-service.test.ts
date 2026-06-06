@@ -157,7 +157,7 @@ test('uploads local article images before adding draft', async () => {
 	});
 });
 
-test('uploads reading avatar background images before adding draft', async () => {
+test('uploads reading avatar images before adding draft', async () => {
 	const requests: Array<{
 		url: string;
 		method: string;
@@ -189,7 +189,7 @@ test('uploads reading avatar background images before adding draft', async () =>
 
 	await service.uploadDraft(
 		{
-			html: '<section style="background-image: url(\'https://example.com/avatar.jpg\'); background-size: cover;"><br></section>',
+			html: '<section><img class="reading-time__avatar" src="https://example.com/avatar.jpg"></section>',
 			plainText: '正文',
 		},
 		'# 标题\n\n正文',
@@ -205,6 +205,47 @@ test('uploads reading avatar background images before adding draft', async () =>
 	assert.match(requests[1].url, /\/cgi-bin\/media\/uploadimg\?access_token=ACCESS_TOKEN/);
 	assert.match(JSON.stringify(requests[2].body), /https:\/\/mmbiz\.qpic\.cn\/avatar\.jpg/);
 	assert.equal(JSON.stringify(requests[2].body).includes('https://example.com/avatar.jpg'), false);
+});
+
+test('uploads avatar image as article image url', async () => {
+	const requests: Array<{
+		url: string;
+		method: string;
+		bodyBytes?: ArrayBuffer;
+		headers?: Record<string, string>;
+	}> = [];
+	const httpClient: WeChatHttpClient = {
+		async requestJson(request) {
+			requests.push(request);
+			if (request.url.includes('/cgi-bin/token')) {
+				return { access_token: 'ACCESS_TOKEN', expires_in: 7200 };
+			}
+			return { errcode: 0, errmsg: 'ok', url: 'https://mmbiz.qpic.cn/avatar.jpg' };
+		},
+	};
+	const service = new WeChatDraftService(httpClient);
+
+	const result = await service.uploadAvatarImage(
+		{
+			fileName: 'avatar.jpg',
+			mimeType: 'image/jpeg',
+			data: new Uint8Array([1, 2, 3]).buffer,
+		},
+		{
+			...DEFAULT_SETTINGS,
+			wechatAppId: 'APPID',
+			wechatAppSecret: 'SECRET',
+		},
+	);
+
+	assert.deepEqual(result, {
+		url: 'https://mmbiz.qpic.cn/avatar.jpg',
+	});
+	assert.equal(requests.length, 2);
+	assert.match(requests[1].url, /\/cgi-bin\/media\/uploadimg\?access_token=ACCESS_TOKEN/);
+	assert.equal(requests[1].method, 'POST');
+	assert.match(requests[1].headers?.['Content-Type'] ?? '', /^multipart\/form-data; boundary=/);
+	assert.ok(requests[1].bodyBytes instanceof ArrayBuffer);
 });
 
 test('uploads cover image as permanent material and returns media id', async () => {

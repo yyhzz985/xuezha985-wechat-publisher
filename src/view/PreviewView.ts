@@ -76,6 +76,9 @@ export class WeChatPublisherPreviewView extends ItemView {
 		private readonly uploadCoverImage: (file: File) => Promise<{ mediaId: string; url: string }> = async () => {
 			throw new Error('未配置封面图上传服务');
 		},
+		private readonly uploadAvatarImage: (file: File) => Promise<{ url: string }> = async () => {
+			throw new Error('未配置头像图上传服务');
+		},
 	) {
 		super(leaf);
 		this.navigation = false;
@@ -261,6 +264,7 @@ export class WeChatPublisherPreviewView extends ItemView {
 		this.addText(content, '头像 URL', 'https://...', settings.avatarUrl, (value) =>
 			this.savePatch({ avatarUrl: value.trim() }),
 		);
+		this.addAvatarUpload(content);
 
 		content.createDiv({ cls: 'wechat-publisher-settings-divider' });
 		content.createEl('h4', { text: '公众号接口' });
@@ -456,6 +460,17 @@ export class WeChatPublisherPreviewView extends ItemView {
 		});
 	}
 
+	private addAvatarUpload(container: HTMLElement): void {
+		const button = container.createEl('button', {
+			cls: 'wechat-publisher-upload-avatar-button',
+			text: '上传头像图',
+		});
+		button.type = 'button';
+		button.addEventListener('click', () => {
+			this.pickAvatarImage();
+		});
+	}
+
 	private pickCoverImage(): void {
 		const input = document.createElement('input');
 		input.type = 'file';
@@ -470,6 +485,20 @@ export class WeChatPublisherPreviewView extends ItemView {
 		input.click();
 	}
 
+	private pickAvatarImage(): void {
+		const input = document.createElement('input');
+		input.type = 'file';
+		input.accept = 'image/jpeg,image/png,image/gif';
+		input.addEventListener('change', () => {
+			const file = input.files?.[0];
+			if (!file) {
+				return;
+			}
+			void this.uploadSelectedAvatar(file);
+		});
+		input.click();
+	}
+
 	private async uploadSelectedCover(file: File): Promise<void> {
 		try {
 			const result = await this.uploadCoverImage(file);
@@ -478,6 +507,17 @@ export class WeChatPublisherPreviewView extends ItemView {
 			this.renderSettingsPanel();
 		} catch (error) {
 			this.noticeView.showCoverError(error);
+		}
+	}
+
+	private async uploadSelectedAvatar(file: File): Promise<void> {
+		try {
+			const result = await this.uploadAvatarImage(file);
+			await this.savePatch({ avatarUrl: result.url });
+			this.noticeView.showAvatarSuccess(result.url);
+			this.renderSettingsPanel();
+		} catch (error) {
+			this.noticeView.showAvatarError(error);
 		}
 	}
 

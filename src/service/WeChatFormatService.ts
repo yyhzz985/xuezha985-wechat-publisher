@@ -428,7 +428,7 @@ export class WeChatFormatService {
 		return [
 			`<section class="reading-time" style="${styles.readingTimeStyle}">`,
 			`<section class="reading-time__card-author" style="${styles.readingAuthorCardStyle}">`,
-			`<section style="${styles.readingAvatarStyle(escapeHtml(avatar))}"><br></section>`,
+			`<img class="reading-time__avatar" src="${escapeHtml(avatar)}" alt="${escapeHtml(author)}" style="${styles.readingAvatarImageStyle}">`,
 			`<p style="${styles.readingAuthorNameStyle}">${escapeHtml(author)}</p>`,
 			'</section>',
 			`<section class="reading-time__card-time" style="${styles.readingTimeCardStyle}">`,

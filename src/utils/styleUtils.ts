@@ -101,10 +101,7 @@ export const readingTimeBoxStyle = 'border: 1px solid #66CCC5; padding: 8px 5px;
 export const readingTimeLabelStyle = 'font-size: 15px; line-height: 28px; margin: 0; text-align: center; letter-spacing: 0; color: #66CCC5;';
 export const readingTimeMinutesStyle = 'font-size: 30px; color: #66CCC5; line-height: 32px; text-align: center;';
 export const readingTimeFastStyle = 'line-height: 28px; margin: 0; font-size: 11px; color: #aaa; padding-top: 3px; text-align: center; letter-spacing: 0;';
-
-export function readingAvatarStyle(avatarUrl: string): string {
-	return `box-sizing: border-box; width: 60px; height: 60px; display: inline-block; vertical-align: middle; border-radius: 50%; font-size: 14px; background-image: url('${avatarUrl}'); background-size: cover; background-position: 50% 50%; background-repeat: no-repeat;`;
-}
+export const readingAvatarImageStyle = 'box-sizing: border-box; width: 60px; height: 60px; display: inline-block; vertical-align: middle; border-radius: 50%; object-fit: cover;';
 
 interface ThemePalette {
 	primary: string;
@@ -176,7 +173,7 @@ export interface WeChatStyleSet {
 	readingTimeStyle: string;
 	readingAuthorCardStyle: string;
 	readingAuthorNameStyle: string;
-	readingAvatarStyle(avatarUrl: string): string;
+	readingAvatarImageStyle: string;
 	readingTimeBoxStyle: string;
 	readingTimeCardStyle: string;
 	readingTimeFastStyle: string;
@@ -360,7 +357,7 @@ export function createWeChatStyles(settings: PluginSettings): WeChatStyleSet {
 		readingTimeStyle,
 		readingAuthorCardStyle: applyPalette(readingAuthorCardStyle, palette),
 		readingAuthorNameStyle: applyPalette(readingAuthorNameStyle, palette),
-		readingAvatarStyle,
+		readingAvatarImageStyle,
 		readingTimeBoxStyle: applyPalette(readingTimeBoxStyle, palette),
 		readingTimeCardStyle,
 		readingTimeFastStyle,

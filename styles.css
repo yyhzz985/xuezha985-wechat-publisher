@@ -410,7 +410,8 @@
 	cursor: pointer;
 }
 
-.wechat-publisher-upload-cover-button {
+.wechat-publisher-upload-cover-button,
+.wechat-publisher-upload-avatar-button {
 	width: 100%;
 	min-height: 34px;
 	margin: 0 0 16px;
@@ -421,7 +422,8 @@
 	cursor: pointer;
 }
 
-.wechat-publisher-upload-cover-button:hover {
+.wechat-publisher-upload-cover-button:hover,
+.wechat-publisher-upload-avatar-button:hover {
 	background: var(--background-secondary);
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }

@@ -32,6 +32,10 @@ export interface WeChatCoverImageResult {
 	url: string;
 }
 
+export interface WeChatAvatarImageResult {
+	url: string;
+}
+
 export interface LocalImageAsset {
 	fileName: string;
 	mimeType: string;
@@ -107,6 +111,14 @@ export class WeChatDraftService {
 		return {
 			mediaId: response.media_id,
 			url: response.url ?? '',
+		};
+	}
+
+	async uploadAvatarImage(asset: LocalImageAsset, settings: PluginSettings): Promise<WeChatAvatarImageResult> {
+		this.assertApiSettings(settings);
+		const accessToken = await this.getAccessToken(settings);
+		return {
+			url: await this.uploadArticleImage(accessToken, asset),
 		};
 	}
 

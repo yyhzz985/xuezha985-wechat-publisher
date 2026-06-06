@@ -243,6 +243,9 @@ test('uploads full current markdown to wechat draft box', () => {
 			async uploadCoverImage() {
 				return { mediaId: 'COVER_MEDIA_ID', url: '' };
 			},
+			async uploadAvatarImage() {
+				return { url: 'https://mmbiz.qpic.cn/avatar.jpg' };
+			},
 		},
 	);
 	controller.register();

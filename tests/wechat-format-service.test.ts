@@ -31,7 +31,8 @@ test('renders possible-bar fixed opening module', () => {
 	assert.match(result.html, /class="reading-time"/);
 	assert.match(result.html, /reading-time__card-author/);
 	assert.match(result.html, /border-right: 1px solid #66CCC5/);
-	assert.match(result.html, /background-image: url\('https:\/\/mp\.knb\.im\/jn\.png'\)/);
+	assert.match(result.html, /<img class="reading-time__avatar" src="https:\/\/mp\.knb\.im\/jn\.png"/);
+	assert.equal(result.html.includes('background-image'), false);
 	assert.match(result.html, /阿禅 Jason Ng/);
 	assert.match(result.html, /读完需要/);
 	assert.match(result.html, /速读仅需 1 分钟/);
@@ -167,7 +168,8 @@ test('adds reading meta when enabled', () => {
 	});
 
 	assert.match(result.html, /阿禅/);
-	assert.match(result.html, /avatar\.png/);
+	assert.match(result.html, /<img class="reading-time__avatar" src="https:\/\/example\.com\/avatar\.png" alt="阿禅"/);
+	assert.match(result.html, /object-fit: cover/);
 	assert.match(result.html, /分钟/);
 });
 

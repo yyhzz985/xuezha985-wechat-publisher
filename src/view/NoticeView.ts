@@ -2,10 +2,12 @@ export interface NoticeView {
 	showSuccess(): void;
 	showDraftSuccess(mediaId: string): void;
 	showCoverSuccess(mediaId: string): void;
+	showAvatarSuccess(url: string): void;
 	showEmpty(): void;
 	showError(error: unknown): void;
 	showDraftError(error: unknown): void;
 	showCoverError(error: unknown): void;
+	showAvatarError(error: unknown): void;
 }
 
 type NoticeConstructor = new (message: string) => unknown;
@@ -23,6 +25,10 @@ export class ObsidianNoticeView implements NoticeView {
 
 	showCoverSuccess(mediaId: string): void {
 		new this.NoticeType(`已上传封面图：${mediaId}`);
+	}
+
+	showAvatarSuccess(): void {
+		new this.NoticeType('已上传头像图');
 	}
 
 	showEmpty(): void {
@@ -43,14 +49,21 @@ export class ObsidianNoticeView implements NoticeView {
 		const message = error instanceof Error ? error.message : String(error);
 		new this.NoticeType(`上传封面图失败：${message}`);
 	}
+
+	showAvatarError(error: unknown): void {
+		const message = error instanceof Error ? error.message : String(error);
+		new this.NoticeType(`上传头像图失败：${message}`);
+	}
 }
 
 export const silentNoticeView: NoticeView = {
 	showSuccess() {},
 	showDraftSuccess() {},
 	showCoverSuccess() {},
+	showAvatarSuccess() {},
 	showEmpty() {},
 	showError() {},
 	showDraftError() {},
 	showCoverError() {},
+	showAvatarError() {},
 };
