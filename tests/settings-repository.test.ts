@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import type { Plugin } from 'obsidian';
 import { SettingsRepository } from '../src/repository/SettingsRepository';
+import { DEFAULT_LICENSE_SERVER_URL } from '../src/settings';
 
 test('generates and persists device id on first load', async () => {
 	let savedData: unknown = null;
@@ -18,7 +19,7 @@ test('generates and persists device id on first load', async () => {
 
 	assert.match(settings.deviceId, /^device_/);
 	assert.equal(settings.licenseKey, '');
-	assert.equal(settings.licenseServerUrl, '');
+	assert.equal(settings.licenseServerUrl, DEFAULT_LICENSE_SERVER_URL);
 	assert.equal(settings.entitlementCache, null);
 	assert.equal((savedData as { deviceId?: string }).deviceId, settings.deviceId);
 });
@@ -29,7 +30,7 @@ test('normalizes entitlement settings from saved data', async () => {
 			return {
 				deviceId: 'device_saved',
 				licenseKey: ' LICENSE ',
-				licenseServerUrl: ' https://license.example.com/v1/licenses/verify ',
+				licenseServerUrl: '',
 				entitlementCache: {
 					plan: 'pro',
 					expiresAt: '2026-06-10T00:00:00.000Z',
@@ -47,7 +48,7 @@ test('normalizes entitlement settings from saved data', async () => {
 
 	assert.equal(settings.deviceId, 'device_saved');
 	assert.equal(settings.licenseKey, 'LICENSE');
-	assert.equal(settings.licenseServerUrl, 'https://license.example.com/v1/licenses/verify');
+	assert.equal(settings.licenseServerUrl, DEFAULT_LICENSE_SERVER_URL);
 	assert.deepEqual(settings.entitlementCache, {
 		plan: 'pro',
 		expiresAt: '2026-06-10T00:00:00.000Z',

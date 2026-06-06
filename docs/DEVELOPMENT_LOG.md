@@ -151,3 +151,14 @@
 - 验证：直接请求 `/v1/licenses/verify` 返回 `active:true`、`plan:pro`、`features:["wechat_upload"]`。
 - Review 查 Bug：先发现 KV 内容 JSON 无效，再改用临时无 BOM JSON 文件上传；没有修改插件授权逻辑和微信上传逻辑。
 - 第一性原理分析：Pro 授权链路真正可用的最低验证标准是“Worker 部署成功 + KV 有有效 key + 插件同款请求能返回 active:true”。本次已完成这个闭环。
+
+## 2026-06-06 授权体验简化与批量发卡
+
+- 将授权服务 URL 固定内置为 `https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify`，设置页和右侧预览设置面板不再展示“授权服务 URL”输入框。
+- 用户侧 Pro 授权只需要填写一个 `License Key`；授权服务 URL 只作为插件内部配置保存，不让普通用户理解和填写。
+- `SettingsRepository` 会把旧配置或空配置里的 `licenseServerUrl` 统一归一化为内置地址，避免旧版本数据导致授权失败。
+- `issue-license.ps1` 新增 `-Count` 批量发卡参数，批量生成 `licenses-YYYYMMDD-HHMMSS.csv`，后续可把 `licenseKey` 列导入发卡工具。
+- 有效期继续由脚本 `-Days` 控制；当前测试 Key 用的是 `-Days 365`，所以约等于一年。
+- 验证：`npm test` 已通过，`npm run build` 已通过，构建产物已同步到 X-Note 插件目录并校验哈希一致。
+- Review 查 Bug：旧的“请先填写授权服务 URL”用户提示已改为“授权服务未配置，请重新安装插件”；没有把授权服务器地址发给用户填写，减少误填风险。
+- 第一性原理分析：用户真正要购买或激活 Pro，不是理解授权服务器。最简单稳定的交互是“用户只填 Key，插件自己知道去哪校验”，批量发卡也应该由脚本一次生成 CSV，而不是每次手工生成一个。

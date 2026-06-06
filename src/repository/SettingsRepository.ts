@@ -2,6 +2,7 @@ import type { Plugin } from 'obsidian';
 import {
 	CODE_THEME_OPTIONS,
 	DEFAULT_SETTINGS,
+	DEFAULT_LICENSE_SERVER_URL,
 	FONT_WEIGHT_OPTIONS,
 	LAYOUT_THEME_OPTIONS,
 	SUBHEADING_STYLE_OPTIONS,
@@ -42,7 +43,7 @@ export class SettingsRepository {
 				? merged.wechatNeedOpenComment
 				: DEFAULT_SETTINGS.wechatNeedOpenComment,
 			licenseKey: this.normalizeText(merged.licenseKey).trim(),
-			licenseServerUrl: this.normalizeText(merged.licenseServerUrl).trim(),
+			licenseServerUrl: DEFAULT_LICENSE_SERVER_URL,
 			deviceId,
 			entitlementCache: this.normalizeEntitlementCache(merged.entitlementCache),
 		};

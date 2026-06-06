@@ -18,15 +18,17 @@ npx wrangler login
 npx wrangler deploy
 ```
 
-3. 把部署后的地址填入插件设置里的“授权服务 URL”，路径必须是：
+3. 插件已经内置当前授权地址，普通用户不用填写授权服务 URL。
+
+当前内置地址是：
 
 ```text
-https://你的-worker域名/v1/licenses/verify
+https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify
 ```
 
 ## 手工发放 License
 
-最简单方式是运行脚本：
+发一个 Key：
 
 ```powershell
 .\scripts\issue-license.ps1 -Days 365 -Note "张三"
@@ -34,9 +36,18 @@ https://你的-worker域名/v1/licenses/verify
 
 脚本会自动生成一个 `PRO-...`，写入 Cloudflare KV。你把输出里的 `License Key` 发给用户即可。
 
+批量发 Key：
+
+```powershell
+.\scripts\issue-license.ps1 -Count 100 -Days 365 -Note "2026-06 批次"
+```
+
 用户在插件里填写：
 
 - `License Key`：你发给他的 `PRO-...`
-- `授权服务 URL`：你的 Worker 校验地址，例如 `https://wechat-publisher-license.你的账号.workers.dev/v1/licenses/verify`
+
+批量脚本会生成 `licenses-YYYYMMDD-HHMMSS.csv`。以后接发卡工具时，把 CSV 里的 `licenseKey` 列导入发卡工具即可。
+
+有效期由 `-Days` 控制。`-Days 365` 就是一年；如果要一个月，用 `-Days 30`。
 
 第一版只防普通用户误用，不做强 DRM。会改插件源码的人可以绕过本地限制。

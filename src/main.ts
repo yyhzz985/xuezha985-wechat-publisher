@@ -85,7 +85,7 @@ export default class WeChatPublisherPlugin extends Plugin {
 		return {
 			async verify(request, serverUrl) {
 				if (!serverUrl) {
-					throw new Error('请先填写授权服务 URL');
+					throw new Error('授权服务未配置，请重新安装插件');
 				}
 				const response = await requestUrl({
 					url: serverUrl,

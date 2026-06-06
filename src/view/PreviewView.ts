@@ -281,9 +281,6 @@ export class WeChatPublisherPreviewView extends ItemView {
 		this.addText(content, 'License Key', 'Pro License Key', settings.licenseKey, (value) =>
 			this.savePatch({ licenseKey: value.trim(), entitlementCache: null }),
 		);
-		this.addText(content, '授权服务 URL', 'https://.../v1/licenses/verify', settings.licenseServerUrl, (value) =>
-			this.savePatch({ licenseServerUrl: value.trim(), entitlementCache: null }),
-		);
 		this.addLicenseRefresh(content);
 
 		content.createDiv({ cls: 'wechat-publisher-settings-divider' });

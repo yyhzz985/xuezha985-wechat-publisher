@@ -16,6 +16,8 @@ export type FontWeight = 'light' | 'medium' | 'bold';
 export type SubheadingStyle = 'number' | 'eye' | 'none';
 export type ProFeature = 'wechat_upload';
 
+export const DEFAULT_LICENSE_SERVER_URL = 'https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify';
+
 export interface EntitlementCache {
 	plan: 'free' | 'pro';
 	expiresAt: string;
@@ -69,7 +71,7 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 	wechatSourceUrl: '',
 	wechatNeedOpenComment: true,
 	licenseKey: '',
-	licenseServerUrl: '',
+	licenseServerUrl: DEFAULT_LICENSE_SERVER_URL,
 	deviceId: '',
 	entitlementCache: null,
 };

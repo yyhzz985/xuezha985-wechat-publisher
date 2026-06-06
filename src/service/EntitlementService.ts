@@ -65,7 +65,7 @@ export class EntitlementService {
 			throw new Error(PRO_REQUIRED_MESSAGE);
 		}
 		if (!settings.licenseServerUrl.trim()) {
-			throw new Error('请先填写授权服务 URL');
+			throw new Error('授权服务未配置，请重新安装插件');
 		}
 
 		let status: EntitlementStatus;
@@ -88,7 +88,7 @@ export class EntitlementService {
 			throw new Error(PRO_REQUIRED_MESSAGE);
 		}
 		if (!serverUrl) {
-			throw new Error('请先填写授权服务 URL');
+			throw new Error('授权服务未配置，请重新安装插件');
 		}
 
 		const response = await this.httpClient.verify(

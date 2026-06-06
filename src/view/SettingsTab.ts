@@ -141,14 +141,6 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 					.onChange((value) => this.savePatch({ licenseKey: value.trim(), entitlementCache: null })),
 			);
 		new Setting(containerEl)
-			.setName('授权服务 URL')
-			.addText((text) =>
-				text
-					.setPlaceholder('https://.../v1/licenses/verify')
-					.setValue(settings.licenseServerUrl)
-					.onChange((value) => this.savePatch({ licenseServerUrl: value.trim(), entitlementCache: null })),
-			);
-		new Setting(containerEl)
 			.setName('校验授权')
 			.addButton((button) =>
 				button
