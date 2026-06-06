@@ -22,6 +22,18 @@ test('uses icon-only copy buttons in preview surfaces', () => {
 	assert.match(previewModal, /setIcon\(copyButton,\s*'copy'\)/);
 });
 
+test('uses one tooltip source for preview icon buttons', () => {
+	assert.match(previewView, /'aria-label': '上传到公众号草稿箱'/);
+	assert.match(previewView, /'aria-label': '设置'/);
+	assert.match(previewView, /'aria-label': '复制到公众号'/);
+	assert.match(previewModal, /'aria-label': '复制到公众号'/);
+	assert.doesNotMatch(previewView, /title:\s*'上传到公众号草稿箱'/);
+	assert.doesNotMatch(previewView, /title:\s*'设置'/);
+	assert.doesNotMatch(previewView, /title:\s*'复制到公众号'/);
+	assert.doesNotMatch(previewView, /title:\s*tool\.title/);
+	assert.doesNotMatch(previewModal, /title:\s*'复制到公众号'/);
+});
+
 test('keeps preview toolbar compact until hover', () => {
 	const toolbarButton = cssRule('.wechat-publisher-format-button');
 	assert.match(toolbarButton, /width:\s*24px/);

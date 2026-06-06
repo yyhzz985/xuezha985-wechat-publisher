@@ -152,14 +152,14 @@ export class PublisherController {
 		this.updatePreviewFromView(view, false);
 	}
 
-	uploadDraft(): void {
+	uploadDraft(): Promise<void> {
 		const view = this.getCurrentMarkdownView();
 		if (!view) {
 			this.noticeView.showDraftError(new Error('请先打开一篇 Markdown 笔记'));
-			return;
+			return Promise.resolve();
 		}
 
-		void this.uploadDraftFromView(view);
+		return this.uploadDraftFromView(view);
 	}
 
 	async uploadCoverImage(file: File): Promise<{ mediaId: string; url: string }> {

@@ -257,3 +257,83 @@ test('uploads full current markdown to wechat draft box', () => {
 	assert.equal(uploads[0].markdown, '## 标题\n\n正文');
 	assert.match(uploads[0].html, /正文/);
 });
+
+test('public draft upload waits for completion and shows success notice', async () => {
+	let activeView: unknown = null;
+	const notices: string[] = [];
+	const plugin = {
+		addCommand() {},
+		addRibbonIcon() {},
+		registerEvent() {},
+		app: {
+			workspace: {
+				getActiveViewOfType() {
+					return activeView;
+				},
+				on() {
+					return {};
+				},
+			},
+		},
+	} as unknown as Plugin;
+
+	class FakeMarkdownView {
+		editor = {
+			getValue() {
+				return '## 标题\n\n正文';
+			},
+			getSelection() {
+				return '';
+			},
+		};
+		file = { path: 'folder/note.md' };
+	}
+
+	const controller = new PublisherController(
+		plugin,
+		FakeMarkdownView as unknown as typeof MarkdownView,
+		() => ({
+			...DEFAULT_SETTINGS,
+			wechatAppId: 'APPID',
+			wechatAppSecret: 'SECRET',
+			wechatThumbMediaId: 'THUMB',
+		}),
+		{
+			showSuccess() {},
+			showDraftSuccess(mediaId) {
+				notices.push(`success:${mediaId}`);
+			},
+			showCoverSuccess() {},
+			showAvatarSuccess() {},
+			showEmpty() {},
+			showError() {},
+			showDraftError(error) {
+				notices.push(`error:${error instanceof Error ? error.message : String(error)}`);
+			},
+			showCoverError() {},
+			showAvatarError() {},
+		},
+		undefined,
+		undefined,
+		undefined,
+		undefined,
+		{
+			async uploadDraft() {
+				return { mediaId: 'DRAFT_MEDIA_ID' };
+			},
+			async uploadCoverImage() {
+				return { mediaId: 'COVER_MEDIA_ID', url: '' };
+			},
+			async uploadAvatarImage() {
+				return { url: 'https://mmbiz.qpic.cn/avatar.jpg' };
+			},
+		},
+	);
+
+	activeView = new FakeMarkdownView();
+	const uploadResult = controller.uploadDraft();
+	assert.ok(uploadResult instanceof Promise);
+	await uploadResult;
+
+	assert.deepEqual(notices, ['success:DRAFT_MEDIA_ID']);
+});

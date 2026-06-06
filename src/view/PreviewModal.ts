@@ -24,7 +24,6 @@ export class PreviewModal extends Modal {
 			cls: 'wechat-publisher-icon-button wechat-publisher-copy-button',
 			attr: {
 				'aria-label': '复制到公众号',
-				title: '复制到公众号',
 			},
 		});
 		copyButton.type = 'button';

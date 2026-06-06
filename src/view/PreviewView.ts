@@ -72,7 +72,7 @@ export class WeChatPublisherPreviewView extends ItemView {
 		private readonly getSettings: () => PluginSettings,
 		private readonly saveSettings: (settings: PluginSettings) => Promise<void>,
 		private readonly applyFormat: (action: MarkdownFormatAction) => void = () => {},
-		private readonly uploadDraft: () => void | Promise<void> = () => {},
+		private readonly uploadDraft: () => Promise<void> = async () => {},
 		private readonly uploadCoverImage: (file: File) => Promise<{ mediaId: string; url: string }> = async () => {
 			throw new Error('未配置封面图上传服务');
 		},
@@ -108,20 +108,18 @@ export class WeChatPublisherPreviewView extends ItemView {
 			cls: 'wechat-publisher-icon-button',
 			attr: {
 				'aria-label': '上传到公众号草稿箱',
-				title: '上传到公众号草稿箱',
 			},
 		}) as HTMLButtonElement;
 		this.syncButton.type = 'button';
 		setIcon(this.syncButton, 'upload-cloud');
 		this.syncButton.addEventListener('click', () => {
-			void this.uploadDraft();
+			void this.uploadDraftFromButton();
 		});
 
 		this.settingsButton = actions.createEl('button', {
 			cls: 'wechat-publisher-icon-button',
 			attr: {
 				'aria-label': '设置',
-				title: '设置',
 			},
 		}) as HTMLButtonElement;
 		this.settingsButton.type = 'button';
@@ -134,7 +132,6 @@ export class WeChatPublisherPreviewView extends ItemView {
 			cls: 'wechat-publisher-icon-button wechat-publisher-copy-button',
 			attr: {
 				'aria-label': '复制到公众号',
-				title: '复制到公众号',
 			},
 		}) as HTMLButtonElement;
 		this.copyButton.type = 'button';
@@ -174,7 +171,6 @@ export class WeChatPublisherPreviewView extends ItemView {
 				cls: 'wechat-publisher-format-button',
 				attr: {
 					'aria-label': tool.title,
-					title: tool.title,
 				},
 			});
 			button.type = 'button';
@@ -518,6 +514,18 @@ export class WeChatPublisherPreviewView extends ItemView {
 			this.renderSettingsPanel();
 		} catch (error) {
 			this.noticeView.showAvatarError(error);
+		}
+	}
+
+	private async uploadDraftFromButton(): Promise<void> {
+		if (!this.article) {
+			return;
+		}
+		this.syncButton.disabled = true;
+		try {
+			await this.uploadDraft();
+		} finally {
+			this.syncButton.disabled = !this.article;
 		}
 	}
 
