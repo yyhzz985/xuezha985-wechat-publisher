@@ -140,3 +140,14 @@
 - 验证：`npm test` 已通过；`npx wrangler deploy --dry-run` 已通过；`issue-license.ps1` PowerShell 语法检查已通过。
 - Review 查 Bug：发 Key 脚本只写 License 记录，不接触微信公众号配置；脚本输出改为英文，避免 Windows PowerShell 中文编码导致脚本解析失败。
 - 第一性原理分析：用户要的是能快速部署和发 key，不是理解 Cloudflare 所有概念。最简单稳的路径是 Wrangler 登录后“一键部署 + 一键发 key”，把 KV ID 手工配置步骤去掉。
+
+## 2026-06-06 Worker 正式部署
+
+- 完成 Cloudflare Wrangler OAuth 登录，账号为 `237219265@qq.com`。
+- 已部署授权 Worker：`https://wechat-publisher-license.237219265.workers.dev`。
+- Wrangler 自动创建 KV 命名空间 `wechat-publisher-license-licenses`，ID 已写入 `worker/wrangler.jsonc`：`dae49a951f8343469f185dfd3e5e1fd6`。
+- 修复 `issue-license.ps1` 两个 Windows 兼容问题：旧版 .NET 没有 `RandomNumberGenerator.Fill`；`Set-Content -Encoding UTF8` 会写 BOM，导致 Worker `JSON.parse` 失败。
+- 已发放并验证测试 Key：`PRO-UKVNJXQ1CSNTKBT7`，有效期至 `2027-06-06T06:52:13.321Z`。
+- 验证：直接请求 `/v1/licenses/verify` 返回 `active:true`、`plan:pro`、`features:["wechat_upload"]`。
+- Review 查 Bug：先发现 KV 内容 JSON 无效，再改用临时无 BOM JSON 文件上传；没有修改插件授权逻辑和微信上传逻辑。
+- 第一性原理分析：Pro 授权链路真正可用的最低验证标准是“Worker 部署成功 + KV 有有效 key + 插件同款请求能返回 active:true”。本次已完成这个闭环。

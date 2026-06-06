@@ -4,7 +4,8 @@
 	"compatibility_date": "2026-06-01",
 	"kv_namespaces": [
 		{
-			"binding": "LICENSES"
+			"binding": "LICENSES",
+			"id": "dae49a951f8343469f185dfd3e5e1fd6"
 		}
 	]
 }
