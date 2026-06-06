@@ -47,6 +47,7 @@ https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify
 - `License Key`：你发给他的 `PRO-...`
 
 批量脚本会生成 `licenses-YYYYMMDD-HHMMSS.csv`。以后接发卡工具时，把 CSV 里的 `licenseKey` 列导入发卡工具即可。
+CSV 里是真实卡密，已经被 `.gitignore` 忽略，不要提交到 Git。
 
 有效期由 `-Days` 控制。`-Days 365` 就是一年；如果要一个月，用 `-Days 30`。
 

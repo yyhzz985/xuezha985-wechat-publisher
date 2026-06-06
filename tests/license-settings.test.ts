@@ -42,6 +42,7 @@ test('wires license refresh through main and controller', () => {
 test('supports batch license issuing for card sellers', () => {
 	assert.match(issueLicenseScript, /int\]\$Count = 1/);
 	assert.match(issueLicenseScript, /licenses-\$batchId\.csv/);
+	assert.match(issueLicenseScript, /kv bulk put/);
 	assert.match(issueLicenseScript, /Export-Csv/);
 	assert.match(issueLicenseScript, /System\.Text\.UTF8Encoding/);
 	assert.match(issueLicenseScript, /ArgumentList \$false/);

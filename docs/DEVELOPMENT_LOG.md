@@ -162,3 +162,13 @@
 - 验证：`npm test` 已通过，`npm run build` 已通过，构建产物已同步到 X-Note 插件目录并校验哈希一致。
 - Review 查 Bug：旧的“请先填写授权服务 URL”用户提示已改为“授权服务未配置，请重新安装插件”；没有把授权服务器地址发给用户填写，减少误填风险。
 - 第一性原理分析：用户真正要购买或激活 Pro，不是理解授权服务器。最简单稳定的交互是“用户只填 Key，插件自己知道去哪校验”，批量发卡也应该由脚本一次生成 CSV，而不是每次手工生成一个。
+
+## 2026-06-06 批量发卡脚本性能修复
+
+- 修复 `issue-license.ps1 -Count 100` 超时问题：旧实现每个 Key 调一次 `wrangler kv key put`，100 个 Key 会非常慢，并且超时后无法生成 CSV。
+- 新实现改为先生成批量 JSON，再调用一次 `wrangler kv bulk put` 写入 Cloudflare KV，成功后再导出 CSV。
+- 已生成 100 个 Pro Key：`worker/licenses-20260606-073236.csv`，共 100 行，有效期至 `2027-06-06T07:32:36.896Z` 附近。
+- 抽查第一条 Key 调用 `/v1/licenses/verify` 返回 `active:true`、`plan:pro`、`features:["wechat_upload"]`。
+- 将 `worker/licenses-*.csv` 加入 `.gitignore`，避免真实卡密误提交。
+- Review 查 Bug：上一轮超时可能已经写入了一些没有 CSV 记录的 Key，本次不使用那些未知 Key；以后以成功生成的 CSV 为准。
+- 第一性原理分析：批量发卡的目标是拿到一批可交付、可追踪的 Key。必须先保证“上传成功”和“CSV 留档”一致，所以一次性 bulk 写入成功后再导出 CSV，比循环单条写入更简单、更稳。

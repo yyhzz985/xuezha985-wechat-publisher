@@ -26,39 +26,37 @@ function New-LicenseKey {
 	return "PRO-$token"
 }
 
-function Write-LicenseRecord {
+function New-LicenseRecord {
 	param(
 		[string]$LicenseKey,
 		[string]$ExpiresAt,
 		[string]$LicenseNote
 	)
 
-	$record = @{
+	return @{
 		active = $true
 		plan = "pro"
 		features = @("wechat_upload")
 		expiresAt = $ExpiresAt
 		note = $LicenseNote
 	} | ConvertTo-Json -Compress
+}
 
-	$tempFile = Join-Path ([System.IO.Path]::GetTempPath()) "wechat-publisher-license-$LicenseKey.json"
+function Write-Utf8NoBom {
+	param(
+		[string]$Path,
+		[string]$Content
+	)
+
 	$utf8NoBom = New-Object -TypeName System.Text.UTF8Encoding -ArgumentList $false
-	[System.IO.File]::WriteAllText($tempFile, $record, $utf8NoBom)
-	try {
-		npx wrangler kv key put --binding LICENSES --remote "license:$LicenseKey" --path $tempFile
-		if ($LASTEXITCODE -ne 0) {
-			exit $LASTEXITCODE
-		}
-	} finally {
-		if (Test-Path -LiteralPath $tempFile) {
-			Remove-Item -LiteralPath $tempFile -Force
-		}
-	}
+	[System.IO.File]::WriteAllText($Path, $Content, $utf8NoBom)
 }
 
 $batchId = (Get-Date).ToUniversalTime().ToString("yyyyMMdd-HHmmss", [System.Globalization.CultureInfo]::InvariantCulture)
 $csvPath = Join-Path (Get-Location) "licenses-$batchId.csv"
+$bulkPath = Join-Path ([System.IO.Path]::GetTempPath()) "wechat-publisher-licenses-$batchId.json"
 $issued = @()
+$bulkEntries = @()
 
 Push-Location (Join-Path $PSScriptRoot "..")
 try {
@@ -74,12 +72,29 @@ try {
 		} else {
 			$licenseNote = "$Note batch=$batchId item=$index".Trim()
 		}
+		$record = New-LicenseRecord -LicenseKey $licenseKey -ExpiresAt $expiresAt -LicenseNote $licenseNote
 
-		Write-LicenseRecord -LicenseKey $licenseKey -ExpiresAt $expiresAt -LicenseNote $licenseNote
+		$bulkEntries += [pscustomobject]@{
+			key = "license:$licenseKey"
+			value = $record
+		}
 		$issued += [pscustomobject]@{
 			licenseKey = $licenseKey
 			expiresAt = $expiresAt
 			note = $licenseNote
+		}
+	}
+
+	$bulkJson = @($bulkEntries) | ConvertTo-Json -Depth 6
+	Write-Utf8NoBom -Path $bulkPath -Content $bulkJson
+	try {
+		npx wrangler kv bulk put $bulkPath --binding LICENSES --remote
+		if ($LASTEXITCODE -ne 0) {
+			exit $LASTEXITCODE
+		}
+	} finally {
+		if (Test-Path -LiteralPath $bulkPath) {
+			Remove-Item -LiteralPath $bulkPath -Force
 		}
 	}
 
