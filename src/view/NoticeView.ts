@@ -1,3 +1,5 @@
+import type { EntitlementStatus } from '../service/EntitlementService';
+
 export interface NoticeView {
 	showSuccess(): void;
 	showDraftSuccess(mediaId: string): void;
@@ -8,6 +10,8 @@ export interface NoticeView {
 	showDraftError(error: unknown): void;
 	showCoverError(error: unknown): void;
 	showAvatarError(error: unknown): void;
+	showLicenseSuccess?(status: EntitlementStatus): void;
+	showLicenseError?(error: unknown): void;
 }
 
 type NoticeConstructor = new (message: string) => unknown;
@@ -54,6 +58,19 @@ export class ObsidianNoticeView implements NoticeView {
 		const message = error instanceof Error ? error.message : String(error);
 		new this.NoticeType(`上传头像图失败：${message}`);
 	}
+
+	showLicenseSuccess(status: EntitlementStatus): void {
+		if (status.active) {
+			new this.NoticeType(`Pro 授权校验成功，有效期至：${status.expiresAt}`);
+			return;
+		}
+		new this.NoticeType(status.message ?? '当前 License 未开通 Pro');
+	}
+
+	showLicenseError(error: unknown): void {
+		const message = error instanceof Error ? error.message : String(error);
+		new this.NoticeType(`授权校验失败：${message}`);
+	}
 }
 
 export const silentNoticeView: NoticeView = {
@@ -66,4 +83,6 @@ export const silentNoticeView: NoticeView = {
 	showDraftError() {},
 	showCoverError() {},
 	showAvatarError() {},
+	showLicenseSuccess() {},
+	showLicenseError() {},
 };

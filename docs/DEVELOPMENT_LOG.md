@@ -118,3 +118,15 @@
 - 测试：新增上传成功提示路径和单一 tooltip 来源断言；`npm test` 已通过，`npm run build` 已通过。
 - Review 查 Bug：没有改微信上传业务；没有把提示逻辑放进 Service；只是让按钮路径可等待，并去掉重复 UI 属性。
 - 第一性原理分析：用户遇到的是交互反馈问题，不是接口问题。最稳做法是保证按钮能等待 Controller 完成，同时消除重复提示来源。
+
+## 2026-06-06 Pro 授权系统第一版
+
+- 新增 Pro 授权设置：`licenseKey`、`licenseServerUrl`、`deviceId`、`entitlementCache`。首次启动会生成 `deviceId` 并保存，只是随机 UUID，不采集硬件指纹。
+- 新增 `EntitlementService` 和 `LicenseHttpClient`：负责校验 `wechat_upload` 功能、读取 24 小时授权缓存、调用授权接口。
+- 上传草稿箱、上传封面图、上传头像图三个入口接入 Pro 校验；预览、复制、格式工具栏和排版设置不拦截。
+- 右侧预览设置面板和 Obsidian 插件设置页新增“Pro 授权”区域：License Key、授权服务 URL、授权状态、校验授权按钮。
+- 新增独立 Cloudflare Worker 授权服务：`worker/src/index.ts`、`worker/wrangler.jsonc`、`worker/README.md`，接口为 `POST /v1/licenses/verify`，通过 KV 手工发放 License。
+- 失败策略：24 小时内成功缓存允许继续上传；缓存过期且授权服务不可达时禁止上传并提示联网重试；License 不存在、过期、禁用时显示服务端原因。
+- 测试：新增授权服务、设置归一化、Controller 拦截、设置入口、Worker 校验测试；`npm test` 已通过，`npm run build` 已通过；构建产物已同步到 X-Note 插件目录。
+- Review 查 Bug：授权服务只接收 License、设备 ID、插件 ID、版本和功能名，不接收公众号 AppSecret 或文章内容；上传入口在调用微信接口前拦截，免费用户不会触发微信上传请求。
+- 第一性原理分析：本地 Obsidian 插件无法防会改代码的人，第一版只防普通用户误用和未授权使用高级上传功能。最简单稳健的方案是“本地缓存 + 远端校验 + 上传入口统一拦截”，不做复杂 DRM。

@@ -14,6 +14,14 @@ export type LayoutTheme =
 	| 'ivy';
 export type FontWeight = 'light' | 'medium' | 'bold';
 export type SubheadingStyle = 'number' | 'eye' | 'none';
+export type ProFeature = 'wechat_upload';
+
+export interface EntitlementCache {
+	plan: 'free' | 'pro';
+	expiresAt: string;
+	checkedAt: string;
+	features: ProFeature[];
+}
 
 export interface LayoutThemeOption {
 	value: LayoutTheme;
@@ -41,6 +49,10 @@ export interface PluginSettings {
 	wechatThumbMediaId: string;
 	wechatSourceUrl: string;
 	wechatNeedOpenComment: boolean;
+	licenseKey: string;
+	licenseServerUrl: string;
+	deviceId: string;
+	entitlementCache: EntitlementCache | null;
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -56,6 +68,10 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 	wechatThumbMediaId: '',
 	wechatSourceUrl: '',
 	wechatNeedOpenComment: true,
+	licenseKey: '',
+	licenseServerUrl: '',
+	deviceId: '',
+	entitlementCache: null,
 };
 
 export const LAYOUT_THEME_GROUPS: LayoutThemeGroup[] = [

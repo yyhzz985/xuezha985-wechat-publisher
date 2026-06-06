@@ -1,12 +1,19 @@
 import type { MarkdownView, Plugin } from 'obsidian';
-import type { PluginSettings } from '../settings';
+import type { PluginSettings, ProFeature } from '../settings';
 import { ClipboardService } from '../service/ClipboardService';
+import type { EntitlementStatus } from '../service/EntitlementService';
 import type { LocalImageAsset } from '../service/WeChatDraftService';
 import { type FormattedWeChatArticle, WeChatFormatService } from '../service/WeChatFormatService';
 import { formatMarkdownSelection, type MarkdownFormatAction } from '../utils/markdownEditUtils';
 import { type NoticeView, silentNoticeView } from '../view/NoticeView';
 
 type PreviewArticle = (article: FormattedWeChatArticle | null, reveal: boolean) => void | Promise<void>;
+type MaybePromise<T> = T | Promise<T>;
+type EntitlementGate = {
+	ensureFeature(feature: ProFeature): MaybePromise<void>;
+	refreshLicense(): Promise<EntitlementStatus>;
+	getCachedStatus(): EntitlementStatus;
+};
 type DraftService = {
 	uploadDraft(
 		article: FormattedWeChatArticle,
@@ -16,6 +23,26 @@ type DraftService = {
 	): Promise<{ mediaId: string }>;
 	uploadCoverImage(asset: LocalImageAsset, settings: PluginSettings): Promise<{ mediaId: string; url: string }>;
 	uploadAvatarImage(asset: LocalImageAsset, settings: PluginSettings): Promise<{ url: string }>;
+};
+
+const allowAllEntitlementGate: EntitlementGate = {
+	ensureFeature() {},
+	async refreshLicense() {
+		return {
+			active: true,
+			plan: 'pro',
+			features: ['wechat_upload'],
+			expiresAt: '9999-12-31T23:59:59.999Z',
+		};
+	},
+	getCachedStatus() {
+		return {
+			active: true,
+			plan: 'pro',
+			features: ['wechat_upload'],
+			expiresAt: '9999-12-31T23:59:59.999Z',
+		};
+	},
 };
 
 export class PublisherController {
@@ -42,6 +69,7 @@ export class PublisherController {
 				throw new Error('未配置头像图上传服务');
 			},
 		},
+		private readonly entitlementService: EntitlementGate = allowAllEntitlementGate,
 	) {}
 
 	register(): void {
@@ -163,13 +191,30 @@ export class PublisherController {
 	}
 
 	async uploadCoverImage(file: File): Promise<{ mediaId: string; url: string }> {
+		await this.ensureProFeature('wechat_upload');
 		const asset = await this.fileToImageAsset(file);
 		return this.draftService.uploadCoverImage(asset, this.getSettings());
 	}
 
 	async uploadAvatarImage(file: File): Promise<{ url: string }> {
+		await this.ensureProFeature('wechat_upload');
 		const asset = await this.fileToImageAsset(file);
 		return this.draftService.uploadAvatarImage(asset, this.getSettings());
+	}
+
+	async refreshLicense(): Promise<EntitlementStatus> {
+		try {
+			const status = await this.entitlementService.refreshLicense();
+			this.noticeView.showLicenseSuccess?.(status);
+			return status;
+		} catch (error) {
+			this.noticeView.showLicenseError?.(error);
+			throw error;
+		}
+	}
+
+	getEntitlementStatus(): EntitlementStatus {
+		return this.entitlementService.getCachedStatus();
 	}
 
 	private async copyFromView(view: MarkdownView): Promise<void> {
@@ -197,6 +242,10 @@ export class PublisherController {
 		}
 
 		try {
+			const entitlementResult = this.entitlementService.ensureFeature('wechat_upload');
+			if (this.isPromiseLike(entitlementResult)) {
+				await entitlementResult;
+			}
 			const settings = this.getSettings();
 			const article = this.formatService.format(markdown, settings);
 			const result = await this.draftService.uploadDraft(article, markdown, settings, {
@@ -258,6 +307,17 @@ export class PublisherController {
 
 	private getCurrentMarkdownView(): MarkdownView | null {
 		return this.plugin.app.workspace.getActiveViewOfType(this.markdownViewType) ?? this.lastMarkdownView;
+	}
+
+	private async ensureProFeature(feature: ProFeature): Promise<void> {
+		const result = this.entitlementService.ensureFeature(feature);
+		if (this.isPromiseLike(result)) {
+			await result;
+		}
+	}
+
+	private isPromiseLike<T>(value: MaybePromise<T>): value is Promise<T> {
+		return typeof (value as Promise<T> | undefined)?.then === 'function';
 	}
 
 	private async fileToImageAsset(file: File): Promise<LocalImageAsset> {

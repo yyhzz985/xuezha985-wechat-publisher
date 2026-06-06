@@ -258,6 +258,17 @@
 	line-height: 1.5;
 }
 
+.wechat-publisher-license-status {
+	margin: -4px 0 14px;
+	color: var(--text-muted);
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.wechat-publisher-license-status.is-pro {
+	color: var(--text-success);
+}
+
 .wechat-publisher-theme-select {
 	position: relative;
 }
@@ -410,6 +421,7 @@
 	cursor: pointer;
 }
 
+.wechat-publisher-license-check-button,
 .wechat-publisher-upload-cover-button,
 .wechat-publisher-upload-avatar-button {
 	width: 100%;
@@ -422,6 +434,7 @@
 	cursor: pointer;
 }
 
+.wechat-publisher-license-check-button:hover,
 .wechat-publisher-upload-cover-button:hover,
 .wechat-publisher-upload-avatar-button:hover {
 	background: var(--background-secondary);

@@ -13,6 +13,7 @@ import {
 	type SubheadingStyle,
 } from '../settings';
 import type { ClipboardService } from '../service/ClipboardService';
+import type { EntitlementStatus } from '../service/EntitlementService';
 import type { FormattedWeChatArticle } from '../service/WeChatFormatService';
 import type { MarkdownFormatAction } from '../utils/markdownEditUtils';
 import type { NoticeView } from './NoticeView';
@@ -79,6 +80,18 @@ export class WeChatPublisherPreviewView extends ItemView {
 		private readonly uploadAvatarImage: (file: File) => Promise<{ url: string }> = async () => {
 			throw new Error('未配置头像图上传服务');
 		},
+		private readonly refreshLicense: () => Promise<EntitlementStatus> = async () => ({
+			active: false,
+			plan: 'free',
+			features: [],
+			expiresAt: '',
+		}),
+		private readonly getEntitlementStatus: () => EntitlementStatus = () => ({
+			active: false,
+			plan: 'free',
+			features: [],
+			expiresAt: '',
+		}),
 	) {
 		super(leaf);
 		this.navigation = false;
@@ -263,6 +276,17 @@ export class WeChatPublisherPreviewView extends ItemView {
 		this.addAvatarUpload(content);
 
 		content.createDiv({ cls: 'wechat-publisher-settings-divider' });
+		content.createEl('h4', { text: 'Pro 授权' });
+		this.addLicenseStatus(content);
+		this.addText(content, 'License Key', 'Pro License Key', settings.licenseKey, (value) =>
+			this.savePatch({ licenseKey: value.trim(), entitlementCache: null }),
+		);
+		this.addText(content, '授权服务 URL', 'https://.../v1/licenses/verify', settings.licenseServerUrl, (value) =>
+			this.savePatch({ licenseServerUrl: value.trim(), entitlementCache: null }),
+		);
+		this.addLicenseRefresh(content);
+
+		content.createDiv({ cls: 'wechat-publisher-settings-divider' });
 		content.createEl('h4', { text: '公众号接口' });
 		content.createEl('p', {
 			cls: 'wechat-publisher-settings-help',
@@ -297,7 +321,10 @@ export class WeChatPublisherPreviewView extends ItemView {
 		clearButton.type = 'button';
 		clearButton.addEventListener('click', () => {
 			this.isThemeDropdownOpen = false;
-			void this.saveSettings({ ...DEFAULT_SETTINGS }).then(() => this.renderSettingsPanel());
+			void this.saveSettings({
+				...DEFAULT_SETTINGS,
+				deviceId: this.getSettings().deviceId,
+			}).then(() => this.renderSettingsPanel());
 		});
 	}
 
@@ -443,6 +470,35 @@ export class WeChatPublisherPreviewView extends ItemView {
 		const field = container.createDiv({ cls: 'wechat-publisher-settings-field' });
 		field.createEl('label', { text: label });
 		return field;
+	}
+
+	private addLicenseStatus(container: HTMLElement): void {
+		const status = this.getEntitlementStatus();
+		const text = status.active
+			? `授权状态：Pro，有效期至 ${status.expiresAt}`
+			: `授权状态：Free${status.message ? `，${status.message}` : ''}`;
+		container.createEl('p', {
+			cls: status.active ? 'wechat-publisher-license-status is-pro' : 'wechat-publisher-license-status',
+			text,
+		});
+	}
+
+	private addLicenseRefresh(container: HTMLElement): void {
+		const button = container.createEl('button', {
+			cls: 'wechat-publisher-license-check-button',
+			text: '校验授权',
+		});
+		button.type = 'button';
+		button.addEventListener('click', () => {
+			this.isThemeDropdownOpen = false;
+			button.disabled = true;
+			void this.refreshLicense()
+				.catch(() => undefined)
+				.finally(() => {
+					button.disabled = false;
+					this.renderSettingsPanel();
+				});
+		});
 	}
 
 	private addCoverUpload(container: HTMLElement): void {

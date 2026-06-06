@@ -11,6 +11,7 @@ import {
 	type PluginSettings,
 	type SubheadingStyle,
 } from '../settings';
+import type { EntitlementStatus } from '../service/EntitlementService';
 import { type NoticeView, silentNoticeView } from './NoticeView';
 
 export class WeChatPublisherSettingTab extends PluginSettingTab {
@@ -25,6 +26,18 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 		private readonly uploadAvatarImage: (file: File) => Promise<{ url: string }> = async () => {
 			throw new Error('未配置头像图上传服务');
 		},
+		private readonly refreshLicense: () => Promise<EntitlementStatus> = async () => ({
+			active: false,
+			plan: 'free',
+			features: [],
+			expiresAt: '',
+		}),
+		private readonly getEntitlementStatus: () => EntitlementStatus = () => ({
+			active: false,
+			plan: 'free',
+			features: [],
+			expiresAt: '',
+		}),
 		private readonly noticeView: NoticeView = silentNoticeView,
 	) {
 		super(app, plugin);
@@ -115,6 +128,38 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 				button.buttonEl.addClass('wechat-publisher-upload-avatar-button');
 			});
 
+		containerEl.createEl('h3', { text: 'Pro 授权' });
+		new Setting(containerEl)
+			.setName('授权状态')
+			.setDesc(this.formatLicenseStatus(this.getEntitlementStatus()));
+		new Setting(containerEl)
+			.setName('License Key')
+			.addText((text) =>
+				text
+					.setPlaceholder('Pro License Key')
+					.setValue(settings.licenseKey)
+					.onChange((value) => this.savePatch({ licenseKey: value.trim(), entitlementCache: null })),
+			);
+		new Setting(containerEl)
+			.setName('授权服务 URL')
+			.addText((text) =>
+				text
+					.setPlaceholder('https://.../v1/licenses/verify')
+					.setValue(settings.licenseServerUrl)
+					.onChange((value) => this.savePatch({ licenseServerUrl: value.trim(), entitlementCache: null })),
+			);
+		new Setting(containerEl)
+			.setName('校验授权')
+			.addButton((button) =>
+				button
+					.setButtonText('校验授权')
+					.onClick(() => {
+						void this.refreshLicense()
+							.catch(() => undefined)
+							.finally(() => this.display());
+					}),
+			);
+
 		containerEl.createEl('h3', { text: '公众号接口' });
 		containerEl.createEl('p', {
 			cls: 'wechat-publisher-setting-note',
@@ -185,7 +230,10 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 				button
 					.setButtonText('清空本地存储')
 					.onClick(() => {
-						void this.saveSettings({ ...DEFAULT_SETTINGS }).then(() => this.display());
+						void this.saveSettings({
+							...DEFAULT_SETTINGS,
+							deviceId: this.getSettings().deviceId,
+						}).then(() => this.display());
 					}),
 			);
 	}
@@ -216,6 +264,13 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 			...this.getSettings(),
 			...patch,
 		});
+	}
+
+	private formatLicenseStatus(status: EntitlementStatus): string {
+		if (status.active) {
+			return `Pro，有效期至 ${status.expiresAt}`;
+		}
+		return status.message ? `Free，${status.message}` : 'Free';
 	}
 
 	private pickCoverImage(): void {

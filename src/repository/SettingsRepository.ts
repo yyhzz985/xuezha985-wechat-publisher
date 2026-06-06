@@ -5,8 +5,10 @@ import {
 	FONT_WEIGHT_OPTIONS,
 	LAYOUT_THEME_OPTIONS,
 	SUBHEADING_STYLE_OPTIONS,
+	type EntitlementCache,
 	type LayoutTheme,
 	type PluginSettings,
+	type ProFeature,
 } from '../settings';
 
 const LEGACY_LAYOUT_THEME_MAP: Record<string, LayoutTheme> = {
@@ -25,7 +27,8 @@ export class SettingsRepository {
 			...DEFAULT_SETTINGS,
 			...(saved ?? {}),
 		};
-		return {
+		const deviceId = this.normalizeText(merged.deviceId).trim() || this.createDeviceId();
+		const settings = {
 			...merged,
 			codeTheme: this.normalizeOption(merged.codeTheme, CODE_THEME_OPTIONS, DEFAULT_SETTINGS.codeTheme),
 			layoutTheme: this.normalizeLayoutTheme(merged.layoutTheme),
@@ -38,7 +41,17 @@ export class SettingsRepository {
 			wechatNeedOpenComment: typeof merged.wechatNeedOpenComment === 'boolean'
 				? merged.wechatNeedOpenComment
 				: DEFAULT_SETTINGS.wechatNeedOpenComment,
+			licenseKey: this.normalizeText(merged.licenseKey).trim(),
+			licenseServerUrl: this.normalizeText(merged.licenseServerUrl).trim(),
+			deviceId,
+			entitlementCache: this.normalizeEntitlementCache(merged.entitlementCache),
 		};
+
+		if (!this.normalizeText(saved?.deviceId).trim()) {
+			await this.save(settings);
+		}
+
+		return settings;
 	}
 
 	async save(settings: PluginSettings): Promise<void> {
@@ -69,5 +82,36 @@ export class SettingsRepository {
 
 	private normalizeText(value: unknown): string {
 		return typeof value === 'string' ? value : '';
+	}
+
+	private normalizeEntitlementCache(value: unknown): EntitlementCache | null {
+		if (!value || typeof value !== 'object') {
+			return null;
+		}
+
+		const cache = value as Partial<EntitlementCache>;
+		const plan = cache.plan === 'pro' || cache.plan === 'free' ? cache.plan : null;
+		if (!plan || typeof cache.expiresAt !== 'string' || typeof cache.checkedAt !== 'string') {
+			return null;
+		}
+
+		return {
+			plan,
+			expiresAt: cache.expiresAt,
+			checkedAt: cache.checkedAt,
+			features: this.normalizeFeatures(cache.features),
+		};
+	}
+
+	private normalizeFeatures(value: unknown): ProFeature[] {
+		if (!Array.isArray(value)) {
+			return [];
+		}
+		return value.filter((feature): feature is ProFeature => feature === 'wechat_upload');
+	}
+
+	private createDeviceId(): string {
+		const randomId = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}_${Math.random().toString(16).slice(2)}`;
+		return `device_${randomId}`;
 	}
 }

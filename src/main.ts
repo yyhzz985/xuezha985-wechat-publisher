@@ -3,6 +3,7 @@ import { PublisherController } from './controller/PublisherController';
 import { ObsidianImageRepository } from './repository/ObsidianImageRepository';
 import { SettingsRepository } from './repository/SettingsRepository';
 import { ClipboardService } from './service/ClipboardService';
+import { EntitlementService, type LicenseHttpClient, type LicenseVerifyResponse } from './service/EntitlementService';
 import { WeChatDraftService, type WeChatHttpClient } from './service/WeChatDraftService';
 import type { FormattedWeChatArticle } from './service/WeChatFormatService';
 import type { PluginSettings } from './settings';
@@ -22,6 +23,15 @@ export default class WeChatPublisherPlugin extends Plugin {
 		const clipboardService = new ClipboardService();
 		const imageRepository = new ObsidianImageRepository(this.app);
 		const draftService = new WeChatDraftService(this.createWeChatHttpClient(), imageRepository);
+		const entitlementService = new EntitlementService(
+			() => this.settings,
+			(settings) => this.saveSettings(settings),
+			this.createLicenseHttpClient(),
+			{
+				pluginId: this.manifest.id,
+				pluginVersion: this.manifest.version,
+			},
+		);
 
 		this.publisherController = new PublisherController(
 			this,
@@ -35,6 +45,7 @@ export default class WeChatPublisherPlugin extends Plugin {
 			undefined,
 			clipboardService,
 			draftService,
+			entitlementService,
 		);
 
 		this.registerView(
@@ -49,6 +60,8 @@ export default class WeChatPublisherPlugin extends Plugin {
 				() => this.publisherController.uploadDraft(),
 				(file) => this.publisherController.uploadCoverImage(file),
 				(file) => this.publisherController.uploadAvatarImage(file),
+				() => this.publisherController.refreshLicense(),
+				() => this.publisherController.getEntitlementStatus(),
 			),
 		);
 
@@ -61,9 +74,30 @@ export default class WeChatPublisherPlugin extends Plugin {
 				(settings) => this.saveSettings(settings),
 				(file) => this.publisherController.uploadCoverImage(file),
 				(file) => this.publisherController.uploadAvatarImage(file),
+				() => this.publisherController.refreshLicense(),
+				() => this.publisherController.getEntitlementStatus(),
 				noticeView,
 			),
 		);
+	}
+
+	private createLicenseHttpClient(): LicenseHttpClient {
+		return {
+			async verify(request, serverUrl) {
+				if (!serverUrl) {
+					throw new Error('请先填写授权服务 URL');
+				}
+				const response = await requestUrl({
+					url: serverUrl,
+					method: 'POST',
+					body: JSON.stringify(request),
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				});
+				return response.json as LicenseVerifyResponse;
+			},
+		};
 	}
 
 	private createWeChatHttpClient(): WeChatHttpClient {

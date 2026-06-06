@@ -337,3 +337,160 @@ test('public draft upload waits for completion and shows success notice', async 
 
 	assert.deepEqual(notices, ['success:DRAFT_MEDIA_ID']);
 });
+
+test('blocks draft upload when pro entitlement is missing', async () => {
+	let activeView: unknown = null;
+	const notices: string[] = [];
+	let uploadCount = 0;
+	const commands: Record<string, { checkCallback: (checking: boolean) => boolean }> = {};
+	const plugin = {
+		addCommand(command: { id: string; checkCallback: (checking: boolean) => boolean }) {
+			commands[command.id] = command;
+		},
+		addRibbonIcon() {},
+		registerEvent() {},
+		app: {
+			workspace: {
+				getActiveViewOfType() {
+					return activeView;
+				},
+				on() {
+					return {};
+				},
+			},
+		},
+	} as unknown as Plugin;
+
+	class FakeMarkdownView {
+		editor = {
+			getValue() {
+				return '## 标题\n\n正文';
+			},
+			getSelection() {
+				return '';
+			},
+		};
+	}
+
+	const controller = new PublisherController(
+		plugin,
+		FakeMarkdownView as unknown as typeof MarkdownView,
+		() => ({
+			...DEFAULT_SETTINGS,
+			wechatAppId: 'APPID',
+			wechatAppSecret: 'SECRET',
+			wechatThumbMediaId: 'THUMB',
+		}),
+		{
+			showSuccess() {},
+			showDraftSuccess() {},
+			showCoverSuccess() {},
+			showAvatarSuccess() {},
+			showEmpty() {},
+			showError() {},
+			showDraftError(error) {
+				notices.push(error instanceof Error ? error.message : String(error));
+			},
+			showCoverError() {},
+			showAvatarError() {},
+		},
+		undefined,
+		undefined,
+		undefined,
+		undefined,
+		{
+			async uploadDraft() {
+				uploadCount += 1;
+				return { mediaId: 'DRAFT_MEDIA_ID' };
+			},
+			async uploadCoverImage() {
+				return { mediaId: 'COVER_MEDIA_ID', url: '' };
+			},
+			async uploadAvatarImage() {
+				return { url: 'https://mmbiz.qpic.cn/avatar.jpg' };
+			},
+		},
+		{
+			async ensureFeature() {
+				throw new Error('公众号上传是 Pro 功能，请在设置中填写 Pro License Key');
+			},
+			async refreshLicense() {
+				throw new Error('should not refresh');
+			},
+			getCachedStatus() {
+				return { active: false, plan: 'free', features: [], expiresAt: '' };
+			},
+		},
+	);
+	controller.register();
+
+	activeView = new FakeMarkdownView();
+	commands['upload-wechat-draft'].checkCallback(false);
+	await Promise.resolve();
+
+	assert.equal(uploadCount, 0);
+	assert.deepEqual(notices, ['公众号上传是 Pro 功能，请在设置中填写 Pro License Key']);
+});
+
+test('allows cover and avatar upload when pro entitlement is active', async () => {
+	let checked = 0;
+	const controller = new PublisherController(
+		{
+			addCommand() {},
+			addRibbonIcon() {},
+			registerEvent() {},
+			app: {
+				workspace: {
+					getActiveViewOfType() {
+						return null;
+					},
+					on() {
+						return {};
+					},
+				},
+			},
+		} as unknown as Plugin,
+		class FakeMarkdownView {} as unknown as typeof MarkdownView,
+		() => DEFAULT_SETTINGS,
+		undefined,
+		undefined,
+		undefined,
+		undefined,
+		undefined,
+		{
+			async uploadDraft() {
+				return { mediaId: 'DRAFT_MEDIA_ID' };
+			},
+			async uploadCoverImage() {
+				return { mediaId: 'COVER_MEDIA_ID', url: '' };
+			},
+			async uploadAvatarImage() {
+				return { url: 'https://mmbiz.qpic.cn/avatar.jpg' };
+			},
+		},
+		{
+			async ensureFeature(feature) {
+				assert.equal(feature, 'wechat_upload');
+				checked += 1;
+			},
+			async refreshLicense() {
+				throw new Error('should not refresh');
+			},
+			getCachedStatus() {
+				return { active: true, plan: 'pro', features: ['wechat_upload'], expiresAt: '2026-06-10T00:00:00.000Z' };
+			},
+		},
+	);
+	const file = {
+		name: 'image.jpg',
+		type: 'image/jpeg',
+		async arrayBuffer() {
+			return new Uint8Array([1, 2, 3]).buffer;
+		},
+	} as File;
+
+	await controller.uploadCoverImage(file);
+	await controller.uploadAvatarImage(file);
+
+	assert.equal(checked, 2);
+});
