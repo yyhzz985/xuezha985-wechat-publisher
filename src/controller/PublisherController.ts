@@ -11,6 +11,7 @@ type DraftService = {
 		article: FormattedWeChatArticle,
 		markdown: string,
 		settings: PluginSettings,
+		context?: { sourcePath?: string },
 	): Promise<{ mediaId: string }>;
 };
 
@@ -179,7 +180,9 @@ export class PublisherController {
 		try {
 			const settings = this.getSettings();
 			const article = this.formatService.format(markdown, settings);
-			const result = await this.draftService.uploadDraft(article, markdown, settings);
+			const result = await this.draftService.uploadDraft(article, markdown, settings, {
+				sourcePath: view.file?.path,
+			});
 			this.noticeView.showDraftSuccess(result.mediaId);
 		} catch (error) {
 			console.error('[WeChat Publisher] draft upload failed', error);

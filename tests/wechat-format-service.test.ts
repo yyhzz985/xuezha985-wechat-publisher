@@ -210,6 +210,13 @@ my-app/
 	assert.equal(result.html.includes('display: inline-block; min-width: max-content'), false);
 });
 
+test('renders obsidian image embeds as article images', () => {
+	const service = new WeChatFormatService();
+	const result = service.format('![[attachments/photo one.png|封面图]]', DEFAULT_SETTINGS);
+
+	assert.match(result.html, /<img src="attachments\/photo%20one\.png" alt="封面图"/);
+});
+
 test('renders knb special containers', () => {
 	const service = new WeChatFormatService();
 	const result = service.format(`:::intro

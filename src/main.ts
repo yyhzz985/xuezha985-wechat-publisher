@@ -1,5 +1,6 @@
 import { MarkdownView, Notice, Plugin, requestUrl, type WorkspaceLeaf } from 'obsidian';
 import { PublisherController } from './controller/PublisherController';
+import { ObsidianImageRepository } from './repository/ObsidianImageRepository';
 import { SettingsRepository } from './repository/SettingsRepository';
 import { ClipboardService } from './service/ClipboardService';
 import { WeChatDraftService, type WeChatHttpClient } from './service/WeChatDraftService';
@@ -19,7 +20,8 @@ export default class WeChatPublisherPlugin extends Plugin {
 		this.settings = await this.settingsRepository.load();
 		const noticeView = new ObsidianNoticeView(Notice);
 		const clipboardService = new ClipboardService();
-		const draftService = new WeChatDraftService(this.createWeChatHttpClient());
+		const imageRepository = new ObsidianImageRepository(this.app);
+		const draftService = new WeChatDraftService(this.createWeChatHttpClient(), imageRepository);
 
 		this.publisherController = new PublisherController(
 			this,
@@ -62,12 +64,12 @@ export default class WeChatPublisherPlugin extends Plugin {
 	private createWeChatHttpClient(): WeChatHttpClient {
 		return {
 			async requestJson(request) {
-				const hasBody = request.body !== undefined;
+				const hasJsonBody = request.body !== undefined;
 				const response = await requestUrl({
 					url: request.url,
 					method: request.method,
-					body: hasBody ? JSON.stringify(request.body) : undefined,
-					headers: hasBody ? { 'Content-Type': 'application/json' } : undefined,
+					body: request.bodyBytes ?? (hasJsonBody ? JSON.stringify(request.body) : undefined),
+					headers: request.headers ?? (hasJsonBody ? { 'Content-Type': 'application/json' } : undefined),
 				});
 				return response.json;
 			},

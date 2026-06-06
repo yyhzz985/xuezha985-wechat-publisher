@@ -3,6 +3,7 @@ import type Token from 'markdown-it/lib/token.mjs';
 import type { RenderRule } from 'markdown-it/lib/renderer.mjs';
 import type { CodeTheme, PluginSettings } from '../settings';
 import { isWeChatLink } from '../utils/linkUtils';
+import { normalizeObsidianImageEmbeds } from '../utils/obsidianImageUtils';
 import {
 	createWeChatStyles,
 	KNB_DEFAULT_AUTHOR,
@@ -53,7 +54,7 @@ const CONTAINER_TITLES: Record<string, { icon: string; title: string }> = {
 
 export class WeChatFormatService {
 	format(markdown: string, settings: PluginSettings): FormattedWeChatArticle {
-		const cleanedMarkdown = removeYamlFrontmatter(markdown).trim();
+		const cleanedMarkdown = normalizeObsidianImageEmbeds(removeYamlFrontmatter(markdown)).trim();
 		const tocEntries = this.extractToc(cleanedMarkdown);
 		const styles = createWeChatStyles(settings);
 		const renderer = this.createRenderer(settings, tocEntries, styles);
