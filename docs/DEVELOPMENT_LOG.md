@@ -217,3 +217,13 @@
 - 验证：先新增撞名回归测试并确认失败，再修改 manifest；`npm test` 59 项通过；`npm run build` 通过；`npx wrangler deploy --dry-run` 通过。
 - Review 查 Bug：没有删除公开插件目录；没有输出或提交公众号 AppSecret、License Key、CSV 卡密；只改插件标识和安装目录，不改排版渲染逻辑。
 - 第一性原理分析：问题不是样式代码变了，而是 Obsidian 加载了同名公开插件。最稳修复是让本插件拥有唯一 ID，而不是继续覆盖同名目录。
+
+## 2026-06-11 隔离预览 View Type 撞名
+
+- 继续排查后发现：公开插件也注册了 `wechat-publisher-preview`，只改 `manifest.id` 还不够，Obsidian 右侧 workspace 可能继续把旧 view type 还原成公开插件 UI。
+- 修复：将本插件预览视图类型改为 `kenengba-wechat-publisher-preview`，并更新 X-Note 的 `workspace.json`，右侧面板现在指向新 view type。
+- 关闭正在运行的 Obsidian 后再写入 `community-plugins.json`，避免 Obsidian 退出时把启用列表写回旧的 `wechat-publisher`。
+- 目标库当前只启用 `kenengba-wechat-publisher`，公开插件目录仍保留但不启用，避免触碰用户目录删除红线。
+- 验证：`npm test` 59 项通过，`npm run build` 通过，`npx wrangler deploy --dry-run` 通过；构建产物已同步到 X-Note 的 `kenengba-wechat-publisher` 插件目录。
+- Review 查 Bug：新插件构建包里没有“未命名草稿/未配置账号/石墨灰/发布草稿”这套公开插件文案；旧文案只存在未启用的公开插件目录里。
+- 第一性原理分析：Obsidian 识别插件不只看目录和 manifest，也会按 workspace 里的 view type 恢复右侧面板。要彻底避免串台，插件 ID、命令归属和 view type 都必须唯一。

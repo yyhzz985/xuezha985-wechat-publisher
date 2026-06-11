@@ -16,6 +16,8 @@ test('uses a unique plugin id that does not collide with public wechat publisher
 	assert.equal(manifest.id, 'kenengba-wechat-publisher');
 	assert.equal(manifest.name, '可能吧公众号排版器');
 	assert.notEqual(manifest.id, 'wechat-publisher');
+	assert.match(previewView, /kenengba-wechat-publisher-preview/);
+	assert.doesNotMatch(previewView, /'wechat-publisher-preview'/);
 });
 
 test('adds license fields to plugin settings', () => {

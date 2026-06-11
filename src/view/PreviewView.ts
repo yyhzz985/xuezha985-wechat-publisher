@@ -19,7 +19,7 @@ import { formatLicenseStatus } from '../utils/licenseDisplayUtils';
 import type { MarkdownFormatAction } from '../utils/markdownEditUtils';
 import type { NoticeView } from './NoticeView';
 
-export const VIEW_TYPE_WECHAT_PUBLISHER_PREVIEW = 'wechat-publisher-preview';
+export const VIEW_TYPE_WECHAT_PUBLISHER_PREVIEW = 'kenengba-wechat-publisher-preview';
 
 interface FormatTool {
 	action: MarkdownFormatAction;
