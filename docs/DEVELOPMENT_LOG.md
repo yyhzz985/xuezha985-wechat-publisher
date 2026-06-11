@@ -236,3 +236,13 @@
 - 验证：`preview-toolbar-style.test.ts` 已先失败后通过；全量验证在本次构建同步前执行。
 - Review 查 Bug：复制按钮仍绑定 `copy()`，上传按钮仍绑定 `uploadDraftFromButton()`，设置和帮助仍互斥打开原有面板。
 - 第一性原理分析：用户要的是认知顺序，不是新功能。最小修复是改 DOM 创建顺序，而不是改 CSS 排序或重做工具栏结构。
+
+## 2026-06-11 清理 X-Note 旧公开插件启用状态
+
+- 用户截图显示左侧出现两个公众号相关图标，右侧又打开“发布草稿/未配置账号/石墨灰”的公开插件 UI。
+- 排查确认：`D:\【仓库】obsidian笔记\X-Note\.obsidian\community-plugins.json` 同时启用了 `kenengba-wechat-publisher` 和旧 `wechat-publisher`，`workspace.json` 也同时保留了两个预览 view。
+- 处理：关闭 Obsidian 后，用无 BOM JSON 写回启用列表，移除旧 `wechat-publisher`，只保留 `kenengba-wechat-publisher`；同时从 `workspace.json` 移除旧 `wechat-publisher-preview` 和旧左侧栏入口记录。
+- 保留旧公开插件目录，未删除目录或文件，避免触碰删除红线。
+- 验证：重启 Obsidian 后再次检查，启用列表没有 `wechat-publisher`，workspace 没有旧 view 和旧命令，只剩 `kenengba-wechat-publisher-preview`。
+- Review 查 Bug：这次没有改插件代码；修复点限定在目标 Obsidian 库配置，避免影响排版、上传、授权逻辑。
+- 第一性原理分析：两个左侧图标不是按钮顺序问题，而是两个插件同时启用。要消除错误 UI，必须禁用旧插件并清掉 workspace 中旧 view，而不是继续调整新插件代码。
