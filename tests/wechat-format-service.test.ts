@@ -33,7 +33,7 @@ test('renders possible-bar fixed opening module', () => {
 	assert.match(result.html, /border-right: 1px solid #66CCC5/);
 	assert.match(result.html, /<img class="reading-time__avatar" src="https:\/\/xuezha985\.oss-cn-beijing\.aliyuncs\.com\/img\/IMG_6890\.JPG"/);
 	assert.equal(result.html.includes('background-image'), false);
-	assert.match(result.html, /阿禅 Jason Ng/);
+	assert.match(result.html, /momo/);
 	assert.match(result.html, /读完需要/);
 	assert.match(result.html, /速读仅需 1 分钟/);
 });

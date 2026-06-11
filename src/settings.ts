@@ -61,7 +61,7 @@ export interface PluginSettings {
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
-	authorName: '',
+	authorName: 'momo',
 	avatarUrl: 'https://xuezha985.oss-cn-beijing.aliyuncs.com/img/IMG_6890.JPG',
 	showReadingTime: true,
 	codeTheme: 'dark',

@@ -1,6 +1,6 @@
 import { LAYOUT_THEME_OPTIONS, type CodeTheme, type FontWeight, type LayoutTheme, type PluginSettings } from '../settings';
 
-export const KNB_DEFAULT_AUTHOR = '阿禅 Jason Ng';
+export const KNB_DEFAULT_AUTHOR = 'momo';
 export const KNB_DEFAULT_AVATAR_URL = 'https://xuezha985.oss-cn-beijing.aliyuncs.com/img/IMG_6890.JPG';
 
 export const articleStyle = 'font-size: 15px; line-height: 28px; color: rgb(43, 43, 43); text-align: left; font-weight: 400; letter-spacing: 1px;';

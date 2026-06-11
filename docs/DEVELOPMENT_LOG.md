@@ -246,3 +246,13 @@
 - 验证：重启 Obsidian 后再次检查，启用列表没有 `wechat-publisher`，workspace 没有旧 view 和旧命令，只剩 `kenengba-wechat-publisher-preview`。
 - Review 查 Bug：这次没有改插件代码；修复点限定在目标 Obsidian 库配置，避免影响排版、上传、授权逻辑。
 - 第一性原理分析：两个左侧图标不是按钮顺序问题，而是两个插件同时启用。要消除错误 UI，必须禁用旧插件并清掉 workspace 中旧 view，而不是继续调整新插件代码。
+
+## 2026-06-11 删除旧公开插件并修改默认作者
+
+- 用户明确允许删除错误旧版后，删除 X-Note 里的旧公开插件目录：`D:\【仓库】obsidian笔记\X-Note\.obsidian\plugins\wechat-publisher`。
+- 保留新版插件目录 `kenengba-wechat-publisher`，并确认启用列表只保留新版插件。
+- 将插件默认作者从空值 fallback 的旧名字改为 `momo`：新安装默认值和空作者名 fallback 都统一显示 `momo`。
+- 同步修改当前 X-Note 插件数据里的 `authorName` 为 `momo`，不触碰头像、公众号 API、License 等配置。
+- 验证：删除前校验目标路径位于 `.obsidian\plugins` 下且目录名精确为 `wechat-publisher`；删除后确认旧目录不存在、新目录存在。
+- Review 查 Bug：本次只删除用户明确指定的旧公开插件目录，未删除 vault 其他文件；作者名变更只影响默认值和当前库配置。
+- 第一性原理分析：旧插件反复回弹的根源是旧目录仍可被 Obsidian/BRAT 重新启用。既然用户已允许删除，最直接稳定的做法是移除旧目录，只保留唯一新版插件。
