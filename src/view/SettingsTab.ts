@@ -12,6 +12,7 @@ import {
 	type SubheadingStyle,
 } from '../settings';
 import type { EntitlementStatus } from '../service/EntitlementService';
+import { formatLicenseStatus as formatEntitlementStatus } from '../utils/licenseDisplayUtils';
 import { type NoticeView, silentNoticeView } from './NoticeView';
 
 export class WeChatPublisherSettingTab extends PluginSettingTab {
@@ -38,7 +39,6 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 			features: [],
 			expiresAt: '',
 		}),
-		private readonly openPurchasePage: () => void = () => {},
 		private readonly noticeView: NoticeView = silentNoticeView,
 	) {
 		super(app, plugin);
@@ -152,7 +152,6 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 							.finally(() => this.display());
 					}),
 			);
-		this.addPurchaseProButton(containerEl);
 
 		containerEl.createEl('h3', { text: '公众号接口' });
 		containerEl.createEl('p', {
@@ -265,23 +264,8 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 		});
 	}
 
-	private addPurchaseProButton(containerEl: HTMLElement): void {
-		new Setting(containerEl)
-			.setName('购买 Pro')
-			.setDesc('打开购买页面，付款成功后复制 License Key 回来激活。')
-			.addButton((button) =>
-				button
-					.setButtonText('购买 Pro')
-					.onClick(() => this.openPurchasePage()),
-			);
-	}
-
 	private formatLicenseStatus(status: EntitlementStatus): string {
-		if (status.active) {
-			const deviceText = status.maxDevices ? `，设备 ${status.usedDevices ?? 0}/${status.maxDevices}` : '';
-			return `Pro，有效期至 ${status.expiresAt}${deviceText}`;
-		}
-		return status.message ? `Free，${status.message}` : 'Free';
+		return formatEntitlementStatus(status);
 	}
 
 	private pickCoverImage(): void {

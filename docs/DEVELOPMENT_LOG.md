@@ -189,3 +189,20 @@
 - 部署说明：已复用 Cloudflare D1 数据库 `wechat-publisher-license-db`，`database_id` 为 `d05e216a-2d98-4bc8-bb3b-780771bcc5e0`；正式部署 D1 版 Worker 前，还需要按 `worker/README.md` 配置 `ADMIN_TOKEN`、`LICENSE_HASH_SECRET`、`MBD_APP_ID`、`MBD_APP_KEY`、`MBD_PRO_YEAR_AMOUNT_CENTS`、`PUBLIC_BASE_URL`。
 - Review 查 Bug：自动发卡不会把公众号 AppSecret 或文章正文发到授权服务；免费用户仍可预览和复制；上传草稿、上传封面、上传头像会先校验 Pro，失败时不会调用微信接口。
 - 第一性原理分析：用户要的是“自动收款后自动发 Key，插件只填 Key”。所以前台不做复杂商城，插件也不暴露授权服务 URL；订单、授权、设备绑定都放到 Worker + D1，范围最小且便于以后接发卡工具。
+
+## 2026-06-11 手动 Pro 激活码与帮助说明
+
+- 插件端删除“购买 Pro”入口：右侧预览设置面板和 Obsidian 插件设置页只保留 `License Key`、授权状态和校验按钮。
+- 右侧预览顶部新增帮助按钮，使用 `circle-help` 图标；帮助面板和设置面板互斥打开，打开后同样把预览区挤到左侧。
+- 帮助内容新增风格来源、快速使用、支持语法、专有格式、排版设置、复制到公众号、上传到草稿箱、公众号 API 配置和 Pro 激活码说明；开头明确说明排版风格参考可能吧公众号排版器 `https://mp.knb.im/`。
+- Pro 说明固定为 `19元/年`、`58元/永久`，期间享受免费插件版本升级，后续计划添加多公众号账号切换管理，联系渣姐微信 `237219265` 获取激活码。
+- 授权状态显示抽出为 `licenseDisplayUtils`，36500 天这类长期卡在插件里显示为“永久授权”，不再显示 2126 年这种远期日期。
+- Worker 公开购买入口已关闭：`/buy`、`/v1/orders/create`、`/v1/pay/mbd/webhook` 都返回“购买入口暂未开放”；后台授权校验、设备绑定和 Admin 发卡接口继续保留。
+- `worker/scripts/issue-license.ps1` 新增 `-LicenseType year|lifetime`：年卡固定 365 天、价格字段 `19`；永久卡固定 36500 天、价格字段 `58`。
+- 已生成线上 D1 可激活年卡 100 条：`worker/licenses-year-20260611-064545.csv`，CSV 行数 100，第一条抽查有效期至 `2027-06-11T06:45:45.199Z`。
+- 已生成线上 D1 可激活永久卡 100 条：`worker/licenses-lifetime-20260611-064736.csv`，CSV 行数 100，第一条抽查有效期至 `2126-05-18T06:47:36.065Z`。
+- 抽查结果：年卡和永久卡样例在设备 A 激活成功，设备 B 使用同一个 Key 被拒绝并提示“该 License 已绑定其他设备，请联系解绑”；抽查后已执行 `reset-device` 重置绑定。
+- 验证：`npm test` 58 项通过；`npm run build` 通过；`npx wrangler deploy --dry-run` 通过；`npx wrangler deploy` 已部署到 `https://wechat-publisher-license.237219265.workers.dev`，版本 ID `befb850e-b6a5-4e29-b2f6-ef08eca38034`。
+- 构建产物已同步到 `D:\【仓库】obsidian笔记\X-Note\.obsidian\plugins\wechat-publisher`，只覆盖 `main.js`、`manifest.json`、`styles.css`，未触碰 `data.json`。
+- Review 查 Bug：免费功能仍可预览和复制；上传草稿、上传封面、上传头像仍在微信接口前校验 Pro；AppSecret 和文章正文不会发到授权服务器；CSV 已被 `.gitignore` 忽略，不进入提交。
+- 第一性原理分析：当前目标是先稳定手动发卡，而不是把没准备好的支付入口暴露给用户。最直接路径是插件只留 Key 激活，Worker 只保留校验和后台发卡，购买说明放到帮助面板里。

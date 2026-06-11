@@ -17,7 +17,6 @@ export type SubheadingStyle = 'number' | 'eye' | 'none';
 export type ProFeature = 'wechat_upload';
 
 export const DEFAULT_LICENSE_SERVER_URL = 'https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify';
-export const DEFAULT_PRO_PURCHASE_URL = 'https://wechat-publisher-license.237219265.workers.dev/buy';
 
 export interface EntitlementCache {
 	plan: 'free' | 'pro';

@@ -1,6 +1,8 @@
 param(
 	[ValidateSet("issue", "reset-device", "disable", "extend")]
 	[string]$Action = "issue",
+	[ValidateSet("year", "lifetime")]
+	[string]$LicenseType = "year",
 	[int]$Count = 1,
 	[int]$Days = 365,
 	[string]$Note = "",
@@ -55,27 +57,37 @@ function Invoke-AdminApi {
 $token = Get-AdminToken -ExplicitToken $AdminToken
 
 if ($Action -eq "issue") {
+	if ($LicenseType -eq "year") {
+		$issueDays = 365
+		$price = 19
+	} else {
+		$issueDays = 36500
+		$price = 58
+	}
+
 	$batchId = (Get-Date).ToUniversalTime().ToString("yyyyMMdd-HHmmss", [System.Globalization.CultureInfo]::InvariantCulture)
-	$csvPath = Join-Path (Get-Location) "licenses-$batchId.csv"
+	$csvPath = Join-Path (Get-Location) "licenses-$LicenseType-$batchId.csv"
 	$issued = @()
 
 	for ($index = 1; $index -le $Count; $index += 1) {
 		if ($Count -eq 1) {
-			$licenseNote = $Note
+			$licenseNote = "$LicenseType $Note".Trim()
 		} else {
-			$licenseNote = "$Note batch=$batchId item=$index".Trim()
+			$licenseNote = "$LicenseType $Note batch=$batchId item=$index".Trim()
 		}
 		$result = Invoke-AdminApi `
 			-Path "/v1/admin/licenses/issue" `
 			-Token $token `
 			-Body @{
-				days = $Days
+				days = $issueDays
 				note = $licenseNote
 			}
 
 		$issued += [pscustomobject]@{
 			licenseKey = $result.licenseKey
 			expiresAt = $result.expiresAt
+			licenseType = $LicenseType
+			price = $price
 			maxDevices = $result.maxDevices
 			note = $licenseNote
 		}
@@ -86,8 +98,9 @@ if ($Action -eq "issue") {
 	if ($Count -eq 1) {
 		Write-Host "License Key: $($issued[0].licenseKey)"
 		Write-Host "Expires At : $($issued[0].expiresAt)"
+		Write-Host "Type       : $LicenseType"
 	} else {
-		Write-Host "Issued $Count license keys."
+		Write-Host "Issued $Count $LicenseType license keys."
 		Write-Host "CSV: $csvPath"
 	}
 	Write-Host "Send License Key values to users."

@@ -6,7 +6,7 @@ import { ClipboardService } from './service/ClipboardService';
 import { EntitlementService, type LicenseHttpClient, type LicenseVerifyResponse } from './service/EntitlementService';
 import { WeChatDraftService, type WeChatHttpClient } from './service/WeChatDraftService';
 import type { FormattedWeChatArticle } from './service/WeChatFormatService';
-import { DEFAULT_PRO_PURCHASE_URL, type PluginSettings } from './settings';
+import type { PluginSettings } from './settings';
 import { ObsidianNoticeView } from './view/NoticeView';
 import { VIEW_TYPE_WECHAT_PUBLISHER_PREVIEW, WeChatPublisherPreviewView } from './view/PreviewView';
 import { WeChatPublisherSettingTab } from './view/SettingsTab';
@@ -62,7 +62,6 @@ export default class WeChatPublisherPlugin extends Plugin {
 				(file) => this.publisherController.uploadAvatarImage(file),
 				() => this.publisherController.refreshLicense(),
 				() => this.publisherController.getEntitlementStatus(),
-				() => this.openPurchasePage(),
 			),
 		);
 
@@ -77,14 +76,9 @@ export default class WeChatPublisherPlugin extends Plugin {
 				(file) => this.publisherController.uploadAvatarImage(file),
 				() => this.publisherController.refreshLicense(),
 				() => this.publisherController.getEntitlementStatus(),
-				() => this.openPurchasePage(),
 				noticeView,
 			),
 		);
-	}
-
-	private openPurchasePage(): void {
-		window.open(DEFAULT_PRO_PURCHASE_URL, '_blank');
 	}
 
 	private createLicenseHttpClient(): LicenseHttpClient {

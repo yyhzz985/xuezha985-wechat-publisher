@@ -16,10 +16,6 @@ export interface WorkerEnv {
 	DB: D1Database;
 	ADMIN_TOKEN?: string;
 	LICENSE_HASH_SECRET?: string;
-	MBD_APP_ID?: string;
-	MBD_APP_KEY?: string;
-	MBD_PRO_YEAR_AMOUNT_CENTS?: string;
-	PUBLIC_BASE_URL?: string;
 }
 
 export type ProFeature = 'wechat_upload';

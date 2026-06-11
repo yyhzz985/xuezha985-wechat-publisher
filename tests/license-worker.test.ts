@@ -189,10 +189,6 @@ interface TestEnv {
 	DB: MemoryD1;
 	ADMIN_TOKEN: string;
 	LICENSE_HASH_SECRET: string;
-	MBD_APP_ID: string;
-	MBD_APP_KEY: string;
-	MBD_PRO_YEAR_AMOUNT_CENTS: string;
-	PUBLIC_BASE_URL: string;
 }
 
 function createEnv(): TestEnv {
@@ -200,10 +196,6 @@ function createEnv(): TestEnv {
 		DB: new MemoryD1(),
 		ADMIN_TOKEN: 'admin-token',
 		LICENSE_HASH_SECRET: 'hash-secret',
-		MBD_APP_ID: 'mbd-app-id',
-		MBD_APP_KEY: 'mbd-app-key',
-		MBD_PRO_YEAR_AMOUNT_CENTS: '9900',
-		PUBLIC_BASE_URL: 'https://license.example.com',
 	};
 }
 
@@ -272,63 +264,19 @@ test('worker binds a pro license to one device by default', async () => {
 	assert.equal(afterReset.usedDevices, 1);
 });
 
-test('worker creates payment order and issues one license after verified webhook', async () => {
+test('worker disables public payment endpoints while manual issuing remains available', async () => {
 	const env = createEnv();
-	const originalFetch = globalThis.fetch;
-	const fetchCalls: Array<{ url: string; body: Record<string, unknown> }> = [];
-	globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
-		const url = String(input);
-		const body = JSON.parse(String(init?.body ?? '{}')) as Record<string, unknown>;
-		fetchCalls.push({ url, body });
-		if (url.includes('/wx/prepay')) {
-			return Response.json({ h5_url: 'https://wx-pay.example.com/pay' });
-		}
-		if (url.includes('/search_order')) {
-			return Response.json({
-				order_id: body.out_trade_no,
-				charge_id: 'charge-1',
-				description: '公众号排版器 Pro 年费',
-				amount: '9900',
-				state: '1',
-				payway: '1',
-				refund_state: '0',
-				refund_amount: '0',
-			});
-		}
-		return Response.json({ error: 'unexpected request' }, { status: 500 });
-	}) as typeof fetch;
 
-	try {
-		const createResponse = await worker.fetch(
-			jsonRequest('/v1/orders/create', { payway: 'wechat_h5' }),
-			env,
-		);
-		assert.equal(createResponse.status, 200);
-		const order = await createResponse.json() as { orderNo: string; orderUrl: string; paymentUrl: string };
-		assert.match(order.orderNo, /^WP/);
-		assert.equal(order.paymentUrl, 'https://wx-pay.example.com/pay');
+	const buyPage = await worker.fetch(new Request('https://license.example.com/buy'), env);
+	assert.equal(buyPage.status, 404);
+	assert.match(await buyPage.text(), /购买入口暂未开放/);
 
-		const webhookBody = {
-			type: 'charge_succeeded',
-			data: {
-				out_trade_no: order.orderNo,
-				amount: 9900,
-				charge_id: 'charge-1',
-				payway: 1,
-			},
-		};
-		const firstWebhook = await worker.fetch(jsonRequest('/v1/pay/mbd/webhook', webhookBody), env);
-		const secondWebhook = await worker.fetch(jsonRequest('/v1/pay/mbd/webhook', webhookBody), env);
-		assert.equal(firstWebhook.status, 200);
-		assert.equal(secondWebhook.status, 200);
-		assert.equal(env.DB.licenses.size, 1);
+	const createOrder = await worker.fetch(jsonRequest('/v1/orders/create', { payway: 'wechat_h5' }), env);
+	assert.equal(createOrder.status, 404);
+	assert.deepEqual(await createOrder.json(), { error: '购买入口暂未开放，请联系渣姐微信 237219265 获取激活码' });
 
-		const orderPage = await worker.fetch(new Request(order.orderUrl), env);
-		const html = await orderPage.text();
-		assert.match(html, /PRO-/);
-		assert.match(html, /复制这个 License Key/);
-		assert.equal(fetchCalls.filter((call) => call.url.includes('/search_order')).length, 1);
-	} finally {
-		globalThis.fetch = originalFetch;
-	}
+	const licenseKey = await issueLicense(env);
+	const status = await verify(env, licenseKey, 'device-manual');
+	assert.equal(status.active, true);
+	assert.equal(status.usedDevices, 1);
 });

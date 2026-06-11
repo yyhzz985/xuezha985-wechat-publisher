@@ -15,6 +15,7 @@ import {
 import type { ClipboardService } from '../service/ClipboardService';
 import type { EntitlementStatus } from '../service/EntitlementService';
 import type { FormattedWeChatArticle } from '../service/WeChatFormatService';
+import { formatLicenseStatus } from '../utils/licenseDisplayUtils';
 import type { MarkdownFormatAction } from '../utils/markdownEditUtils';
 import type { NoticeView } from './NoticeView';
 
@@ -62,8 +63,10 @@ export class WeChatPublisherPreviewView extends ItemView {
 	private copyButton!: HTMLButtonElement;
 	private syncButton!: HTMLButtonElement;
 	private settingsButton!: HTMLButtonElement;
+	private helpButton!: HTMLButtonElement;
 	private settingsPanel!: HTMLElement;
-	private isSettingsOpen = false;
+	private helpPanel!: HTMLElement;
+	private activePanel: 'settings' | 'help' | null = null;
 	private isThemeDropdownOpen = false;
 
 	constructor(
@@ -92,7 +95,6 @@ export class WeChatPublisherPreviewView extends ItemView {
 			features: [],
 			expiresAt: '',
 		}),
-		private readonly openPurchasePage: () => void = () => {},
 	) {
 		super(leaf);
 		this.navigation = false;
@@ -130,6 +132,18 @@ export class WeChatPublisherPreviewView extends ItemView {
 			void this.uploadDraftFromButton();
 		});
 
+		this.helpButton = actions.createEl('button', {
+			cls: 'wechat-publisher-icon-button',
+			attr: {
+				'aria-label': '帮助',
+			},
+		}) as HTMLButtonElement;
+		this.helpButton.type = 'button';
+		setIcon(this.helpButton, 'circle-help');
+		this.helpButton.addEventListener('click', () => {
+			this.setActivePanel(this.activePanel === 'help' ? null : 'help');
+		});
+
 		this.settingsButton = actions.createEl('button', {
 			cls: 'wechat-publisher-icon-button',
 			attr: {
@@ -139,7 +153,7 @@ export class WeChatPublisherPreviewView extends ItemView {
 		this.settingsButton.type = 'button';
 		setIcon(this.settingsButton, 'settings');
 		this.settingsButton.addEventListener('click', () => {
-			this.setSettingsOpen(!this.isSettingsOpen);
+			this.setActivePanel(this.activePanel === 'settings' ? null : 'settings');
 		});
 
 		this.copyButton = actions.createEl('button', {
@@ -165,9 +179,11 @@ export class WeChatPublisherPreviewView extends ItemView {
 		});
 		this.articleEl = shell.createDiv({ cls: 'wechat-publisher-phone-article' });
 		this.settingsPanel = body.createDiv({ cls: 'wechat-publisher-inline-settings' });
+		this.helpPanel = body.createDiv({ cls: 'wechat-publisher-inline-help' });
 
 		this.renderSettingsPanel();
-		this.setSettingsOpen(false);
+		this.renderHelpPanel();
+		this.setActivePanel(null);
 		this.renderArticle();
 	}
 
@@ -229,11 +245,14 @@ export class WeChatPublisherPreviewView extends ItemView {
 		this.articleEl.innerHTML = this.article.html;
 	}
 
-	private setSettingsOpen(isOpen: boolean): void {
-		this.isSettingsOpen = isOpen;
-		this.contentEl.toggleClass('is-settings-open', isOpen);
-		this.settingsButton.toggleClass('is-active', isOpen);
-		this.settingsPanel.toggle(isOpen);
+	private setActivePanel(panel: 'settings' | 'help' | null): void {
+		this.activePanel = panel;
+		this.contentEl.toggleClass('is-settings-open', panel === 'settings');
+		this.contentEl.toggleClass('is-help-open', panel === 'help');
+		this.settingsButton.toggleClass('is-active', panel === 'settings');
+		this.helpButton.toggleClass('is-active', panel === 'help');
+		this.settingsPanel.toggle(panel === 'settings');
+		this.helpPanel.toggle(panel === 'help');
 	}
 
 	private renderSettingsPanel(): void {
@@ -283,7 +302,6 @@ export class WeChatPublisherPreviewView extends ItemView {
 			this.savePatch({ licenseKey: value.trim(), entitlementCache: null }),
 		);
 		this.addLicenseRefresh(content);
-		this.addPurchaseProButton(content);
 
 		content.createDiv({ cls: 'wechat-publisher-settings-divider' });
 		content.createEl('h4', { text: '公众号接口' });
@@ -477,15 +495,9 @@ export class WeChatPublisherPreviewView extends ItemView {
 
 	private addLicenseStatus(container: HTMLElement): void {
 		const status = this.getEntitlementStatus();
-		const deviceText = status.active && status.maxDevices
-			? `，设备 ${status.usedDevices ?? 0}/${status.maxDevices}`
-			: '';
-		const text = status.active
-			? `授权状态：Pro，有效期至 ${status.expiresAt}${deviceText}`
-			: `授权状态：Free${status.message ? `，${status.message}` : ''}`;
 		container.createEl('p', {
 			cls: status.active ? 'wechat-publisher-license-status is-pro' : 'wechat-publisher-license-status',
-			text,
+			text: `授权状态：${formatLicenseStatus(status)}`,
 		});
 	}
 
@@ -504,18 +516,6 @@ export class WeChatPublisherPreviewView extends ItemView {
 					button.disabled = false;
 					this.renderSettingsPanel();
 				});
-		});
-	}
-
-	private addPurchaseProButton(container: HTMLElement): void {
-		const button = container.createEl('button', {
-			cls: 'wechat-publisher-license-check-button',
-			text: '购买 Pro',
-		});
-		button.type = 'button';
-		button.addEventListener('click', () => {
-			this.isThemeDropdownOpen = false;
-			this.openPurchasePage();
 		});
 	}
 
@@ -621,5 +621,63 @@ export class WeChatPublisherPreviewView extends ItemView {
 		} catch (error) {
 			this.noticeView.showError(error);
 		}
+	}
+
+	private renderHelpPanel(): void {
+		if (!this.helpPanel) {
+			return;
+		}
+
+		this.helpPanel.empty();
+		const header = this.helpPanel.createDiv({ cls: 'wechat-publisher-inline-settings-header' });
+		setIcon(header.createSpan(), 'circle-help');
+		header.createEl('h3', { text: '帮助' });
+
+		const content = this.helpPanel.createDiv({ cls: 'wechat-publisher-inline-settings-content wechat-publisher-help-content' });
+		this.addHelpSection(content, '风格说明', [
+			'因为自己非常喜欢这种简约高级的排版风格，可能吧的排版完全在我的审美上，所以这个插件参考引用了可能吧公众号排版器的风格排版。',
+			'可能吧公众号排版器：https://mp.knb.im/',
+		]);
+		this.addHelpSection(content, '快速使用', [
+			'打开一篇 Markdown 笔记，点击左侧功能区的公众号预览图标，右侧会出现实时预览。',
+			'没有选中文本时，复制和上传会使用整篇笔记；有选中文本时，复制会优先使用选区。',
+			'写完后点击右上角复制图标，把内容粘贴到微信公众号后台。',
+		]);
+		this.addHelpSection(content, '支持语法', [
+			'支持标题、段落、粗体、斜体、引用、列表、图片、分割线、链接、代码块和 Markdown 表格。',
+			'公众号内链会保留，其他外链会改写成“文字（URL）”，避免粘贴后链接丢失。',
+			'代码块支持深色/浅色主题和横向滚动，适合粘贴较长代码。',
+		]);
+		this.addHelpSection(content, '专有格式', [
+			'工具栏提供全能导航、摘要、高亮、提示、说明、笔记、注意、危险、想说的话和多角色对话。',
+			'全能导航会根据二级标题生成文章导航；对话格式会让同名角色保持一致图标。',
+			'这些格式都写回 Markdown，后续可以继续编辑。',
+		]);
+		this.addHelpSection(content, '排版设置', [
+			'右上角齿轮可以调整主题、字重、小标题风格、代码主题和顶部时间模块。',
+			'作者名和头像 URL 会显示在顶部时间模块里，也可以上传本地头像图自动生成公众号可用图片链接。',
+		]);
+		this.addHelpSection(content, '公众号上传配置', [
+			'上传到草稿箱需要填写公众号 AppID、AppSecret 和默认封面 media_id。',
+			'AppID 和 AppSecret 在微信公众平台的“设置与开发”里获取；服务器 IP 白名单也在公众号后台“设置与开发”里配置。',
+			'默认封面 media_id 可以手填，也可以点击上传封面图，让插件自动上传为永久素材后写回。',
+			'原文链接可选；开启评论后，上传草稿时会允许文章留言评论。',
+			'AppSecret 会明文保存在当前 Obsidian 库插件数据里；文章内容和公众号密钥不会发到授权服务器。',
+		]);
+		this.addHelpSection(content, 'Pro 激活码', [
+			'实时预览、复制到公众号、排版工具栏和主题设置免费使用。',
+			'上传草稿箱、上传封面图、上传头像图属于 Pro 功能，需要填写 License Key 后校验授权。',
+			'Pro 权限：19元/年，58元/永久；期间享受免费插件版本升级。',
+			'后续计划添加多公众号账号切换管理。',
+			'联系渣姐微信：237219265 获取激活码。',
+		]);
+	}
+
+	private addHelpSection(container: HTMLElement, title: string, paragraphs: string[]): void {
+		const section = container.createEl('section');
+		section.createEl('h4', { text: title });
+		paragraphs.forEach((paragraph) => {
+			section.createEl('p', { text: paragraph });
+		});
 	}
 }

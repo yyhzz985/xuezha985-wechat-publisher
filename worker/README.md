@@ -1,80 +1,88 @@
-# 公众号排版器 Pro 授权与自动发卡 Worker
+# 公众号排版器 Pro 授权 Worker
 
-这个 Worker 负责三件事：
+这个 Worker 负责手动激活码授权，不接收公众号 AppSecret，也不接收文章正文。
 
-- 校验插件里的 `License Key`。
-- 接收面包多 Pay 付款成功通知，自动生成 Pro Key。
-- 管理 Key 的设备绑定、禁用、延期、解绑。
+当前公开购买入口已关闭：`/buy`、`/v1/orders/create`、`/v1/pay/mbd/webhook` 都只返回“购买入口暂未开放”。现在的发卡方式是后台脚本批量生成 License Key，再手动发给用户。
 
-插件仍然只让用户填写一个 `License Key`。公众号 AppSecret 和文章正文不会发到这个 Worker。
-
-## 1. 创建 D1
+## 1. 数据库
 
 ```powershell
 cd E:\AI_project\ob-kenengba\worker
-npx wrangler d1 create wechat-publisher-license-db
+npx wrangler d1 migrations apply wechat-publisher-license-db --remote
 ```
 
-把命令输出里的 `database_id` 填到 `wrangler.jsonc` 的 `d1_databases[0].database_id`。
+D1 数据库绑定在 `wrangler.jsonc` 里，表结构包括：
 
-## 2. 配置 Secrets
+- `licenses`：保存 License 哈希、套餐、有效期、设备数、状态。
+- `license_activations`：保存设备绑定。
+- `license_events`：记录发卡、激活、拒绝、解绑、禁用等事件。
+- `orders`、`payment_events`：预留给以后自动收款发卡。
+
+## 2. Secrets
+
+线上 Worker 必须配置：
 
 ```powershell
 npx wrangler secret put ADMIN_TOKEN
 npx wrangler secret put LICENSE_HASH_SECRET
-npx wrangler secret put MBD_APP_ID
-npx wrangler secret put MBD_APP_KEY
-npx wrangler secret put MBD_PRO_YEAR_AMOUNT_CENTS
-npx wrangler secret put PUBLIC_BASE_URL
 ```
 
-说明：
+- `ADMIN_TOKEN`：本地管理脚本调用 Worker Admin API 的口令。
+- `LICENSE_HASH_SECRET`：License 哈希盐，随机长字符串即可。
 
-- `ADMIN_TOKEN`：你本地管理脚本调用 Worker Admin API 的口令。
-- `LICENSE_HASH_SECRET`：用于 License 哈希和加密，随机长字符串即可。
-- `MBD_APP_ID`、`MBD_APP_KEY`：面包多 Pay 控制台里获取。
-- `MBD_PRO_YEAR_AMOUNT_CENTS`：Pro 年费金额，单位是分，例如 `9900`。
-- `PUBLIC_BASE_URL`：Worker 公开地址，例如 `https://wechat-publisher-license.237219265.workers.dev`。
+本地脚本可以把 Admin Token 写到 `worker/.admin-token.local`，这个文件已被 `.gitignore` 忽略，不要提交。
 
-本地调试可以把这些写到 `worker/.dev.vars`，不要提交。
-
-## 3. 初始化数据库并部署
+## 3. 部署
 
 ```powershell
-npx wrangler d1 migrations apply wechat-publisher-license-db --remote
+cd E:\AI_project\ob-kenengba\worker
+npx wrangler deploy --dry-run
 npx wrangler deploy
 ```
 
-部署后，在面包多 Pay 控制台设置 Webhook URL：
+当前线上地址：
 
 ```text
-https://你的-worker域名/v1/pay/mbd/webhook
+https://wechat-publisher-license.237219265.workers.dev
 ```
 
-## 4. 自动购买链路
-
-插件里的“购买 Pro”会打开：
+插件内置校验接口：
 
 ```text
-https://wechat-publisher-license.237219265.workers.dev/buy
+https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify
 ```
 
-用户付款后：
+## 4. 手动发卡
 
-1. 面包多发送 Webhook。
-2. Worker 反查面包多订单，确认已支付、金额正确、未退款。
-3. Worker 生成 `PRO-...`，写入 D1。
-4. 用户在订单页复制 Key，回到插件里激活。
-
-## 5. 管理 Key
-
-先把 `ADMIN_TOKEN` 放到环境变量，或写入 `worker/.admin-token.local`。
-
-批量发 Key：
+年卡 100 条：
 
 ```powershell
-.\scripts\issue-license.ps1 -Count 100 -Days 365 -Note "2026-06 批次"
+.\scripts\issue-license.ps1 -Count 100 -LicenseType year -Note "manual"
 ```
+
+永久卡 100 条：
+
+```powershell
+.\scripts\issue-license.ps1 -Count 100 -LicenseType lifetime -Note "manual"
+```
+
+脚本会直接写入线上 D1，并在当前目录导出 CSV：
+
+- `licenses-year-YYYYMMDD-HHMMSS.csv`
+- `licenses-lifetime-YYYYMMDD-HHMMSS.csv`
+
+CSV 字段：
+
+- `licenseKey`
+- `expiresAt`
+- `licenseType`
+- `price`
+- `maxDevices`
+- `note`
+
+年卡固定 365 天，价格字段 `19`。永久卡用 36500 天表示，价格字段 `58`。默认一个 Key 绑定一台设备。
+
+## 5. 管理 Key
 
 解绑设备：
 
@@ -94,4 +102,24 @@ https://wechat-publisher-license.237219265.workers.dev/buy
 .\scripts\issue-license.ps1 -Action extend -LicenseKey "PRO-xxxx" -Days 365
 ```
 
-CSV 卡密文件会输出到当前目录，已被 `.gitignore` 忽略，不要提交。
+## 6. 抽查校验
+
+抽查时会把 Key 绑定到测试设备。抽查完成后要立刻执行 `reset-device`，否则这条 Key 会被占用。
+
+```powershell
+$body = @{
+  licenseKey = "PRO-xxxx"
+  deviceId = "codex-check"
+  pluginId = "wechat-publisher"
+  pluginVersion = "0.1.0"
+  feature = "wechat_upload"
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+  -Method Post `
+  -Uri "https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify" `
+  -ContentType "application/json" `
+  -Body $body
+
+.\scripts\issue-license.ps1 -Action reset-device -LicenseKey "PRO-xxxx"
+```

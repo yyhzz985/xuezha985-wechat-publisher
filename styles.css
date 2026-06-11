@@ -180,7 +180,8 @@
 	transition: flex-basis 160ms ease;
 }
 
-.wechat-publisher-inline-settings {
+.wechat-publisher-inline-settings,
+.wechat-publisher-inline-help {
 	box-sizing: border-box;
 	flex: 0 0 320px;
 	width: 320px;
@@ -211,6 +212,20 @@
 	height: calc(100% - 48px);
 	overflow: auto;
 	padding: 18px 16px 20px;
+}
+
+.wechat-publisher-help-content {
+	font-size: 13px;
+	line-height: 1.65;
+}
+
+.wechat-publisher-help-content section {
+	margin: 0 0 22px;
+}
+
+.wechat-publisher-help-content p {
+	margin: 0 0 9px;
+	color: var(--text-muted);
 }
 
 .wechat-publisher-inline-settings-content h4 {

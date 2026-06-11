@@ -1,7 +1,6 @@
 import { D1Repository } from './repository/D1Repository';
 import { LicenseService } from './service/LicenseService';
-import { PaymentService, type PaymentConfig } from './service/PaymentService';
-import type { Payway, VerifyRequest, WorkerEnv } from './types';
+import type { VerifyRequest, WorkerEnv } from './types';
 import { denied, escapeHtml, html, json, options, readJson } from './utils/http';
 
 export default {
@@ -19,13 +18,13 @@ export default {
 				return handleVerify(request, licenseService);
 			}
 			if (request.method === 'GET' && url.pathname === '/buy') {
-				return html(renderBuyPage());
+				return html(renderMessagePage('购买入口暂未开放', '当前版本先使用手动发放激活码。请联系渣姐微信 237219265 获取 License Key。'), 404);
 			}
 			if (request.method === 'POST' && url.pathname === '/v1/orders/create') {
-				return handleCreateOrder(request, repository, licenseService, env);
+				return json({ error: '购买入口暂未开放，请联系渣姐微信 237219265 获取激活码' }, 404);
 			}
 			if (request.method === 'POST' && url.pathname === '/v1/pay/mbd/webhook') {
-				return handleMbdWebhook(request, repository, licenseService, env);
+				return json({ error: '购买入口暂未开放' }, 404);
 			}
 			if (request.method === 'GET' && url.pathname.startsWith('/order/')) {
 				return handleOrderPage(url, repository, licenseService);
@@ -54,29 +53,6 @@ async function handleVerify(request: Request, licenseService: LicenseService): P
 	}
 
 	return json(await licenseService.verify(body as VerifyRequest));
-}
-
-async function handleCreateOrder(
-	request: Request,
-	repository: D1Repository,
-	licenseService: LicenseService,
-	env: WorkerEnv,
-): Promise<Response> {
-	const body = await readJson<{ payway?: Payway }>(request);
-	const payway = body.payway === 'alipay' ? 'alipay' : 'wechat_h5';
-	const paymentService = new PaymentService(repository, licenseService, createPaymentConfig(env));
-	return json(await paymentService.createOrder(payway));
-}
-
-async function handleMbdWebhook(
-	request: Request,
-	repository: D1Repository,
-	licenseService: LicenseService,
-	env: WorkerEnv,
-): Promise<Response> {
-	const body = await readJson<Record<string, unknown>>(request);
-	const paymentService = new PaymentService(repository, licenseService, createPaymentConfig(env));
-	return json(await paymentService.handleWebhook(body));
 }
 
 async function handleOrderPage(url: URL, repository: D1Repository, licenseService: LicenseService): Promise<Response> {
@@ -144,19 +120,6 @@ function validateVerifyRequest(body: Partial<VerifyRequest>): string | null {
 	return null;
 }
 
-function createPaymentConfig(env: WorkerEnv): PaymentConfig {
-	const amountCents = Number(env.MBD_PRO_YEAR_AMOUNT_CENTS);
-	if (!Number.isInteger(amountCents) || amountCents <= 0) {
-		throw new Error('MBD_PRO_YEAR_AMOUNT_CENTS 未配置');
-	}
-	return {
-		appId: requireSecret(env.MBD_APP_ID, 'MBD_APP_ID'),
-		appKey: requireSecret(env.MBD_APP_KEY, 'MBD_APP_KEY'),
-		amountCents,
-		publicBaseUrl: (env.PUBLIC_BASE_URL ?? '').replace(/\/+$/g, '') || 'https://wechat-publisher-license.237219265.workers.dev',
-	};
-}
-
 function requireSecret(value: string | undefined, name: string): string {
 	if (!value?.trim()) {
 		throw new Error(`${name} 未配置`);
@@ -186,62 +149,6 @@ function normalizeDays(value: unknown): number {
 
 function isNonEmptyString(value: unknown): value is string {
 	return typeof value === 'string' && value.trim().length > 0;
-}
-
-function renderBuyPage(): string {
-	return `<!doctype html>
-<html lang="zh-CN">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>购买 Pro</title>
-<style>
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;background:#f6f7f8;color:#222}
-main{max-width:520px;margin:0 auto;padding:48px 20px}
-.card{background:#fff;border:1px solid #e7e7e7;border-radius:12px;padding:24px}
-h1{font-size:24px;margin:0 0 10px}
-p{line-height:1.7;color:#555}
-button{display:block;width:100%;margin:12px 0;padding:13px 16px;border:1px solid #2a9d8f;border-radius:8px;background:#2a9d8f;color:#fff;font-weight:700;font-size:16px}
-button.secondary{background:#fff;color:#2a9d8f}
-#message{min-height:24px;color:#777}
-</style>
-</head>
-<body>
-<main>
-<section class="card">
-<h1>公众号排版器 Pro 年费</h1>
-<p>付款成功后会自动生成 License Key。复制 Key 后回到 Obsidian 插件设置里激活。</p>
-<button data-payway="wechat_h5">微信支付</button>
-<button class="secondary" data-payway="alipay">支付宝支付</button>
-<p id="message"></p>
-</section>
-</main>
-<script>
-for (const button of document.querySelectorAll('button[data-payway]')) {
-  button.addEventListener('click', async () => {
-    document.getElementById('message').textContent = '正在创建订单...';
-    const response = await fetch('/v1/orders/create', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ payway: button.dataset.payway })
-    });
-    const data = await response.json();
-    if (!response.ok || data.error) {
-      document.getElementById('message').textContent = data.error || '创建订单失败';
-      return;
-    }
-    if (data.paymentHtml) {
-      document.open();
-      document.write(data.paymentHtml);
-      document.close();
-      return;
-    }
-    location.href = data.paymentUrl;
-  });
-}
-</script>
-</body>
-</html>`;
 }
 
 function renderLicensePage(licenseKey: string, orderNo: string): string {
