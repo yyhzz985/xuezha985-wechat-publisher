@@ -227,3 +227,12 @@
 - 验证：`npm test` 59 项通过，`npm run build` 通过，`npx wrangler deploy --dry-run` 通过；构建产物已同步到 X-Note 的 `kenengba-wechat-publisher` 插件目录。
 - Review 查 Bug：新插件构建包里没有“未命名草稿/未配置账号/石墨灰/发布草稿”这套公开插件文案；旧文案只存在未启用的公开插件目录里。
 - 第一性原理分析：Obsidian 识别插件不只看目录和 manifest，也会按 workspace 里的 view type 恢复右侧面板。要彻底避免串台，插件 ID、命令归属和 view type 都必须唯一。
+
+## 2026-06-11 预览顶部功能图标顺序调整
+
+- 将右侧预览顶部功能图标顺序调整为：复制、上传、设置、帮助。
+- 只调整 `PreviewView` 里四个按钮的创建顺序，不修改按钮样式、事件逻辑、上传逻辑和设置面板逻辑。
+- 新增顺序回归测试，锁定 `copyButton -> syncButton -> settingsButton -> helpButton`，避免后续改回乱序。
+- 验证：`preview-toolbar-style.test.ts` 已先失败后通过；全量验证在本次构建同步前执行。
+- Review 查 Bug：复制按钮仍绑定 `copy()`，上传按钮仍绑定 `uploadDraftFromButton()`，设置和帮助仍互斥打开原有面板。
+- 第一性原理分析：用户要的是认知顺序，不是新功能。最小修复是改 DOM 创建顺序，而不是改 CSS 排序或重做工具栏结构。

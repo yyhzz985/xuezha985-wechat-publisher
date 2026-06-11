@@ -120,6 +120,18 @@ export class WeChatPublisherPreviewView extends ItemView {
 		header.createEl('h2', { text: '公众号预览' });
 		const actions = header.createDiv({ cls: 'wechat-publisher-preview-actions' });
 
+		this.copyButton = actions.createEl('button', {
+			cls: 'wechat-publisher-icon-button wechat-publisher-copy-button',
+			attr: {
+				'aria-label': '复制到公众号',
+			},
+		}) as HTMLButtonElement;
+		this.copyButton.type = 'button';
+		setIcon(this.copyButton, 'copy');
+		this.copyButton.addEventListener('click', () => {
+			void this.copy();
+		});
+
 		this.syncButton = actions.createEl('button', {
 			cls: 'wechat-publisher-icon-button',
 			attr: {
@@ -130,18 +142,6 @@ export class WeChatPublisherPreviewView extends ItemView {
 		setIcon(this.syncButton, 'upload-cloud');
 		this.syncButton.addEventListener('click', () => {
 			void this.uploadDraftFromButton();
-		});
-
-		this.helpButton = actions.createEl('button', {
-			cls: 'wechat-publisher-icon-button',
-			attr: {
-				'aria-label': '帮助',
-			},
-		}) as HTMLButtonElement;
-		this.helpButton.type = 'button';
-		setIcon(this.helpButton, 'circle-help');
-		this.helpButton.addEventListener('click', () => {
-			this.setActivePanel(this.activePanel === 'help' ? null : 'help');
 		});
 
 		this.settingsButton = actions.createEl('button', {
@@ -156,16 +156,16 @@ export class WeChatPublisherPreviewView extends ItemView {
 			this.setActivePanel(this.activePanel === 'settings' ? null : 'settings');
 		});
 
-		this.copyButton = actions.createEl('button', {
-			cls: 'wechat-publisher-icon-button wechat-publisher-copy-button',
+		this.helpButton = actions.createEl('button', {
+			cls: 'wechat-publisher-icon-button',
 			attr: {
-				'aria-label': '复制到公众号',
+				'aria-label': '帮助',
 			},
 		}) as HTMLButtonElement;
-		this.copyButton.type = 'button';
-		setIcon(this.copyButton, 'copy');
-		this.copyButton.addEventListener('click', () => {
-			void this.copy();
+		this.helpButton.type = 'button';
+		setIcon(this.helpButton, 'circle-help');
+		this.helpButton.addEventListener('click', () => {
+			this.setActivePanel(this.activePanel === 'help' ? null : 'help');
 		});
 
 		const toolbar = this.contentEl.createDiv({ cls: 'wechat-publisher-format-toolbar' });

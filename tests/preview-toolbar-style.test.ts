@@ -34,6 +34,21 @@ test('uses one tooltip source for preview icon buttons', () => {
 	assert.doesNotMatch(previewModal, /title:\s*'复制到公众号'/);
 });
 
+test('orders preview action icons as copy upload settings help', () => {
+	const copyIndex = previewView.indexOf('this.copyButton = actions.createEl');
+	const uploadIndex = previewView.indexOf('this.syncButton = actions.createEl');
+	const settingsIndex = previewView.indexOf('this.settingsButton = actions.createEl');
+	const helpIndex = previewView.indexOf('this.helpButton = actions.createEl');
+
+	assert.ok(copyIndex > -1);
+	assert.ok(uploadIndex > -1);
+	assert.ok(settingsIndex > -1);
+	assert.ok(helpIndex > -1);
+	assert.ok(copyIndex < uploadIndex);
+	assert.ok(uploadIndex < settingsIndex);
+	assert.ok(settingsIndex < helpIndex);
+});
+
 test('keeps preview toolbar compact until hover', () => {
 	const toolbarButton = cssRule('.wechat-publisher-format-button');
 	assert.match(toolbarButton, /width:\s*24px/);
