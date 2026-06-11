@@ -206,3 +206,14 @@
 - 构建产物已同步到 `D:\【仓库】obsidian笔记\X-Note\.obsidian\plugins\wechat-publisher`，只覆盖 `main.js`、`manifest.json`、`styles.css`，未触碰 `data.json`。
 - Review 查 Bug：免费功能仍可预览和复制；上传草稿、上传封面、上传头像仍在微信接口前校验 Pro；AppSecret 和文章正文不会发到授权服务器；CSV 已被 `.gitignore` 忽略，不进入提交。
 - 第一性原理分析：当前目标是先稳定手动发卡，而不是把没准备好的支付入口暴露给用户。最直接路径是插件只留 Key 激活，Worker 只保留校验和后台发卡，购买说明放到帮助面板里。
+
+## 2026-06-11 修复 Obsidian 插件 ID 撞名
+
+- 根因：插件 ID 使用了 `wechat-publisher`，这个 ID 和公开的 RanceLee 微信公众号发布插件撞名，Obsidian 插件目录被公开插件覆盖后会加载成“发布草稿/未配置账号/石墨灰”的另一套 UI。
+- 修复：将本插件 `manifest.json` 改为独立 ID `kenengba-wechat-publisher`，名称改为 `可能吧公众号排版器`，避免以后再被公开插件覆盖。
+- 构建产物已同步到新目录 `D:\【仓库】obsidian笔记\X-Note\.obsidian\plugins\kenengba-wechat-publisher`，并保留公开插件原目录不删除。
+- 从旧 `wechat-publisher/data.json` 只迁移本插件需要的字段到新目录：排版设置、公众号 API、License、设备 ID、头像和封面配置；没有迁移公开插件的账号和草稿记录。
+- 已更新 `D:\【仓库】obsidian笔记\X-Note\.obsidian\community-plugins.json`：移除 `wechat-publisher`，启用 `kenengba-wechat-publisher`。
+- 验证：先新增撞名回归测试并确认失败，再修改 manifest；`npm test` 59 项通过；`npm run build` 通过；`npx wrangler deploy --dry-run` 通过。
+- Review 查 Bug：没有删除公开插件目录；没有输出或提交公众号 AppSecret、License Key、CSV 卡密；只改插件标识和安装目录，不改排版渲染逻辑。
+- 第一性原理分析：问题不是样式代码变了，而是 Obsidian 加载了同名公开插件。最稳修复是让本插件拥有唯一 ID，而不是继续覆盖同名目录。
