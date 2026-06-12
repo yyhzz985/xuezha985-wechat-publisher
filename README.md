@@ -4,6 +4,8 @@
 
 本插件的排版风格参考 [可能吧公众号排版器](https://mp.knb.im/)。我非常喜欢它简约、克制、高级的排版审美，所以把这套写作后的排版工作流搬进了 Obsidian。
 
+GitHub 仓库地址：[https://github.com/yyhzz985/xuezha985-wechat-publisher](https://github.com/yyhzz985/xuezha985-wechat-publisher)
+
 ## 功能
 
 - 右侧实时预览公众号排版效果
@@ -15,28 +17,152 @@
 - 支持主题、字重、小标题风格、代码主题、阅读时间模块配置
 - Pro 功能：上传草稿箱、上传封面图、上传头像图
 
-## 安装
+## 给别人安装使用
 
-### 方式一：手动安装
+推荐把这一段直接发给使用者。
 
-1. 下载发布包 `xuezha985-wechat-publisher-版本号.zip`
-2. 解压后得到 3 个文件：
-   - `manifest.json`
-   - `main.js`
-   - `styles.css`
-3. 在你的 Obsidian 库里创建目录：
+### 第一步：下载安装包
+
+打开插件发布页：
+
+[https://github.com/yyhzz985/xuezha985-wechat-publisher/releases](https://github.com/yyhzz985/xuezha985-wechat-publisher/releases)
+
+下载最新版本里的 zip 文件，例如：
+
+```text
+xuezha985-wechat-publisher-0.1.0.zip
+```
+
+### 第二步：解压文件
+
+解压 zip 后，里面应该只有 3 个文件：
+
+```text
+manifest.json
+main.js
+styles.css
+```
+
+如果解压后外面多了一层文件夹，也没关系，最终只需要这 3 个文件。
+
+### 第三步：找到你的 Obsidian 库目录
+
+打开 Obsidian，进入你要安装插件的那个库。
+
+如果不知道库在哪：
+
+1. 在 Obsidian 左侧文件列表里，任选一篇笔记
+2. 右键点击笔记
+3. 选择 `在系统资源管理器中显示`
+4. 打开的文件夹就是你的 Obsidian 库里的某个位置
+5. 回到这个库的根目录
+
+库根目录里应该能看到 `.obsidian` 文件夹。如果看不到，需要先打开系统的“显示隐藏文件”。
+
+### 第四步：创建插件目录
+
+在你的 Obsidian 库里创建这个目录：
 
 ```text
 .obsidian/plugins/xuezha985-wechat-publisher/
 ```
 
-4. 把上面 3 个文件放进去
-5. 重启 Obsidian
-6. 打开 `设置 -> 第三方插件`，启用 `公众号一键排版上传`
+Windows 示例：
 
-### 方式二：BRAT 安装
+```text
+D:\你的Obsidian库\.obsidian\plugins\xuezha985-wechat-publisher\
+```
 
-如果你使用 BRAT，可以在 BRAT 里添加本插件的 GitHub 仓库地址，然后启用插件。
+macOS 示例：
+
+```text
+/Users/你的用户名/你的Obsidian库/.obsidian/plugins/xuezha985-wechat-publisher/
+```
+
+### 第五步：放入插件文件
+
+把解压出来的 3 个文件放进刚才创建的目录：
+
+```text
+.obsidian/plugins/xuezha985-wechat-publisher/manifest.json
+.obsidian/plugins/xuezha985-wechat-publisher/main.js
+.obsidian/plugins/xuezha985-wechat-publisher/styles.css
+```
+
+目录名必须是：
+
+```text
+xuezha985-wechat-publisher
+```
+
+不要改成中文，也不要多一层文件夹。
+
+### 第六步：启用插件
+
+1. 重启 Obsidian
+2. 打开 `设置`
+3. 进入 `第三方插件`
+4. 如果还没关闭安全模式，先关闭安全模式
+5. 在已安装插件列表里找到 `公众号一键排版上传`
+6. 打开右侧开关启用插件
+
+### 第七步：开始使用
+
+1. 打开一篇 Markdown 笔记
+2. 点击 Obsidian 左侧功能区的公众号预览图标
+3. 右侧会出现公众号实时预览
+4. 写完后点击右上角复制图标
+5. 到微信公众号后台编辑器里粘贴即可
+
+如果你有 Pro 激活码：
+
+1. 点击右侧预览区右上角齿轮图标
+2. 找到 `License Key`
+3. 填入激活码
+4. 点击 `校验授权`
+5. 授权成功后即可使用上传草稿箱、上传封面图、上传头像图
+
+### 常见安装问题
+
+**1. Obsidian 里看不到插件**
+
+检查这 3 个文件是不是放在正确目录：
+
+```text
+.obsidian/plugins/xuezha985-wechat-publisher/manifest.json
+.obsidian/plugins/xuezha985-wechat-publisher/main.js
+.obsidian/plugins/xuezha985-wechat-publisher/styles.css
+```
+
+最常见错误是多了一层目录，例如：
+
+```text
+.obsidian/plugins/xuezha985-wechat-publisher/xuezha985-wechat-publisher-0.1.0/manifest.json
+```
+
+这种是不对的。
+
+**2. 提示无法加载第三方插件**
+
+进入 `设置 -> 第三方插件`，关闭安全模式，然后再启用插件。
+
+**3. 插件启用后没有右侧预览**
+
+先打开一篇 Markdown 笔记，再点击左侧功能区的公众号预览图标。
+
+**4. 上传草稿箱失败**
+
+上传草稿箱是 Pro 功能，并且需要配置公众号 AppID、AppSecret、默认封面 media_id 和 IP 白名单。免费功能不影响复制排版。
+
+### BRAT 安装方式
+
+如果你已经安装 BRAT，也可以用 BRAT 添加仓库：
+
+```text
+https://github.com/yyhzz985/xuezha985-wechat-publisher
+```
+
+BRAT 适合自动更新；普通用户推荐优先使用上面的手动安装方式。
 
 ## 基础使用
 
