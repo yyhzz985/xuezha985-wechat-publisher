@@ -7,7 +7,8 @@
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-		"test": "node --import tsx --test tests/**/*.test.ts"
+		"test": "node --import tsx --test tests/**/*.test.ts",
+		"package:plugin": "npm run build && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-plugin.ps1"
 	},
 	"keywords": [
 		"obsidian",

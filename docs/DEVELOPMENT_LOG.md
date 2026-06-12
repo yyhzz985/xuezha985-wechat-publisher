@@ -295,3 +295,15 @@
 - 验证：先运行相关测试看到旧实现失败，再实现后运行 `npm test` 62 项通过；`npm run build` 通过；构建产物已同步到 `D:\【仓库】obsidian笔记\X-Note\.obsidian\plugins\xuezha985-wechat-publisher`，未触碰 `data.json`。
 - Review 查 Bug：本次只替换帮助文案来源和帮助面板样式，不改预览、复制、上传、授权、公众号 API 配置逻辑；本地 Markdown 渲染关闭 HTML，避免文档内容直接注入脚本。
 - 第一性原理分析：用户要的是“用这份文档替换帮助文案”，最稳的做法不是再复制一份到代码里，而是让文档成为单一来源。这样后续改文案只动 `docs/plugin-help.md`，减少重复和改漏。
+
+## 2026-06-12 分享发布准备与本地打包
+
+- 新增 `README.md` 作为对外插件使用说明，覆盖插件简介、安装方式、基础使用、专有格式、公众号上传配置、Pro 激活、安全说明和开发命令。
+- 新增 `scripts/package-plugin.ps1`，并在 `package.json` 增加 `npm run package:plugin`。打包流程会先执行生产构建，再把 `manifest.json`、`main.js`、`styles.css` 压缩成 Obsidian 可手动安装的 zip。
+- 打包脚本不覆盖、不删除旧包；如果同版本 zip 已存在，会自动追加时间戳生成新包，避免误删或覆盖。
+- `.gitignore` 增加 `dist/`，打包产物不进入源码仓库；后续上传 GitHub 时，zip 应作为 Release 附件，而不是源码文件。
+- 已生成分享包：`dist/xuezha985-wechat-publisher-0.1.0.zip`，包内仅包含 `manifest.json`、`main.js`、`styles.css` 三个 Obsidian 插件必需文件。
+- 验证：`npm run package:plugin` 通过；zip 内容检查通过；`npm test` 62 项通过。
+- GitHub 状态：本地仓库当前没有 remote；GitHub CLI 已登录。上传 GitHub 属于公开发布动作，需要用户确认目标仓库和公开/私有后再执行 push 或创建仓库。
+- Review 查 Bug：没有把 `dist/`、License CSV、AppSecret、授权 token 等敏感或生成物纳入提交；README 只写使用说明，不泄露本地 `data.json` 配置。
+- 第一性原理分析：别人使用插件只需要源码说明和安装 zip。最小交付是 README + 可复现打包脚本 + release zip，而不是把生成物混进源码提交。

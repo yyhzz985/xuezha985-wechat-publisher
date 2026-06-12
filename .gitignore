@@ -3,6 +3,7 @@ node_modules/
 .playwright-mcp/
 .DS_Store
 npm-debug.log*
+dist/
 worker/licenses-*.csv
 worker/.admin-token.local
 worker/.dev.vars*
