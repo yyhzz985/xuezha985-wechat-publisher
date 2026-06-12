@@ -265,3 +265,13 @@
 - 更新 manifest 元数据测试，锁定展示名和作者。
 - Review 查 Bug：只改 manifest 展示信息和对应测试，不改排版、上传、授权、数据迁移逻辑。
 - 第一性原理分析：用户要改的是插件列表里显示的名字和作者，最小稳定路径是改 manifest 元数据，不改目录名和插件 ID。
+
+## 2026-06-12 预览工具栏图标默认样式精简
+
+- 移除预览顶部功能图标和格式工具栏图标的默认灰底、边框、阴影痕迹。
+- 增加更高优先级的 `button.wechat-publisher-*` 样式，压住 Obsidian 默认 button 样式。
+- 默认状态保持透明背景、透明边框、无阴影；鼠标 hover 时显示边框和轻阴影。
+- 设置按钮打开面板时仍保留激活态背景，但不显示阴影边框。
+- 新增样式测试断言：默认 `background/background-color` 为透明、`background-image` 为 none、`box-shadow` 为 none、`appearance` 为 none。
+- Review 查 Bug：只改 CSS 和样式测试，不改按钮顺序、点击事件、复制、上传、设置、帮助逻辑。
+- 第一性原理分析：用户要的是视觉静默状态，最小修复是覆盖 Obsidian 默认按钮外观，而不是改 DOM 结构或重做工具栏。

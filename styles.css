@@ -95,26 +95,30 @@
 	color: var(--text-on-accent);
 }
 
-.wechat-publisher-format-button {
+button.wechat-publisher-format-button {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	flex: 0 0 auto;
 	width: 24px;
 	height: 24px;
+	min-width: 0;
 	padding: 0;
 	border: 1px solid transparent;
 	border-radius: 5px;
 	background: transparent;
+	background-color: transparent;
+	background-image: none;
 	color: var(--text-normal);
 	box-shadow: none;
+	appearance: none;
 	font-size: 12px;
 	font-weight: 700;
 	line-height: 1;
 	cursor: pointer;
 }
 
-.wechat-publisher-format-button:hover {
+button.wechat-publisher-format-button:hover {
 	background: var(--background-secondary);
 	border-color: var(--background-modifier-border);
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
@@ -125,22 +129,26 @@
 	height: 14px;
 }
 
-.wechat-publisher-icon-button {
+button.wechat-publisher-icon-button {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	width: 28px;
 	height: 28px;
+	min-width: 0;
 	padding: 0;
 	border: 1px solid transparent;
 	border-radius: 5px;
 	background: transparent;
+	background-color: transparent;
+	background-image: none;
 	color: var(--text-muted);
 	box-shadow: none;
+	appearance: none;
 	cursor: pointer;
 }
 
-.wechat-publisher-icon-button:hover {
+button.wechat-publisher-icon-button:hover {
 	background: var(--background-secondary);
 	border-color: var(--background-modifier-border);
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
@@ -154,6 +162,8 @@
 
 .wechat-publisher-icon-button.is-active {
 	background: var(--interactive-accent);
+	border-color: transparent;
+	box-shadow: none;
 	color: var(--text-on-accent);
 }
 

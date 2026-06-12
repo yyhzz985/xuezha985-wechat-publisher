@@ -54,7 +54,11 @@ test('keeps preview toolbar compact until hover', () => {
 	assert.match(toolbarButton, /width:\s*24px/);
 	assert.match(toolbarButton, /height:\s*24px/);
 	assert.match(toolbarButton, /border:\s*1px solid transparent/);
+	assert.match(toolbarButton, /background:\s*transparent/);
+	assert.match(toolbarButton, /background-color:\s*transparent/);
+	assert.match(toolbarButton, /background-image:\s*none/);
 	assert.match(toolbarButton, /box-shadow:\s*none/);
+	assert.match(toolbarButton, /appearance:\s*none/);
 
 	const toolbarButtonHover = cssRule('.wechat-publisher-format-button:hover');
 	assert.match(toolbarButtonHover, /border-color:\s*var\(--background-modifier-border\)/);
@@ -62,7 +66,11 @@ test('keeps preview toolbar compact until hover', () => {
 
 	const iconButton = cssRule('.wechat-publisher-icon-button');
 	assert.match(iconButton, /border:\s*1px solid transparent/);
+	assert.match(iconButton, /background:\s*transparent/);
+	assert.match(iconButton, /background-color:\s*transparent/);
+	assert.match(iconButton, /background-image:\s*none/);
 	assert.match(iconButton, /box-shadow:\s*none/);
+	assert.match(iconButton, /appearance:\s*none/);
 
 	const iconButtonHover = cssRule('.wechat-publisher-icon-button:hover');
 	assert.match(iconButtonHover, /border-color:\s*var\(--background-modifier-border\)/);
