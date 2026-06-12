@@ -10,11 +10,12 @@ const styleUtils = readFileSync('src/utils/styleUtils.ts', 'utf8');
 const entitlementService = readFileSync('src/service/EntitlementService.ts', 'utf8');
 const issueLicenseScript = readFileSync('worker/scripts/issue-license.ps1', 'utf8');
 const worker = readFileSync('worker/src/index.ts', 'utf8');
-const manifest = JSON.parse(readFileSync('manifest.json', 'utf8')) as { id: string; name: string };
+const manifest = JSON.parse(readFileSync('manifest.json', 'utf8')) as { id: string; name: string; author: string };
 
 test('uses a unique plugin id that does not collide with public wechat publisher plugins', () => {
 	assert.equal(manifest.id, 'kenengba-wechat-publisher');
-	assert.equal(manifest.name, '可能吧公众号排版器');
+	assert.equal(manifest.name, '公众号一键排版上传');
+	assert.equal(manifest.author, 'xuezha985');
 	assert.notEqual(manifest.id, 'wechat-publisher');
 	assert.match(previewView, /kenengba-wechat-publisher-preview/);
 	assert.doesNotMatch(previewView, /'wechat-publisher-preview'/);
