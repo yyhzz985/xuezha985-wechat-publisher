@@ -372,7 +372,11 @@ test('renders toc marker from h2 headings', () => {
 	assert.match(result.html, /全文导航/);
 	assert.match(result.html, /class="knb-toc-index"/);
 	assert.match(result.html, /class="knb-toc-track"/);
-	assert.match(result.html, /class="knb-toc-fill"/);
+	assert.doesNotMatch(result.html, /class="knb-toc-fill"/);
+	assert.doesNotMatch(result.html, /class="knb-toc-track" style="[^"]*linear-gradient/);
+	assert.match(result.html, /class="knb-toc-bar"[^>]*width:50%;[^>]*border-top: 3px solid rgb\(41, 148, 128\)[^>]*>&nbsp;<\/span>/);
+	assert.match(result.html, /class="knb-toc-rest"[^>]*width:50%;[^>]*border-top: 3px solid #efefef[^>]*>&nbsp;<\/span>/);
+	assert.match(result.html, /class="knb-toc-bar"[^>]*width:100%;[^>]*border-top: 3px solid rgb\(41, 148, 128\)[^>]*>&nbsp;<\/span>/);
 	assert.match(result.html, /第一章/);
 	assert.match(result.html, /第二章/);
 	assert.equal(result.html.includes('字</span>'), false);

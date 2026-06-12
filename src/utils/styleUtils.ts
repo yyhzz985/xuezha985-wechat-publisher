@@ -78,8 +78,17 @@ export const tocTitleStyle = 'margin: 0 0 0.8em; color: rgb(41, 148, 128); font-
 export const tocRowStyle = 'margin: 0 0 0.7em; padding: 0; box-sizing: border-box;';
 export const tocLineStyle = 'margin: 0 0 0.2em; color: rgb(43, 43, 43); font-size: 14px; line-height: 1.5; letter-spacing: 0;';
 export const tocIndexStyle = 'display: inline-block; min-width: 1.4em; margin-right: 0.45em; color: rgb(41, 148, 128); font-weight: 700;';
-export const tocTrackStyle = 'height: 3px; background: #efefef; overflow: hidden; line-height: 0; font-size: 0;';
-export const tocFillStyle = 'display: block; height: 3px; background: linear-gradient(to right, rgb(41, 148, 128), rgb(73, 200, 149)); line-height: 0; font-size: 0;';
+export const tocTrackStyle = 'height: 3px; min-height: 3px; overflow: hidden; line-height: 0; font-size: 0; white-space: nowrap;';
+
+export function tocBarStyle(progressPercent: number): string {
+	const progress = Math.max(0, Math.min(100, progressPercent));
+	return `display: inline-block; width:${progress}%; height: 0; line-height: 0; font-size: 0; vertical-align: top; border-top: 3px solid rgb(41, 148, 128); box-sizing: border-box; color: transparent;`;
+}
+
+export function tocRestStyle(progressPercent: number): string {
+	const rest = 100 - Math.max(0, Math.min(100, progressPercent));
+	return `display: inline-block; width:${rest}%; height: 0; line-height: 0; font-size: 0; vertical-align: top; border-top: 3px solid #efefef; box-sizing: border-box; color: transparent;`;
+}
 
 export const tableWrapStyle = 'margin: 1.2em 8px; max-width: 100%; overflow-x: auto; box-sizing: border-box;';
 export const tableStyle = 'width: 100%; max-width: 100%; border-collapse: collapse; table-layout: fixed; color: rgb(43, 43, 43); font-size: 15px; line-height: 28px; letter-spacing: 1px;';
@@ -174,7 +183,8 @@ export interface WeChatStyleSet {
 	tocLineStyle: string;
 	tocIndexStyle: string;
 	tocTrackStyle: string;
-	tocFillStyle: string;
+	tocBarStyle(progressPercent: number): string;
+	tocRestStyle(progressPercent: number): string;
 	tableWrapStyle: string;
 	tableStyle: string;
 	tableHeaderCellStyle: string;
@@ -367,7 +377,8 @@ export function createWeChatStyles(settings: PluginSettings): WeChatStyleSet {
 		tocLineStyle: withContentWeight(applyPalette(tocLineStyle, palette), contentWeight),
 		tocIndexStyle: withHeadingWeight(applyPalette(tocIndexStyle, palette), headingWeight),
 		tocTrackStyle,
-		tocFillStyle: applyPalette(tocFillStyle, palette),
+		tocBarStyle: (progressPercent: number) => applyPalette(tocBarStyle(progressPercent), palette),
+		tocRestStyle,
 		tableWrapStyle,
 		tableStyle: withContentWeight(applyPalette(tableStyle, palette), contentWeight),
 		tableHeaderCellStyle: withHeadingWeight(applyPalette(tableHeaderCellStyle, palette), headingWeight),

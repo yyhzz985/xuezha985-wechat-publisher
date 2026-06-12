@@ -334,3 +334,13 @@
 - 验证：`npm test` 68 项通过；`npm run build` 通过。
 - Review 查 Bug：本次只改 Markdown 到公众号 HTML 的渲染链路和对应样式，没有改上传、授权、设置、帮助、GitHub 发布逻辑；脚注只支持当前排版器需要的单行定义，避免为未使用的复杂多行脚注增加解析复杂度。
 - 第一性原理分析：这些问题的根因不是预览 CSS 单点偏差，而是 Markdown 解析阶段缺少对应语法能力。最稳路径是在 Service 层补齐语法转换，在 Utils 样式层补齐可复用样式，而不是在 View 层做显示后处理。
+
+## 2026-06-12 目录长度条公众号草稿箱兼容修复
+
+- 修复 `[TOC]` 全文导航上传到公众号草稿箱后长度条只剩灰线的问题。
+- 根因：旧目录长度条依赖空 `span.knb-toc-fill`、`width` 和 `linear-gradient`，插件预览可见，但微信公众号草稿箱会过滤或弱化这类结构/样式。
+- 新实现：目录轨道内输出非空 `span.knb-toc-bar` 和 `span.knb-toc-rest`，使用基础 `border-top` 画绿色长度段和灰色剩余段，不再依赖渐变背景。
+- 新增回归测试：目录轨道不允许出现 `knb-toc-fill`，不允许在 `knb-toc-track` 上使用 `linear-gradient`，并断言 50%/100% 长度段用 `border-top` 输出。
+- 验证：先看到目录单测红灯，再实现后通过；`npm test` 68 项通过；`npm run build` 通过；构建产物已同步到 `D:\【仓库】obsidian笔记\X-Note\.obsidian\plugins\xuezha985-wechat-publisher`，未触碰 `data.json`。
+- Review 查 Bug：只改目录渲染和目录样式，不改上传、授权、帮助、普通 H2/H3 进度条和公众号 API 链路。
+- 第一性原理分析：用户最终看到的是公众号草稿箱结果，不是插件预览。最稳做法是用公众号更容易保留的基础 HTML/CSS 表达长度条，而不是继续调整预览里可见但草稿箱可能过滤的 CSS。

@@ -564,7 +564,7 @@ export class WeChatFormatService {
 				return [
 					`<section style="${styles.tocRowStyle}">`,
 					`<p style="${styles.tocLineStyle}"><span class="knb-toc-index" style="${styles.tocIndexStyle}">${index + 1}</span>${this.renderPlainInline(entry.title)}</p>`,
-					`<section class="knb-toc-track" style="${styles.tocTrackStyle}"><span class="knb-toc-fill" style="${styles.tocFillStyle} width:${width}%;"></span></section>`,
+					`<section class="knb-toc-track" style="${styles.tocTrackStyle}"><span class="knb-toc-bar" style="${styles.tocBarStyle(width)}">&nbsp;</span><span class="knb-toc-rest" style="${styles.tocRestStyle(width)}">&nbsp;</span></section>`,
 					'</section>',
 				].join('');
 			})
