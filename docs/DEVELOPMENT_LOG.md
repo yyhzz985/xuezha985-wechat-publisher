@@ -319,3 +319,18 @@
 - 验证：`npm test` 62 项通过；`npm run build` 通过；release zip 内容检查通过，包内仅包含 `manifest.json`、`main.js`、`styles.css`。
 - Review 查 Bug：没有把 `dist/` 安装包提交进源码仓库；公开仓库不包含 `data.json`、公众号 `AppSecret`、License CSV 或本地授权 token；Release 只上传面向用户安装的 zip。
 - 第一性原理分析：给别人使用插件，最直接路径是公开源码仓库 + Release 安装包 + README 安装步骤。用户不应该从源码构建，也不应该手动找构建产物，所以下载入口必须指向 Release 附件。
+
+## 2026-06-12 可能吧细节渲染补齐
+
+- 新增 Shiki 代码高亮渲染：围栏代码块会按语言自动高亮，保留深色/亮色代码主题、行号、横向滚动和微信公众号可粘贴的内联样式。
+- 新增 `markdown-it-emoji` 支持：`:smile:`、`:rocket:`、`:sparkles:`、`:tada:`、`:star:` 等 emoji 短代码会在预览和复制 HTML 中显示为表情。
+- 修复手写专有容器解析：支持 `::: tip 内容 :::`、`::: warning`、`::: note`、`::: say`、`::: chat` 等带空格和单行写法，不再只有点击工具栏插入的格式可预览。
+- 图片渲染改为图片块：Markdown 图片会包成图片 + 下方说明文字，图片 alt 文本显示为图注。
+- 外链渲染改为可能吧风格：公众号内链继续保留可点击链接，普通外链仍改写为 `文字（URL）`，并给文字和 URL 使用蓝色样式。
+- 新增脚注抽取：正文中的 `[^1]` 显示为绿色上标，文末统一追加脚注列表，避免 markdown-it 把脚注误判为链接引用后出现 URL 编码串。
+- 分割线样式调整为可能吧的浅灰实线，不再使用绿色虚线。
+- TypeScript `moduleResolution` 改为 `Bundler`，让项目能正确解析 Shiki 的 ESM 类型导出。
+- 新增/更新格式服务测试，覆盖 Shiki 高亮、容器、外链、图片图注、emoji、脚注和分割线。
+- 验证：`npm test` 68 项通过；`npm run build` 通过。
+- Review 查 Bug：本次只改 Markdown 到公众号 HTML 的渲染链路和对应样式，没有改上传、授权、设置、帮助、GitHub 发布逻辑；脚注只支持当前排版器需要的单行定义，避免为未使用的复杂多行脚注增加解析复杂度。
+- 第一性原理分析：这些问题的根因不是预览 CSS 单点偏差，而是 Markdown 解析阶段缺少对应语法能力。最稳路径是在 Service 层补齐语法转换，在 Utils 样式层补齐可复用样式，而不是在 View 层做显示后处理。

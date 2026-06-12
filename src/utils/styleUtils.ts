@@ -34,6 +34,8 @@ export const listItemStyle = 'margin: 0.4em 0; line-height: 28px;';
 export const listItemContentStyle = 'color: rgb(43, 43, 43); font-size: 15px; line-height: 28px; letter-spacing: 1px;';
 
 export const linkStyle = 'color: rgb(41, 148, 128); text-decoration: none; border-bottom: 1px solid rgba(41, 148, 128, 0.25);';
+export const externalLinkTextStyle = 'color: #2f63b7; text-decoration: none;';
+export const externalLinkUrlStyle = 'color: #2f63b7; text-decoration: none; letter-spacing: 0;';
 
 export const inlineCodeStyle = 'margin: 0 2px; padding: 2px 5px; border-radius: 4px; background: rgba(41, 148, 128, 0.08); color: rgb(41, 148, 128); font-size: 14px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;';
 
@@ -54,10 +56,14 @@ export function codeTagStyle(widthPx: number): string {
 }
 
 export const codeLineTextStyle = 'margin: 0; padding: 0; color: inherit; font-size: 13px; line-height: 19px; letter-spacing: 0; text-align: left; white-space: nowrap; word-break: keep-all; overflow-wrap: normal;';
+export const codeLineNumberStyle = 'display: inline-block; width: 2.2em; margin-right: 0.8em; color: #6a737d; text-align: right; user-select: none;';
+export const codeLineContentStyle = 'display: inline; color: inherit;';
 
-export const imageStyle = 'display: block; max-width: 100%; margin: 1.2em auto; border-radius: 0;';
+export const imageFigureStyle = 'margin: 1.2em 8px; padding: 0; text-align: center;';
+export const imageStyle = 'display: block; max-width: 100%; margin: 0 auto; border-radius: 0;';
+export const imageCaptionStyle = 'margin: 0.45em 0 0; color: #8a8a8a; font-size: 13px; line-height: 1.6; text-align: center; letter-spacing: 0;';
 
-export const hrStyle = 'margin: 2em 8px; border: 0; border-top: 1px dashed rgb(41, 148, 128);';
+export const hrStyle = 'margin: 2em 8px; border: 0; border-top: 1px solid #e5e5e5;';
 
 export const introStyle = 'margin: 1.6em 8px 2em; padding: 0.9em 0.4em; border: 0; border-top: 1px dashed rgb(41, 148, 128); border-bottom: 1px dashed rgb(41, 148, 128); border-radius: 0; background: transparent;';
 export const introParagraphStyle = 'margin: 0.3em 0; color: rgb(60, 90, 80); font-size: 15px; line-height: 1.85; letter-spacing: 0.04em; text-align: left;';
@@ -92,6 +98,10 @@ export const chatStyle = 'margin: 1.4em 8px; padding: 0;';
 export const chatSpeakerStyle = 'margin: 0.7em 0 0.15em; color: rgb(41, 148, 128); font-size: 14px; line-height: 1.7; font-weight: 700; letter-spacing: 1px;';
 export const chatTextStyle = 'margin: 0 0 0.55em; color: rgb(43, 43, 43); font-size: 15px; line-height: 1.8; letter-spacing: 1px; text-align: left;';
 export const chatIconStyle = 'display: inline-block; margin: 0 5px 0 0; color: rgb(43, 43, 43); font-size: 13px; line-height: 1; vertical-align: -1px;';
+
+export const footnoteRefStyle = 'margin: 0 1px; color: rgb(41, 148, 128); font-size: 12px; line-height: 1; vertical-align: super;';
+export const footnotesStyle = 'margin: 2em 8px 0; padding: 1.2em 0 0; border-top: 1px solid #e5e5e5; color: #777; font-size: 13px; line-height: 1.8; letter-spacing: 0;';
+export const footnoteItemStyle = 'margin: 0.4em 0; color: #777; font-size: 13px; line-height: 1.8; letter-spacing: 0; text-align: left;';
 
 export const readingTimeStyle = 'text-align: center; margin: 0 8px 1.6em; font-size: 0; box-sizing: border-box;';
 export const readingAuthorCardStyle = 'display: inline-block; vertical-align: middle; padding: 8px 5px; width: 50%; box-sizing: border-box; text-align: center; border-right: 1px solid #66CCC5;';
@@ -137,6 +147,8 @@ export interface WeChatStyleSet {
 	listItemStyle: string;
 	listItemContentStyle: string;
 	linkStyle: string;
+	externalLinkTextStyle: string;
+	externalLinkUrlStyle: string;
 	inlineCodeStyle: string;
 	markStyle: string;
 	underlineStyle: string;
@@ -144,7 +156,11 @@ export interface WeChatStyleSet {
 	codeScrollerStyle: string;
 	codeTagStyle(widthPx: number): string;
 	codeLineTextStyle: string;
+	codeLineNumberStyle: string;
+	codeLineContentStyle: string;
+	imageFigureStyle: string;
 	imageStyle: string;
+	imageCaptionStyle: string;
 	hrStyle: string;
 	introStyle: string;
 	introParagraphStyle: string;
@@ -170,6 +186,9 @@ export interface WeChatStyleSet {
 	chatSpeakerStyle: string;
 	chatTextStyle: string;
 	chatIconStyle: string;
+	footnoteRefStyle: string;
+	footnotesStyle: string;
+	footnoteItemStyle: string;
 	readingTimeStyle: string;
 	readingAuthorCardStyle: string;
 	readingAuthorNameStyle: string;
@@ -321,6 +340,8 @@ export function createWeChatStyles(settings: PluginSettings): WeChatStyleSet {
 		listItemStyle,
 		listItemContentStyle: withContentWeight(applyPalette(listItemContentStyle, palette), contentWeight),
 		linkStyle: applyPalette(linkStyle, palette),
+		externalLinkTextStyle,
+		externalLinkUrlStyle,
 		inlineCodeStyle: applyPalette(inlineCodeStyle, palette),
 		markStyle: applyPalette(markStyle, palette),
 		underlineStyle: applyPalette(underlineStyle, palette),
@@ -328,7 +349,11 @@ export function createWeChatStyles(settings: PluginSettings): WeChatStyleSet {
 		codeScrollerStyle,
 		codeTagStyle,
 		codeLineTextStyle,
+		codeLineNumberStyle,
+		codeLineContentStyle,
+		imageFigureStyle,
 		imageStyle,
+		imageCaptionStyle,
 		hrStyle: applyPalette(hrStyle, palette),
 		introStyle: applyPalette(introStyle, palette),
 		introParagraphStyle: applyPalette(introParagraphStyle, palette),
@@ -354,6 +379,9 @@ export function createWeChatStyles(settings: PluginSettings): WeChatStyleSet {
 		chatSpeakerStyle: withHeadingWeight(applyPalette(chatSpeakerStyle, palette), headingWeight),
 		chatTextStyle: withContentWeight(applyPalette(chatTextStyle, palette), contentWeight),
 		chatIconStyle,
+		footnoteRefStyle: applyPalette(footnoteRefStyle, palette),
+		footnotesStyle,
+		footnoteItemStyle,
 		readingTimeStyle,
 		readingAuthorCardStyle: applyPalette(readingAuthorCardStyle, palette),
 		readingAuthorNameStyle: applyPalette(readingAuthorNameStyle, palette),

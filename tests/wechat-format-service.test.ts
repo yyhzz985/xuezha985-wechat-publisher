@@ -155,7 +155,9 @@ test('keeps wechat links and rewrites external links', () => {
 
 	assert.match(result.html, /href="https:\/\/mp\.weixin\.qq\.com\/s\/example"/);
 	assert.equal(result.html.includes('href="https://example.com/path"'), false);
-	assert.match(result.html, /外链（https:\/\/example\.com\/path）/);
+	assert.match(result.html, /class="knb-external-link-text"/);
+	assert.match(result.html, /class="knb-external-link-url"/);
+	assert.match(result.html, /https:\/\/example\.com\/path/);
 });
 
 test('adds reading meta when enabled', () => {
@@ -178,7 +180,8 @@ test('escapes fenced code block html', () => {
 	const result = service.format('```html\n<div>hi</div>\n```', DEFAULT_SETTINGS);
 
 	assert.equal(result.html.includes('<div>hi</div>'), false);
-	assert.match(result.html, /&lt;div&gt;hi&lt;\/div&gt;/);
+	assert.match(result.html, /&lt;/);
+	assert.match(result.html, /&gt;hi&lt;\//);
 });
 
 test('renders fenced code blocks with horizontal scrolling and line numbers', () => {
@@ -206,10 +209,34 @@ my-app/
 	assert.match(result.html, /class="code-scroll-area"/);
 	assert.equal(result.html.includes('class="code-scrollbar-track"'), false);
 	assert.equal(result.html.includes('class="code-scrollbar-thumb"'), false);
-	assert.match(result.html, /1&nbsp;&nbsp;my-app\//);
-	assert.match(result.html, /2&nbsp;&nbsp;.*public\//);
+	assert.match(result.html, /class="code-line-number"[^>]*>1<\/span>/);
+	assert.match(result.html, /class="code-line-content"[^>]*>my-app\//);
+	assert.match(result.html, /class="code-line-number"[^>]*>2<\/span>/);
+	assert.match(result.html, /public\//);
 	assert.equal(result.html.includes('class="line-no"'), false);
 	assert.equal(result.html.includes('display: inline-block; min-width: max-content'), false);
+});
+
+test('renders shiki syntax highlighting for fenced code blocks', () => {
+	const service = new WeChatFormatService();
+	const result = service.format(`\`\`\`js
+function greet(name) {
+  return \`Hello, ${'${name}'}!\`
+}
+
+console.log(greet('世界'))
+\`\`\`
+`, {
+		...DEFAULT_SETTINGS,
+		codeTheme: 'dark',
+	});
+
+	assert.match(result.html, /class="shiki github-dark"/);
+	assert.match(result.html, /class="code-line-number"/);
+	assert.match(result.html, />1<\/span>/);
+	assert.match(result.html, /style="color:#F97583">function<\/span>/);
+	assert.match(result.html, /style="color:#B392F0">greet<\/span>/);
+	assert.match(result.html, /console\./);
 });
 
 test('renders obsidian image embeds as article images', () => {
@@ -217,6 +244,16 @@ test('renders obsidian image embeds as article images', () => {
 	const result = service.format('![[attachments/photo one.png|封面图]]', DEFAULT_SETTINGS);
 
 	assert.match(result.html, /<img src="attachments\/photo%20one\.png" alt="封面图"/);
+});
+
+test('renders image captions below markdown images', () => {
+	const service = new WeChatFormatService();
+	const result = service.format('![一张示例图片](https://mp.knb.im/light.jpg)', DEFAULT_SETTINGS);
+
+	assert.match(result.html, /class="knb-image-figure"/);
+	assert.match(result.html, /<img src="https:\/\/mp\.knb\.im\/light\.jpg" alt="一张示例图片"/);
+	assert.match(result.html, /class="knb-image-caption"/);
+	assert.match(result.html, />一张示例图片<\/p>/);
 });
 
 test('renders knb special containers', () => {
@@ -272,6 +309,38 @@ test('renders knb special containers', () => {
 	assert.equal((result.html.match(/>🗨️<\/span>/g) ?? []).length, 1);
 });
 
+test('renders spaced and single-line knb special containers', () => {
+	const service = new WeChatFormatService();
+	const result = service.format(`::: tip 这是一段 tip 提示。 :::
+
+::: warning
+这是一段 warning 警告，里面也可以有 **加粗**。
+:::
+
+::: note 这是一段 note 笔记。 :::
+
+::: say 在这里写一段独白 :::
+
+::: chat
+我: 对话内容
+你: 对话内容
+:::
+`, DEFAULT_SETTINGS);
+
+	assert.match(result.html, /knb-callout-tip/);
+	assert.match(result.html, /💡 提示/);
+	assert.match(result.html, /这是一段 tip 提示/);
+	assert.match(result.html, /knb-callout-warning/);
+	assert.match(result.html, /⚠️ 注意/);
+	assert.match(result.html, /<strong/);
+	assert.match(result.html, /knb-callout-note/);
+	assert.match(result.html, /📝 笔记/);
+	assert.match(result.html, /knb-callout-say/);
+	assert.match(result.html, /💬 说/);
+	assert.match(result.html, /class="knb-chat-icon knb-chat-icon-0"[^>]*>💬<\/span>/);
+	assert.match(result.html, /class="knb-chat-icon knb-chat-icon-1"[^>]*>🗨️<\/span>/);
+});
+
 test('keeps markdown tables inside article margins', () => {
 	const service = new WeChatFormatService();
 	const result = service.format(`| 文件 | 作用 |
@@ -323,4 +392,56 @@ test('renders knb inline extensions and task list', () => {
 	assert.match(result.html, /<sup/);
 	assert.match(result.html, /✅/);
 	assert.match(result.html, /⬜/);
+});
+
+test('renders external links with styled url text and keeps wechat links clickable', () => {
+	const service = new WeChatFormatService();
+	const result = service.format(
+		`公众号内链 [阅读原文](https://mp.weixin.qq.com/s/example) 会保留。
+
+外站链接：[可能吧](https://kenengba.com) 会改写。`,
+		DEFAULT_SETTINGS,
+	);
+
+	assert.match(result.html, /href="https:\/\/mp\.weixin\.qq\.com\/s\/example"/);
+	assert.equal(result.html.includes('href="https://kenengba.com"'), false);
+	assert.match(result.html, /class="knb-external-link-text"/);
+	assert.match(result.html, /class="knb-external-link-url"/);
+	assert.match(result.html, /可能吧/);
+	assert.match(result.html, /https:\/\/kenengba\.com/);
+});
+
+test('renders emoji shortcodes and footnotes like possible-bar preview', () => {
+	const service = new WeChatFormatService();
+	const result = service.format(`写文章可以用 emoji 短代码： :smile: :rocket: :sparkles: :tada: :star:
+
+这里有一处需要解释的概念[^1]，文末会自动汇总脚注列表[^2]。
+
+[^1]: 脚注在文末以独立列表形式出现。
+[^2]: 另一个脚注在文末以独立列表形式出现。
+`, DEFAULT_SETTINGS);
+
+	assert.match(result.html, /😄|😃|😊/);
+	assert.match(result.html, /🚀/);
+	assert.match(result.html, /✨/);
+	assert.match(result.html, /🎉/);
+	assert.match(result.html, /⭐/);
+	assert.match(result.html, /class="knb-footnote-ref"[^>]*>\[1\]<\/sup>/);
+	assert.match(result.html, /class="knb-footnotes"/);
+	assert.match(result.html, /\[1\] 脚注在文末以独立列表形式出现。/);
+	assert.match(result.html, /\[2\] 另一个脚注在文末以独立列表形式出现。/);
+	assert.equal(result.html.includes('%E8%84%9A'), false);
+});
+
+test('renders horizontal rules as subtle solid separators', () => {
+	const service = new WeChatFormatService();
+	const result = service.format(`## 分割线
+
+---
+
+## 写完后怎么办
+`, DEFAULT_SETTINGS);
+
+	assert.match(result.html, /<hr style="[^"]*border-top: 1px solid #e5e5e5/);
+	assert.equal(result.html.includes('border-top: 1px dashed rgb(41, 148, 128)'), false);
 });

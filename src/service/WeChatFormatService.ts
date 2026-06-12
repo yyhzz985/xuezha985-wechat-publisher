@@ -1,6 +1,23 @@
 import MarkdownIt from 'markdown-it';
 import type Token from 'markdown-it/lib/token.mjs';
 import type { RenderRule } from 'markdown-it/lib/renderer.mjs';
+import { createHighlighterCoreSync, type HighlighterCore } from 'shiki/core';
+import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
+import javascript from 'shiki/langs/javascript.mjs';
+import typescript from 'shiki/langs/typescript.mjs';
+import jsx from 'shiki/langs/jsx.mjs';
+import tsx from 'shiki/langs/tsx.mjs';
+import json from 'shiki/langs/json.mjs';
+import html from 'shiki/langs/html.mjs';
+import css from 'shiki/langs/css.mjs';
+import markdownLang from 'shiki/langs/markdown.mjs';
+import bash from 'shiki/langs/bash.mjs';
+import shellscript from 'shiki/langs/shellscript.mjs';
+import yaml from 'shiki/langs/yaml.mjs';
+import python from 'shiki/langs/python.mjs';
+import githubDark from 'shiki/themes/github-dark.mjs';
+import githubLight from 'shiki/themes/github-light.mjs';
+import { full as emojiPlugin } from 'markdown-it-emoji';
 import type { CodeTheme, PluginSettings } from '../settings';
 import { isWeChatLink } from '../utils/linkUtils';
 import { normalizeObsidianImageEmbeds } from '../utils/obsidianImageUtils';
@@ -40,8 +57,68 @@ type BlockState = {
 };
 
 type ChatRoleIconMap = Map<string, number>;
+type FootnoteNumberMap = Map<string, number>;
+
+interface FootnoteEntry {
+	id: string;
+	number: number;
+	content: string;
+}
+
+interface MarkdownFootnoteExtraction {
+	markdown: string;
+	footnotes: FootnoteEntry[];
+}
+
+type ShikiToken = {
+	content: string;
+	color?: string;
+	fontStyle?: number;
+};
+
+type ShikiTokenLine = ShikiToken[];
+
 const CHAT_ICON_SYMBOLS = ['💬', '🗨️'];
 const CHAT_ICON_VARIANT_COUNT = CHAT_ICON_SYMBOLS.length;
+
+const CODE_LANGUAGE_ALIASES: Record<string, string> = {
+	js: 'javascript',
+	javascript: 'javascript',
+	mjs: 'javascript',
+	cjs: 'javascript',
+	ts: 'typescript',
+	typescript: 'typescript',
+	jsx: 'jsx',
+	tsx: 'tsx',
+	json: 'json',
+	html: 'html',
+	xml: 'html',
+	css: 'css',
+	md: 'markdown',
+	markdown: 'markdown',
+	bash: 'bash',
+	sh: 'shellscript',
+	shell: 'shellscript',
+	zsh: 'shellscript',
+	yml: 'yaml',
+	yaml: 'yaml',
+	py: 'python',
+	python: 'python',
+};
+
+let shikiHighlighter: HighlighterCore | null = null;
+
+function getShikiHighlighter(): HighlighterCore {
+	if (!shikiHighlighter) {
+		shikiHighlighter = createHighlighterCoreSync({
+			themes: [githubDark, githubLight],
+			langs: [javascript, typescript, jsx, tsx, json, html, css, markdownLang, bash, shellscript, yaml, python],
+			engine: createJavaScriptRegexEngine(),
+		});
+	}
+
+	return shikiHighlighter;
+}
 
 const CONTAINER_TITLES: Record<string, { icon: string; title: string }> = {
 	tip: { icon: '💡', title: '提示' },
@@ -55,15 +132,17 @@ const CONTAINER_TITLES: Record<string, { icon: string; title: string }> = {
 export class WeChatFormatService {
 	format(markdown: string, settings: PluginSettings): FormattedWeChatArticle {
 		const cleanedMarkdown = normalizeObsidianImageEmbeds(removeYamlFrontmatter(markdown)).trim();
-		const tocEntries = this.extractToc(cleanedMarkdown);
+		const footnoteExtraction = this.extractFootnotes(cleanedMarkdown);
+		const tocEntries = this.extractToc(footnoteExtraction.markdown);
 		const styles = createWeChatStyles(settings);
-		const renderer = this.createRenderer(settings, tocEntries, styles);
-		const bodyHtml = renderer.render(cleanedMarkdown);
-		const plainText = htmlToPlainText(bodyHtml);
+		const renderer = this.createRenderer(settings, tocEntries, styles, footnoteExtraction.footnotes);
+		const bodyHtml = renderer.render(footnoteExtraction.markdown);
+		const footnotesHtml = this.renderFootnotes(footnoteExtraction.footnotes, renderer, styles);
+		const plainText = htmlToPlainText(bodyHtml + footnotesHtml);
 		const metaHtml = settings.showReadingTime
 			? this.renderReadingMeta(settings, plainText, styles)
 			: '';
-		const html = `<section class="wechat-markdown-root" style="${styles.articleStyle}">${metaHtml}${bodyHtml}</section>`;
+		const html = `<section class="wechat-markdown-root" style="${styles.articleStyle}">${metaHtml}${bodyHtml}${footnotesHtml}</section>`;
 
 		return {
 			html,
@@ -71,7 +150,12 @@ export class WeChatFormatService {
 		};
 	}
 
-	private createRenderer(settings: PluginSettings, tocEntries: TocEntry[], styles: WeChatStyleSet): MarkdownIt {
+	private createRenderer(
+		settings: PluginSettings,
+		tocEntries: TocEntry[],
+		styles: WeChatStyleSet,
+		footnotes: FootnoteEntry[],
+	): MarkdownIt {
 		let h2Index = 0;
 		let activeH2Index = 0;
 		let h3IndexInSection = 0;
@@ -83,11 +167,13 @@ export class WeChatFormatService {
 			typographer: false,
 		});
 		const chatRoleIcons: ChatRoleIconMap = new Map();
+		const footnoteNumbers: FootnoteNumberMap = new Map(footnotes.map((entry) => [entry.id, entry.number]));
 
+		md.use(emojiPlugin);
 		this.registerContainerRule(md);
 		this.registerTocRule(md);
 
-		md.renderer.rules.text = (tokens, index) => this.renderText(tokens[index].content, styles);
+		md.renderer.rules.text = (tokens, index) => this.renderText(tokens[index].content, styles, footnoteNumbers);
 
 		md.renderer.rules.paragraph_open = () => `<p style="${blockquoteDepth > 0 ? styles.blockquoteParagraphStyle : styles.paragraphStyle}">`;
 		md.renderer.rules.paragraph_close = () => '</p>';
@@ -178,7 +264,7 @@ export class WeChatFormatService {
 			const href = tokens[index].attrGet('href') ?? '';
 			if (!isWeChatLink(href)) {
 				externalLinks.push(href);
-				return '';
+				return `<span class="knb-external-link-text" style="${styles.externalLinkTextStyle}">`;
 			}
 			return `<a href="${escapeHtml(href)}" style="${styles.linkStyle}">`;
 		};
@@ -186,7 +272,7 @@ export class WeChatFormatService {
 		md.renderer.rules.link_close = () => {
 			const href = externalLinks.pop();
 			if (href !== undefined) {
-				return `（${escapeHtml(href)}）`;
+				return `</span>（<span class="knb-external-link-url" style="${styles.externalLinkUrlStyle}">${escapeHtml(href)}</span>）`;
 			}
 			return '</a>';
 		};
@@ -194,10 +280,11 @@ export class WeChatFormatService {
 		md.renderer.rules.image = (tokens, index) => this.renderImage(tokens[index], styles);
 		md.renderer.rules.code_inline = (tokens, index) =>
 			`<code style="${styles.inlineCodeStyle}">${this.renderPlainInline(tokens[index].content)}</code>`;
-		md.renderer.rules.fence = (tokens, index) => this.renderCodeBlock(tokens[index].content, settings.codeTheme, styles);
+		md.renderer.rules.fence = (tokens, index) =>
+			this.renderCodeBlock(tokens[index].content, tokens[index].info, settings.codeTheme, styles);
 		md.renderer.rules.code_block = md.renderer.rules.fence as RenderRule;
 		md.renderer.rules.knb_container = (tokens, index) =>
-			this.renderContainer(tokens[index].info, tokens[index].content, md, styles, chatRoleIcons);
+			this.renderContainer(tokens[index].info, tokens[index].content, md, styles, chatRoleIcons, footnoteNumbers);
 		md.renderer.rules.knb_toc = () => this.renderToc(tocEntries, styles);
 
 		return md;
@@ -208,11 +295,22 @@ export class WeChatFormatService {
 			const start = state.bMarks[startLine] + state.tShift[startLine];
 			const end = state.eMarks[startLine];
 			const marker = state.src.slice(start, end).trim();
-			const match = marker.match(/^:::(intro|highlight|tip|info|note|warning|danger|say|chat)\s*$/);
+			const match = marker.match(/^:::\s*(intro|highlight|tip|info|note|warning|danger|say|chat)(?:\s+(.*))?$/);
 			if (!match) {
 				return false;
 			}
 			if (silent) {
+				return true;
+			}
+
+			const inlineContent = (match[2] ?? '').trim();
+			const inlineCloseMatch = inlineContent.match(/^(.*?)\s*:::\s*$/);
+			if (inlineCloseMatch) {
+				const token = state.push('knb_container', '', 0);
+				token.info = match[1];
+				token.content = inlineCloseMatch[1].trim();
+				token.map = [startLine, startLine + 1];
+				state.line = startLine + 1;
 				return true;
 			}
 
@@ -230,7 +328,10 @@ export class WeChatFormatService {
 			const contentEnd = nextLine < endLine ? state.bMarks[nextLine] : state.eMarks[endLine - 1];
 			const token = state.push('knb_container', '', 0);
 			token.info = match[1];
-			token.content = state.src.slice(contentStart, contentEnd).trim();
+			token.content = [inlineContent, state.src.slice(contentStart, contentEnd).trim()]
+				.filter(Boolean)
+				.join('\n')
+				.replace(/\s*:::\s*$/, '');
 			token.map = [startLine, Math.min(nextLine + 1, endLine)];
 			state.line = Math.min(nextLine + 1, endLine);
 			return true;
@@ -255,15 +356,24 @@ export class WeChatFormatService {
 		});
 	}
 
-	private renderText(text: string, styles: WeChatStyleSet): string {
+	private renderText(text: string, styles: WeChatStyleSet, footnoteNumbers: FootnoteNumberMap): string {
 		const value = this.renderPlainInline(text);
 		return value
+			.replace(/\[\^([^\]]+)\]/g, (_match, id: string) => this.renderFootnoteReference(id, footnoteNumbers, styles))
 			.replace(/==(.+?)==/g, `<mark style="${styles.markStyle}">$1</mark>`)
 			.replace(/\+\+(.+?)\+\+/g, `<u style="${styles.underlineStyle}">$1</u>`)
 			.replace(/~([^~]+?)~/g, '<sub>$1</sub>')
 			.replace(/\^([^^]+?)\^/g, '<sup>$1</sup>')
 			.replace(/^\[x\]\s+/i, '✅ ')
 			.replace(/^\[\s\]\s+/, '⬜ ');
+	}
+
+	private renderFootnoteReference(id: string, footnoteNumbers: FootnoteNumberMap, styles: WeChatStyleSet): string {
+		const number = footnoteNumbers.get(id);
+		if (!number) {
+			return `[^${escapeHtml(id)}]`;
+		}
+		return `<sup class="knb-footnote-ref" style="${styles.footnoteRefStyle}">[${number}]</sup>`;
 	}
 
 	private renderPlainInline(text: string): string {
@@ -286,15 +396,27 @@ export class WeChatFormatService {
 	private renderImage(token: Token, styles: WeChatStyleSet): string {
 		const src = token.attrGet('src') ?? '';
 		const alt = token.content ? ` alt="${this.renderPlainInline(token.content)}"` : '';
-		return `<img src="${escapeHtml(src)}"${alt} style="${styles.imageStyle}">`;
+		const caption = token.content
+			? `<p class="knb-image-caption" style="${styles.imageCaptionStyle}">${this.renderPlainInline(token.content)}</p>`
+			: '';
+		return `<section class="knb-image-figure" style="${styles.imageFigureStyle}"><img src="${escapeHtml(src)}"${alt} style="${styles.imageStyle}">${caption}</section>`;
 	}
 
-	private renderCodeBlock(content: string, theme: CodeTheme, styles: WeChatStyleSet): string {
+	private renderCodeBlock(content: string, info: string, theme: CodeTheme, styles: WeChatStyleSet): string {
 		const lines = content.replace(/\n$/, '').split('\n');
 		const numberWidth = String(lines.length).length;
+		const highlightedLines = this.highlightCodeLines(content, info, theme);
 		const rows = lines
-			.map((line, index) => `${String(index + 1).padStart(numberWidth, ' ')}  ${line}`)
-			.map((line) => `<p style="${styles.codeLineTextStyle}">${escapeHtmlPreservingSpaces(line)}</p>`)
+			.map((line, index) => {
+				const lineNumber = String(index + 1).padStart(numberWidth, ' ');
+				const lineContent = highlightedLines[index] ?? escapeHtmlPreservingSpaces(line);
+				return [
+					`<p style="${styles.codeLineTextStyle}">`,
+					`<span class="code-line-number" style="${styles.codeLineNumberStyle}">${lineNumber}</span>`,
+					`<span class="code-line-content" style="${styles.codeLineContentStyle}">${lineContent}</span>`,
+					'</p>',
+				].join('');
+			})
 			.join('');
 		const codeWidthPx = Math.max(
 			360,
@@ -311,12 +433,57 @@ export class WeChatFormatService {
 		].join('');
 	}
 
+	private highlightCodeLines(content: string, info: string, theme: CodeTheme): string[] {
+		const lang = this.normalizeCodeLanguage(info);
+		if (!lang) {
+			return content.replace(/\n$/, '').split('\n').map((line) => escapeHtmlPreservingSpaces(line));
+		}
+
+		try {
+			const highlighter = getShikiHighlighter();
+			const tokenLines = highlighter.codeToTokens(content.replace(/\n$/, ''), {
+				lang,
+				theme: theme === 'dark' ? 'github-dark' : 'github-light',
+			}).tokens as ShikiTokenLine[];
+			return tokenLines.map((line) => line.map((token) => this.renderShikiToken(token)).join(''));
+		} catch {
+			return content.replace(/\n$/, '').split('\n').map((line) => escapeHtmlPreservingSpaces(line));
+		}
+	}
+
+	private normalizeCodeLanguage(info: string): string | null {
+		const language = info.trim().split(/\s+/)[0]?.toLowerCase();
+		if (!language) {
+			return null;
+		}
+		return CODE_LANGUAGE_ALIASES[language] ?? null;
+	}
+
+	private renderShikiToken(token: ShikiToken): string {
+		const styles: string[] = [];
+		if (token.color) {
+			styles.push(`color:${token.color.toUpperCase()}`);
+		}
+		if (token.fontStyle !== undefined && (token.fontStyle & 1) === 1) {
+			styles.push('font-style:italic');
+		}
+		if (token.fontStyle !== undefined && (token.fontStyle & 2) === 2) {
+			styles.push('font-weight:700');
+		}
+		if (token.fontStyle !== undefined && (token.fontStyle & 4) === 4) {
+			styles.push('text-decoration:underline');
+		}
+		const styleAttr = styles.length > 0 ? ` style="${styles.join(';')}"` : '';
+		return `<span${styleAttr}>${escapeHtmlPreservingSpaces(token.content)}</span>`;
+	}
+
 	private renderContainer(
 		type: string,
 		content: string,
 		md: MarkdownIt,
 		styles: WeChatStyleSet,
 		chatRoleIcons: ChatRoleIconMap,
+		footnoteNumbers: FootnoteNumberMap,
 	): string {
 		if (type === 'intro') {
 			return `<section class="container-intro" style="${styles.introStyle}">${this.renderIntroContent(content, md, styles)}</section>`;
@@ -331,7 +498,7 @@ export class WeChatFormatService {
 			].join('');
 		}
 		if (type === 'chat') {
-			return this.renderChat(content, styles, chatRoleIcons);
+			return this.renderChat(content, styles, chatRoleIcons, footnoteNumbers);
 		}
 
 		const title = CONTAINER_TITLES[type] ?? CONTAINER_TITLES.info;
@@ -343,20 +510,25 @@ export class WeChatFormatService {
 		].join('');
 	}
 
-	private renderChat(content: string, styles: WeChatStyleSet, chatRoleIcons: ChatRoleIconMap): string {
+	private renderChat(
+		content: string,
+		styles: WeChatStyleSet,
+		chatRoleIcons: ChatRoleIconMap,
+		footnoteNumbers: FootnoteNumberMap,
+	): string {
 		const rows = content
 			.split(/\r?\n/)
 			.map((line) => line.trim())
 			.filter(Boolean)
 			.map((line) => {
-				const match = line.match(/^([^:：]{1,16})[:：]\s*(.+)$/);
+				const match = line.match(/^([^:：\s]{1,16})(?:[:：]|\s+)\s*(.+)$/);
 				const name = match ? match[1] : '说';
 				const text = match ? match[2] : line;
 				const iconIndex = this.getChatRoleIconIndex(name, chatRoleIcons);
 				return [
 					'<section style="margin:0 0 0.5em;">',
 					`<p class="knb-chat-speaker" style="${styles.chatSpeakerStyle}">${this.renderChatIcon(iconIndex, styles)}${this.renderPlainInline(name)}</p>`,
-					`<p style="${styles.chatTextStyle}">${this.renderText(text, styles)}</p>`,
+					`<p style="${styles.chatTextStyle}">${this.renderText(text, styles, footnoteNumbers)}</p>`,
 					'</section>',
 				].join('');
 			})
@@ -399,6 +571,55 @@ export class WeChatFormatService {
 			.join('');
 
 		return `<section class="knb-toc" style="${styles.tocStyle}"><p style="${styles.tocTitleStyle}">全文导航</p>${rows}</section>`;
+	}
+
+	private extractFootnotes(markdown: string): MarkdownFootnoteExtraction {
+		const footnotes: FootnoteEntry[] = [];
+		const knownIds = new Set<string>();
+		const bodyLines: string[] = [];
+
+		for (const line of markdown.split(/\r?\n/)) {
+			let remaining = line.trim();
+			let matchedFootnote = false;
+			while (remaining) {
+				const match = remaining.match(/^\[\^([^\]]+)\]:\s*(.*)$/);
+				if (!match) {
+					break;
+				}
+				matchedFootnote = true;
+				const nextMatchIndex = match[2].search(/\[\^[^\]]+\]:/);
+				const content = nextMatchIndex >= 0 ? match[2].slice(0, nextMatchIndex).trim() : match[2].trim();
+				if (!knownIds.has(match[1])) {
+					knownIds.add(match[1]);
+					footnotes.push({
+						id: match[1],
+						number: footnotes.length + 1,
+						content,
+					});
+				}
+				remaining = nextMatchIndex >= 0 ? match[2].slice(nextMatchIndex).trim() : '';
+			}
+
+			if (!matchedFootnote) {
+				bodyLines.push(line);
+			}
+		}
+
+		return {
+			markdown: bodyLines.join('\n').trim(),
+			footnotes,
+		};
+	}
+
+	private renderFootnotes(footnotes: FootnoteEntry[], md: MarkdownIt, styles: WeChatStyleSet): string {
+		if (footnotes.length === 0) {
+			return '';
+		}
+
+		const rows = footnotes
+			.map((entry) => `<p class="knb-footnote-item" style="${styles.footnoteItemStyle}">[${entry.number}] ${md.renderInline(entry.content)}</p>`)
+			.join('');
+		return `<section class="knb-footnotes" style="${styles.footnotesStyle}">${rows}</section>`;
 	}
 
 	private extractToc(markdown: string): TocEntry[] {
