@@ -11,13 +11,16 @@ const entitlementService = readFileSync('src/service/EntitlementService.ts', 'ut
 const issueLicenseScript = readFileSync('worker/scripts/issue-license.ps1', 'utf8');
 const worker = readFileSync('worker/src/index.ts', 'utf8');
 const manifest = JSON.parse(readFileSync('manifest.json', 'utf8')) as { id: string; name: string; author: string };
+const packageJson = JSON.parse(readFileSync('package.json', 'utf8')) as { name: string };
 
 test('uses a unique plugin id that does not collide with public wechat publisher plugins', () => {
-	assert.equal(manifest.id, 'kenengba-wechat-publisher');
+	assert.equal(manifest.id, 'xuezha985-wechat-publisher');
 	assert.equal(manifest.name, '公众号一键排版上传');
 	assert.equal(manifest.author, 'xuezha985');
+	assert.equal(packageJson.name, 'obsidian-xuezha985-wechat-publisher');
 	assert.notEqual(manifest.id, 'wechat-publisher');
-	assert.match(previewView, /kenengba-wechat-publisher-preview/);
+	assert.match(previewView, /xuezha985-wechat-publisher-preview/);
+	assert.doesNotMatch(previewView, /kenengba-wechat-publisher-preview/);
 	assert.doesNotMatch(previewView, /'wechat-publisher-preview'/);
 });
 
@@ -81,6 +84,9 @@ test('adds a help panel and manual activation instructions', () => {
 	assert.match(previewView, /helpButton/);
 	assert.match(previewView, /circle-help/);
 	assert.match(previewView, /wechat-publisher-inline-help/);
+	assert.match(previewView, /createEl\('a'/);
+	assert.match(previewView, /target:\s*'_blank'/);
+	assert.match(previewView, /href:\s*item\.href/);
 	assert.match(previewView, /可能吧公众号排版器/);
 	assert.match(previewView, /https:\/\/mp\.knb\.im\//);
 	assert.match(previewView, /19元\/年/);

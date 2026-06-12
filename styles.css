@@ -227,6 +227,7 @@ button.wechat-publisher-icon-button:hover {
 .wechat-publisher-help-content {
 	font-size: 13px;
 	line-height: 1.65;
+	user-select: text;
 }
 
 .wechat-publisher-help-content section {
@@ -236,6 +237,13 @@ button.wechat-publisher-icon-button:hover {
 .wechat-publisher-help-content p {
 	margin: 0 0 9px;
 	color: var(--text-muted);
+}
+
+.wechat-publisher-help-content a {
+	color: var(--text-accent);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	user-select: text;
 }
 
 .wechat-publisher-inline-settings-content h4 {

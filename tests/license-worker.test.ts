@@ -223,7 +223,7 @@ async function verify(env: TestEnv, licenseKey: string, deviceId: string): Promi
 		jsonRequest('/v1/licenses/verify', {
 			licenseKey,
 			deviceId,
-			pluginId: 'wechat-publisher',
+			pluginId: 'xuezha985-wechat-publisher',
 			pluginVersion: '0.1.0',
 			feature: 'wechat_upload',
 		}),

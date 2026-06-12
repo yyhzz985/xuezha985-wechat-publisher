@@ -275,3 +275,12 @@
 - 新增样式测试断言：默认 `background/background-color` 为透明、`background-image` 为 none、`box-shadow` 为 none、`appearance` 为 none。
 - Review 查 Bug：只改 CSS 和样式测试，不改按钮顺序、点击事件、复制、上传、设置、帮助逻辑。
 - 第一性原理分析：用户要的是视觉静默状态，最小修复是覆盖 Obsidian 默认按钮外观，而不是改 DOM 结构或重做工具栏。
+
+## 2026-06-12 插件 ID 与帮助面板交互调整
+
+- 将插件 ID 改为 `xuezha985-wechat-publisher`，预览 view type 改为 `xuezha985-wechat-publisher-preview`，包名改为 `obsidian-xuezha985-wechat-publisher`。
+- 帮助面板改为结构化渲染：普通文案仍用文本节点，可能吧网址用真实 `<a>` 链接并新窗口打开。
+- 帮助内容区域显式允许 `user-select: text`，方便选中文字复制。
+- 授权 Worker 不改逻辑；测试改用新 `pluginId` 校验，确认现有 License 不因插件 ID 改名失效。
+- Review 查 Bug：只改 ID、帮助链接渲染、帮助区可选中文本，不改帮助正文和授权接口。
+- 第一性原理分析：用户要准备分享插件，ID 应带作者前缀；帮助面板需要可复制可跳转，最小实现是结构化文本/链接，不引入 Markdown 渲染器。

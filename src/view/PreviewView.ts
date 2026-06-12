@@ -19,7 +19,7 @@ import { formatLicenseStatus } from '../utils/licenseDisplayUtils';
 import type { MarkdownFormatAction } from '../utils/markdownEditUtils';
 import type { NoticeView } from './NoticeView';
 
-export const VIEW_TYPE_WECHAT_PUBLISHER_PREVIEW = 'kenengba-wechat-publisher-preview';
+export const VIEW_TYPE_WECHAT_PUBLISHER_PREVIEW = 'xuezha985-wechat-publisher-preview';
 
 interface FormatTool {
 	action: MarkdownFormatAction;
@@ -27,6 +27,11 @@ interface FormatTool {
 	title: string;
 	icon?: string;
 }
+
+type HelpItem = string | {
+	text: string;
+	href: string;
+};
 
 const BASIC_FORMAT_TOOLS: FormatTool[] = [
 	{ action: 'h1', label: 'H1', title: '一级标题' },
@@ -636,7 +641,7 @@ export class WeChatPublisherPreviewView extends ItemView {
 		const content = this.helpPanel.createDiv({ cls: 'wechat-publisher-inline-settings-content wechat-publisher-help-content' });
 		this.addHelpSection(content, '风格说明', [
 			'因为自己非常喜欢这种简约高级的排版风格，可能吧的排版完全在我的审美上，所以这个插件参考引用了可能吧公众号排版器的风格排版。',
-			'可能吧公众号排版器：https://mp.knb.im/',
+			{ text: '可能吧公众号排版器', href: 'https://mp.knb.im/' },
 		]);
 		this.addHelpSection(content, '快速使用', [
 			'打开一篇 Markdown 笔记，点击左侧功能区的公众号预览图标，右侧会出现实时预览。',
@@ -673,11 +678,24 @@ export class WeChatPublisherPreviewView extends ItemView {
 		]);
 	}
 
-	private addHelpSection(container: HTMLElement, title: string, paragraphs: string[]): void {
+	private addHelpSection(container: HTMLElement, title: string, paragraphs: HelpItem[]): void {
 		const section = container.createEl('section');
 		section.createEl('h4', { text: title });
-		paragraphs.forEach((paragraph) => {
-			section.createEl('p', { text: paragraph });
+		paragraphs.forEach((item) => {
+			if (typeof item === 'string') {
+				section.createEl('p', { text: item });
+				return;
+			}
+			const paragraph = section.createEl('p');
+			const link = paragraph.createEl('a', {
+				text: item.text,
+				href: item.href,
+				attr: {
+					target: '_blank',
+					rel: 'noopener noreferrer',
+				},
+			});
+			link.setAttr('aria-label', `${item.text}：${item.href}`);
 		});
 	}
 }

@@ -76,3 +76,8 @@ test('keeps preview toolbar compact until hover', () => {
 	assert.match(iconButtonHover, /border-color:\s*var\(--background-modifier-border\)/);
 	assert.match(iconButtonHover, /box-shadow:\s*0 2px 6px/);
 });
+
+test('allows selecting and copying help panel text', () => {
+	const helpContent = cssRule('.wechat-publisher-help-content');
+	assert.match(helpContent, /user-select:\s*text/);
+});
