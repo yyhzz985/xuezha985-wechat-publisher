@@ -1,4 +1,7 @@
+import MarkdownIt from 'markdown-it';
+import type { RenderRule } from 'markdown-it/lib/renderer.mjs';
 import { ItemView, setIcon, type WorkspaceLeaf } from 'obsidian';
+import helpMarkdown from '../../docs/plugin-help.md';
 import {
 	CODE_THEME_OPTIONS,
 	DEFAULT_SETTINGS,
@@ -28,11 +31,6 @@ interface FormatTool {
 	icon?: string;
 }
 
-type HelpItem = string | {
-	text: string;
-	href: string;
-};
-
 const BASIC_FORMAT_TOOLS: FormatTool[] = [
 	{ action: 'h1', label: 'H1', title: '一级标题' },
 	{ action: 'h2', label: 'H2', title: '二级标题' },
@@ -60,6 +58,23 @@ const SPECIAL_FORMAT_TOOLS: FormatTool[] = [
 	{ action: 'say', label: '', title: '想说的话', icon: 'message-square' },
 	{ action: 'chat', label: '', title: '对话', icon: 'messages-square' },
 ];
+
+const HELP_MARKDOWN_RENDERER = new MarkdownIt({
+	html: false,
+	linkify: true,
+	typographer: false,
+});
+
+const defaultHelpLinkOpen = HELP_MARKDOWN_RENDERER.renderer.rules.link_open;
+const openExternalHelpLink: RenderRule = (tokens, index, options, env, self) => {
+	tokens[index].attrSet('target', '_blank');
+	tokens[index].attrSet('rel', 'noopener noreferrer');
+	return defaultHelpLinkOpen
+		? defaultHelpLinkOpen(tokens, index, options, env, self)
+		: self.renderToken(tokens, index, options);
+};
+
+HELP_MARKDOWN_RENDERER.renderer.rules.link_open = openExternalHelpLink;
 
 export class WeChatPublisherPreviewView extends ItemView {
 	private article: FormattedWeChatArticle | null = null;
@@ -639,63 +654,6 @@ export class WeChatPublisherPreviewView extends ItemView {
 		header.createEl('h3', { text: '帮助' });
 
 		const content = this.helpPanel.createDiv({ cls: 'wechat-publisher-inline-settings-content wechat-publisher-help-content' });
-		this.addHelpSection(content, '风格说明', [
-			'因为自己非常喜欢这种简约高级的排版风格，可能吧的排版完全在我的审美上，所以这个插件参考引用了可能吧公众号排版器的风格排版。',
-			{ text: '可能吧公众号排版器', href: 'https://mp.knb.im/' },
-		]);
-		this.addHelpSection(content, '快速使用', [
-			'打开一篇 Markdown 笔记，点击左侧功能区的公众号预览图标，右侧会出现实时预览。',
-			'没有选中文本时，复制和上传会使用整篇笔记；有选中文本时，复制会优先使用选区。',
-			'写完后点击右上角复制图标，把内容粘贴到微信公众号后台。',
-		]);
-		this.addHelpSection(content, '支持语法', [
-			'支持标题、段落、粗体、斜体、引用、列表、图片、分割线、链接、代码块和 Markdown 表格。',
-			'公众号内链会保留，其他外链会改写成“文字（URL）”，避免粘贴后链接丢失。',
-			'代码块支持深色/浅色主题和横向滚动，适合粘贴较长代码。',
-		]);
-		this.addHelpSection(content, '专有格式', [
-			'工具栏提供全能导航、摘要、高亮、提示、说明、笔记、注意、危险、想说的话和多角色对话。',
-			'全能导航会根据二级标题生成文章导航；对话格式会让同名角色保持一致图标。',
-			'这些格式都写回 Markdown，后续可以继续编辑。',
-		]);
-		this.addHelpSection(content, '排版设置', [
-			'右上角齿轮可以调整主题、字重、小标题风格、代码主题和顶部时间模块。',
-			'作者名和头像 URL 会显示在顶部时间模块里，也可以上传本地头像图自动生成公众号可用图片链接。',
-		]);
-		this.addHelpSection(content, '公众号上传配置', [
-			'上传到草稿箱需要填写公众号 AppID、AppSecret 和默认封面 media_id。',
-			'AppID 和 AppSecret 在微信公众平台的“设置与开发”里获取；服务器 IP 白名单也在公众号后台“设置与开发”里配置。',
-			'默认封面 media_id 可以手填，也可以点击上传封面图，让插件自动上传为永久素材后写回。',
-			'原文链接可选；开启评论后，上传草稿时会允许文章留言评论。',
-			'AppSecret 会明文保存在当前 Obsidian 库插件数据里；文章内容和公众号密钥不会发到授权服务器。',
-		]);
-		this.addHelpSection(content, 'Pro 激活码', [
-			'实时预览、复制到公众号、排版工具栏和主题设置免费使用。',
-			'上传草稿箱、上传封面图、上传头像图属于 Pro 功能，需要填写 License Key 后校验授权。',
-			'Pro 权限：19元/年，58元/永久；期间享受免费插件版本升级。',
-			'后续计划添加多公众号账号切换管理。',
-			'联系渣姐微信：237219265 获取激活码。',
-		]);
-	}
-
-	private addHelpSection(container: HTMLElement, title: string, paragraphs: HelpItem[]): void {
-		const section = container.createEl('section');
-		section.createEl('h4', { text: title });
-		paragraphs.forEach((item) => {
-			if (typeof item === 'string') {
-				section.createEl('p', { text: item });
-				return;
-			}
-			const paragraph = section.createEl('p');
-			const link = paragraph.createEl('a', {
-				text: item.text,
-				href: item.href,
-				attr: {
-					target: '_blank',
-					rel: 'noopener noreferrer',
-				},
-			});
-			link.setAttr('aria-label', `${item.text}：${item.href}`);
-		});
+		content.innerHTML = HELP_MARKDOWN_RENDERER.render(helpMarkdown);
 	}
 }

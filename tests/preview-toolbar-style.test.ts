@@ -81,3 +81,18 @@ test('allows selecting and copying help panel text', () => {
 	const helpContent = cssRule('.wechat-publisher-help-content');
 	assert.match(helpContent, /user-select:\s*text/);
 });
+
+test('styles markdown blocks inside the help panel', () => {
+	const helpTable = cssRule('.wechat-publisher-help-content table');
+	assert.match(helpTable, /border-collapse:\s*collapse/);
+	assert.match(helpTable, /width:\s*100%/);
+
+	const helpCode = cssRule('.wechat-publisher-help-content code');
+	assert.match(helpCode, /font-family:\s*var\(--font-monospace\)/);
+
+	const helpPre = cssRule('.wechat-publisher-help-content pre');
+	assert.match(helpPre, /overflow:\s*auto/);
+
+	const helpQuote = cssRule('.wechat-publisher-help-content blockquote');
+	assert.match(helpQuote, /border-left:\s*3px solid var\(--interactive-accent\)/);
+});

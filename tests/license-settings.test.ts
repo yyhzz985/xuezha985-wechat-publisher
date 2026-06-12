@@ -10,6 +10,7 @@ const styleUtils = readFileSync('src/utils/styleUtils.ts', 'utf8');
 const entitlementService = readFileSync('src/service/EntitlementService.ts', 'utf8');
 const issueLicenseScript = readFileSync('worker/scripts/issue-license.ps1', 'utf8');
 const worker = readFileSync('worker/src/index.ts', 'utf8');
+const helpMarkdown = readFileSync('docs/plugin-help.md', 'utf8');
 const manifest = JSON.parse(readFileSync('manifest.json', 'utf8')) as { id: string; name: string; author: string };
 const packageJson = JSON.parse(readFileSync('package.json', 'utf8')) as { name: string };
 
@@ -80,23 +81,26 @@ test('supports admin license management instead of raw KV issuing only', () => {
 	assert.doesNotMatch(issueLicenseScript, /kv bulk put/);
 });
 
-test('adds a help panel and manual activation instructions', () => {
+test('renders the inline help panel from docs/plugin-help.md', () => {
 	assert.match(previewView, /helpButton/);
 	assert.match(previewView, /circle-help/);
 	assert.match(previewView, /wechat-publisher-inline-help/);
-	assert.match(previewView, /createEl\('a'/);
-	assert.match(previewView, /target:\s*'_blank'/);
-	assert.match(previewView, /href:\s*item\.href/);
-	assert.match(previewView, /可能吧公众号排版器/);
-	assert.match(previewView, /https:\/\/mp\.knb\.im\//);
-	assert.match(previewView, /19元\/年/);
-	assert.match(previewView, /58元\/永久/);
-	assert.match(previewView, /237219265/);
-	assert.match(previewView, /AppID/);
-	assert.match(previewView, /AppSecret/);
-	assert.match(previewView, /IP 白名单/);
-	assert.match(previewView, /默认封面 media_id/);
-	assert.match(previewView, /多公众号账号切换管理/);
+	assert.match(previewView, /plugin-help\.md/);
+	assert.match(previewView, /MarkdownIt/);
+	assert.match(previewView, /linkify:\s*true/);
+	assert.match(previewView, /attrSet\('target',\s*'_blank'\)/);
+	assert.match(previewView, /attrSet\('rel',\s*'noopener noreferrer'\)/);
+	assert.match(helpMarkdown, /可能吧公众号排版器/);
+	assert.match(helpMarkdown, /https:\/\/mp\.knb\.im\//);
+	assert.match(helpMarkdown, /快速开始/);
+	assert.match(helpMarkdown, /支持的语法/);
+	assert.match(helpMarkdown, /公众号草稿箱上传/);
+	assert.match(helpMarkdown, /Pro 功能与价格/);
+	assert.match(helpMarkdown, /19 元/);
+	assert.match(helpMarkdown, /58 元/);
+	assert.match(helpMarkdown, /237219265/);
+	assert.match(helpMarkdown, /https:\/\/developers\.weixin\.qq\.com\/platform/);
+	assert.match(helpMarkdown, /https:\/\/myip\.ipip\.net\//);
 });
 
 test('disables public purchase endpoints while manual activation is used', () => {

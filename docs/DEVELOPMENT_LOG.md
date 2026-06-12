@@ -284,3 +284,14 @@
 - 授权 Worker 不改逻辑；测试改用新 `pluginId` 校验，确认现有 License 不因插件 ID 改名失效。
 - Review 查 Bug：只改 ID、帮助链接渲染、帮助区可选中文本，不改帮助正文和授权接口。
 - 第一性原理分析：用户要准备分享插件，ID 应带作者前缀；帮助面板需要可复制可跳转，最小实现是结构化文本/链接，不引入 Markdown 渲染器。
+
+## 2026-06-12 帮助文案改为 Markdown 文档来源
+
+- 将右侧帮助面板正文从 `PreviewView` 内硬编码段落改为读取 `docs/plugin-help.md`，后续只维护这一份帮助文档。
+- 使用已有 `markdown-it` 渲染本地 Markdown，配置 `html:false`、`linkify:true`，并统一给帮助链接加 `target="_blank"` 和 `rel="noopener noreferrer"`。
+- 为 esbuild 增加 `.md` 文本 loader，并新增 `src/types/text-modules.d.ts`，让 TypeScript 和构建流程都能识别 Markdown 文本导入。
+- 给帮助面板补充 Markdown 样式：标题、列表、表格、行内代码、代码块、引用和分割线都限制在帮助面板内，不影响公众号正文预览。
+- 新增测试锁定：帮助面板来自 `docs/plugin-help.md`，可能吧链接、公众号配置、Pro 价格和联系方式仍在文档里；帮助区 Markdown 表格、代码块、引用有对应样式。
+- 验证：先运行相关测试看到旧实现失败，再实现后运行 `npm test` 62 项通过；`npm run build` 通过；构建产物已同步到 `D:\【仓库】obsidian笔记\X-Note\.obsidian\plugins\xuezha985-wechat-publisher`，未触碰 `data.json`。
+- Review 查 Bug：本次只替换帮助文案来源和帮助面板样式，不改预览、复制、上传、授权、公众号 API 配置逻辑；本地 Markdown 渲染关闭 HTML，避免文档内容直接注入脚本。
+- 第一性原理分析：用户要的是“用这份文档替换帮助文案”，最稳的做法不是再复制一份到代码里，而是让文档成为单一来源。这样后续改文案只动 `docs/plugin-help.md`，减少重复和改漏。
