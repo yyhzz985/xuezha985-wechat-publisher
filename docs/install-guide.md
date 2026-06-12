@@ -1,0 +1,157 @@
+# 公众号一键排版上传插件安装使用说明
+
+插件仓库：
+
+[https://github.com/yyhzz985/xuezha985-wechat-publisher](https://github.com/yyhzz985/xuezha985-wechat-publisher)
+
+插件下载页：
+
+[https://github.com/yyhzz985/xuezha985-wechat-publisher/releases](https://github.com/yyhzz985/xuezha985-wechat-publisher/releases)
+
+## 1. 下载安装包
+
+打开下载页，下载最新版本里的 zip 文件，例如：
+
+```text
+xuezha985-wechat-publisher-0.1.0.zip
+```
+
+不要下载 GitHub 页面上的 `Source code`，那个是源码包，不是 Obsidian 插件安装包。
+
+## 2. 解压安装包
+
+解压 zip 后，里面应该只有 3 个文件：
+
+```text
+manifest.json
+main.js
+styles.css
+```
+
+如果解压后多了一层文件夹，也没关系，最终只需要把这 3 个文件放进 Obsidian 插件目录。
+
+## 3. 找到 Obsidian 库目录
+
+打开 Obsidian，进入你要安装插件的那个库。
+
+如果不知道库在哪里：
+
+1. 在 Obsidian 左侧文件列表里，任选一篇笔记
+2. 右键点击笔记
+3. 选择 `在系统资源管理器中显示`
+4. 回到这个库的根目录
+
+库根目录里应该能看到 `.obsidian` 文件夹。如果看不到，需要先打开系统的“显示隐藏文件”。
+
+## 4. 创建插件目录
+
+在 Obsidian 库里创建这个目录：
+
+```text
+.obsidian/plugins/xuezha985-wechat-publisher/
+```
+
+Windows 示例：
+
+```text
+D:\你的Obsidian库\.obsidian\plugins\xuezha985-wechat-publisher\
+```
+
+macOS 示例：
+
+```text
+/Users/你的用户名/你的Obsidian库/.obsidian/plugins/xuezha985-wechat-publisher/
+```
+
+目录名必须是：
+
+```text
+xuezha985-wechat-publisher
+```
+
+不要改成中文，也不要多套一层目录。
+
+## 5. 放入插件文件
+
+把解压出来的 3 个文件放进刚才创建的目录：
+
+```text
+.obsidian/plugins/xuezha985-wechat-publisher/manifest.json
+.obsidian/plugins/xuezha985-wechat-publisher/main.js
+.obsidian/plugins/xuezha985-wechat-publisher/styles.css
+```
+
+## 6. 启用插件
+
+1. 重启 Obsidian
+2. 打开 `设置`
+3. 进入 `第三方插件`
+4. 如果还没关闭安全模式，先关闭安全模式
+5. 找到 `公众号一键排版上传`
+6. 打开右侧开关启用插件
+
+## 7. 使用插件
+
+1. 打开一篇 Markdown 笔记
+2. 点击 Obsidian 左侧功能区的公众号预览图标
+3. 右侧会出现公众号实时预览
+4. 写完后点击右上角复制图标
+5. 到微信公众号后台编辑器里粘贴即可
+
+右上角按钮从左到右依次是：
+
+```text
+复制 -> 上传草稿箱 -> 设置 -> 帮助
+```
+
+## 8. Pro 激活
+
+免费功能可以预览和复制排版 HTML。
+
+Pro 功能包括：
+
+- 上传到公众号草稿箱
+- 上传封面图
+- 上传头像图
+
+有 Pro 激活码后：
+
+1. 点击右侧预览区右上角齿轮图标
+2. 找到 `License Key`
+3. 填入激活码
+4. 点击 `校验授权`
+5. 授权成功后即可使用上传功能
+
+## 9. 常见问题
+
+### Obsidian 里看不到插件
+
+检查这 3 个文件是不是放在正确目录：
+
+```text
+.obsidian/plugins/xuezha985-wechat-publisher/manifest.json
+.obsidian/plugins/xuezha985-wechat-publisher/main.js
+.obsidian/plugins/xuezha985-wechat-publisher/styles.css
+```
+
+最常见错误是多了一层目录，例如：
+
+```text
+.obsidian/plugins/xuezha985-wechat-publisher/xuezha985-wechat-publisher-0.1.0/manifest.json
+```
+
+这种目录结构是不对的。
+
+### 提示无法加载第三方插件
+
+进入 `设置 -> 第三方插件`，关闭安全模式，然后再启用插件。
+
+### 插件启用后没有右侧预览
+
+先打开一篇 Markdown 笔记，再点击左侧功能区的公众号预览图标。
+
+### 上传草稿箱失败
+
+上传草稿箱是 Pro 功能，并且需要配置公众号 AppID、AppSecret、默认封面 media_id 和 IP 白名单。
+
+如果只是复制排版到公众号后台，不需要配置公众号 API。

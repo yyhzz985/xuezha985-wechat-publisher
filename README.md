@@ -6,6 +6,8 @@
 
 GitHub 仓库地址：[https://github.com/yyhzz985/xuezha985-wechat-publisher](https://github.com/yyhzz985/xuezha985-wechat-publisher)
 
+给别人看的安装使用说明：[docs/install-guide.md](docs/install-guide.md)
+
 ## 功能
 
 - 右侧实时预览公众号排版效果

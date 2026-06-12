@@ -315,6 +315,7 @@
 - 创建 `v0.1.0` Release：`https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/tag/v0.1.0`。
 - 上传安装包附件：`xuezha985-wechat-publisher-0.1.0.zip`，下载地址为 `https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/download/v0.1.0/xuezha985-wechat-publisher-0.1.0.zip`，文件大小 `78591` 字节，GitHub 返回 SHA-256 为 `f6e629a5ddcc5c4cbd66e4a536e330299bb7cc570e54246388ed697073c3ba8f`。
 - 更新 `README.md`：增加可直接发给用户的安装说明，包含 Release 下载、解压、创建 `.obsidian/plugins/xuezha985-wechat-publisher/` 目录、启用第三方插件、基础使用、Pro 激活和常见问题。
+- 新增 `docs/install-guide.md`：独立安装使用说明，适合直接复制发给插件使用者；README 顶部增加该文档入口。
 - 验证：`npm test` 62 项通过；`npm run build` 通过；release zip 内容检查通过，包内仅包含 `manifest.json`、`main.js`、`styles.css`。
 - Review 查 Bug：没有把 `dist/` 安装包提交进源码仓库；公开仓库不包含 `data.json`、公众号 `AppSecret`、License CSV 或本地授权 token；Release 只上传面向用户安装的 zip。
 - 第一性原理分析：给别人使用插件，最直接路径是公开源码仓库 + Release 安装包 + README 安装步骤。用户不应该从源码构建，也不应该手动找构建产物，所以下载入口必须指向 Release 附件。
