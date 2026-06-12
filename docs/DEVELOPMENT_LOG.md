@@ -307,3 +307,14 @@
 - GitHub 状态：本地仓库当前没有 remote；GitHub CLI 已登录。上传 GitHub 属于公开发布动作，需要用户确认目标仓库和公开/私有后再执行 push 或创建仓库。
 - Review 查 Bug：没有把 `dist/`、License CSV、AppSecret、授权 token 等敏感或生成物纳入提交；README 只写使用说明，不泄露本地 `data.json` 配置。
 - 第一性原理分析：别人使用插件只需要源码说明和安装 zip。最小交付是 README + 可复现打包脚本 + release zip，而不是把生成物混进源码提交。
+
+## 2026-06-12 公开 GitHub 仓库与 v0.1.0 Release
+
+- 创建公开 GitHub 仓库：`https://github.com/yyhzz985/xuezha985-wechat-publisher`，默认分支为 `main`。
+- 将当前插件源码推送到远端 `main`，本地分支 `codex/auto-pay-license-d1` 跟踪 `origin/main`。
+- 创建 `v0.1.0` Release：`https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/tag/v0.1.0`。
+- 上传安装包附件：`xuezha985-wechat-publisher-0.1.0.zip`，下载地址为 `https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/download/v0.1.0/xuezha985-wechat-publisher-0.1.0.zip`，文件大小 `78591` 字节，GitHub 返回 SHA-256 为 `f6e629a5ddcc5c4cbd66e4a536e330299bb7cc570e54246388ed697073c3ba8f`。
+- 更新 `README.md`：增加可直接发给用户的安装说明，包含 Release 下载、解压、创建 `.obsidian/plugins/xuezha985-wechat-publisher/` 目录、启用第三方插件、基础使用、Pro 激活和常见问题。
+- 验证：`npm test` 62 项通过；`npm run build` 通过；release zip 内容检查通过，包内仅包含 `manifest.json`、`main.js`、`styles.css`。
+- Review 查 Bug：没有把 `dist/` 安装包提交进源码仓库；公开仓库不包含 `data.json`、公众号 `AppSecret`、License CSV 或本地授权 token；Release 只上传面向用户安装的 zip。
+- 第一性原理分析：给别人使用插件，最直接路径是公开源码仓库 + Release 安装包 + README 安装步骤。用户不应该从源码构建，也不应该手动找构建产物，所以下载入口必须指向 Release 附件。
