@@ -1,4 +1,4 @@
-import type { EntitlementStatus } from '../service/EntitlementService';
+import { PRO_REQUIRED_MESSAGE, type EntitlementStatus } from '../service/EntitlementService';
 
 export interface NoticeView {
 	showSuccess(): void;
@@ -46,6 +46,10 @@ export class ObsidianNoticeView implements NoticeView {
 
 	showDraftError(error: unknown): void {
 		const message = error instanceof Error ? error.message : String(error);
+		if (message === PRO_REQUIRED_MESSAGE) {
+			new this.NoticeType(message);
+			return;
+		}
 		new this.NoticeType(`上传草稿失败：${message}`);
 	}
 

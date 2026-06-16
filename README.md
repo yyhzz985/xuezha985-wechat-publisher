@@ -6,7 +6,7 @@
 
 GitHub 仓库地址：[https://github.com/yyhzz985/xuezha985-wechat-publisher](https://github.com/yyhzz985/xuezha985-wechat-publisher)
 
-给别人看的安装使用说明：[docs/install-guide.md](docs/install-guide.md)
+安装使用说明：[docs/install-guide.md](docs/install-guide.md)
 
 ## 功能
 
@@ -15,13 +15,15 @@ GitHub 仓库地址：[https://github.com/yyhzz985/xuezha985-wechat-publisher](h
 - 支持当前整篇笔记或选中文本
 - 自动去掉 YAML frontmatter
 - 支持标题、段落、粗体、斜体、引用、列表、图片、分割线、链接、代码块、表格
+- 本地图片预览按 Obsidian 当前笔记解析，不绑定固定附件目录
 - 支持专有格式：全能导航、摘要、高亮、提示、说明、笔记、注意、危险、独白、多角色对话
 - 支持主题、字重、小标题风格、代码主题、阅读时间模块配置
-- Pro 功能：上传草稿箱、上传封面图、上传头像图
+- 免费功能：预览、排版设置、复制 HTML、复制网络图片链接
+- Pro 功能：上传草稿箱、上传封面图、上传头像图、复制时自动上传本地图片
 
-## 给别人安装使用
+## 安装使用
 
-推荐把这一段直接发给使用者。
+按下面步骤下载安装到 Obsidian。
 
 ### 第一步：下载安装包
 
@@ -32,7 +34,7 @@ GitHub 仓库地址：[https://github.com/yyhzz985/xuezha985-wechat-publisher](h
 下载最新版本里的 zip 文件，例如：
 
 ```text
-xuezha985-wechat-publisher-0.1.0.zip
+xuezha985-wechat-publisher-0.1.1.zip
 ```
 
 ### 第二步：解压文件
@@ -122,7 +124,7 @@ xuezha985-wechat-publisher
 2. 找到 `License Key`
 3. 填入激活码
 4. 点击 `校验授权`
-5. 授权成功后即可使用上传草稿箱、上传封面图、上传头像图
+5. 授权成功后，公众号接口配置区会解锁；配置 AppID / AppSecret 后即可使用上传草稿箱、上传封面图、上传头像图
 
 ### 常见安装问题
 
@@ -139,7 +141,7 @@ xuezha985-wechat-publisher
 最常见错误是多了一层目录，例如：
 
 ```text
-.obsidian/plugins/xuezha985-wechat-publisher/xuezha985-wechat-publisher-0.1.0/manifest.json
+.obsidian/plugins/xuezha985-wechat-publisher/xuezha985-wechat-publisher-0.1.1/manifest.json
 ```
 
 这种是不对的。
@@ -154,7 +156,7 @@ xuezha985-wechat-publisher
 
 **4. 上传草稿箱失败**
 
-上传草稿箱是 Pro 功能，并且需要配置公众号 AppID、AppSecret、默认封面 media_id 和 IP 白名单。免费功能不影响复制排版。
+上传草稿箱是 Pro 功能，并且需要配置公众号 AppID、AppSecret、默认封面 media_id 和 IP 白名单。免费复制不需要这些配置；如果文章里有本地图片，免费复制不会上传本地图片。
 
 ### BRAT 安装方式
 
@@ -182,6 +184,14 @@ BRAT 适合自动更新；普通用户推荐优先使用上面的手动安装方
 
 - 有选中文本：只复制选中文本
 - 没有选中文本：复制整篇当前笔记
+- 免费复制不需要公众号 AppID、AppSecret，也不需要 Pro 授权
+
+图片规则：
+
+- 网络图片链接会原样保留；只要微信后台能访问该链接，粘贴后就能显示
+- 本地图片在 Obsidian 预览里可以显示，但免费复制不会上传本地文件，粘贴到公众号后台后不会显示
+- Pro 复制和上传草稿箱会先上传本地图片，再替换成微信图片 URL
+- 插件不提供图片目录配置；Obsidian 原生预览能解析到的图片，插件才会处理
 
 ## 常用 Markdown 写法
 
@@ -201,6 +211,8 @@ BRAT 适合自动更新；普通用户推荐优先使用上面的手动安装方
 `行内代码`
 
 ![图片说明](https://example.com/image.png)
+![本地图片](assets/image.png)
+![[Obsidian图片.png]]
 [链接文字](https://example.com)
 ```
 
@@ -284,6 +296,8 @@ console.log('hello');
 
 草稿箱上传属于 Pro 功能。配置入口在右侧预览区右上角的设置按钮里。
 
+未激活 Pro 时，公众号接口配置区默认锁定，不能填写 AppID / AppSecret。这样免费用户只用复制功能时，不会被要求配置公众号接口。
+
 需要填写：
 
 - `AppID`：公众号 AppID
@@ -291,6 +305,8 @@ console.log('hello');
 - `默认封面 media_id`：上传草稿时使用的封面素材 ID
 - `原文链接`：可选
 - `开启评论`：上传草稿时允许文章留言评论
+
+上传头像图也属于 Pro 功能。手动填写头像 URL 是免费功能；点击“上传头像图”选择本地图片时，会调用微信公众号正文图片上传接口，所以需要 Pro 授权和公众号接口配置。
 
 AppID 和 AppSecret 获取位置：
 
@@ -314,15 +330,18 @@ IP 白名单配置：
 免费功能：
 
 - 实时预览
-- 复制到公众号
+- 复制到公众号，不要求 AppID / AppSecret
+- 复制网络图片链接
 - 排版工具栏
 - 主题设置
+- 手动填写头像 URL
 
 Pro 功能：
 
 - 上传到公众号草稿箱
 - 上传封面图
 - 上传头像图
+- 复制时自动上传本地图片并替换成微信图片 URL
 
 价格：
 
@@ -340,6 +359,7 @@ Pro 功能：
 - 公众号 AppSecret 不会发送到授权服务器
 - 授权服务器只校验 License Key、设备 ID、插件 ID、插件版本和功能名
 - 一个 License Key 默认绑定 1 台设备
+- 只有使用上传草稿箱、上传封面图、上传头像图或 Pro 本地图片上传时，插件才会调用微信公众号接口
 
 ## 开发
 
@@ -357,6 +377,8 @@ npm run package:plugin
 
 生成的 zip 在 `dist/` 目录。
 
-## 许可证
+## 开源许可证
 
-MIT
+本项目使用 MIT License。
+
+简单说：你可以免费使用、复制、修改和分发这份源码；如果再次分发，需要保留原作者版权和许可声明。软件按原样提供，作者不对使用结果承担担保责任。

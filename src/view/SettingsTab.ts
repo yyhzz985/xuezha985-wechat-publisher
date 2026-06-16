@@ -47,6 +47,7 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 	display(): void {
 		const { containerEl } = this;
 		const settings = this.getSettings();
+		const canUseWechatUpload = this.hasWechatUploadEntitlement();
 
 		containerEl.empty();
 		containerEl.createEl('p', {
@@ -123,6 +124,7 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 			.addButton((button) => {
 				button
 					.setButtonText('上传头像图')
+					.setDisabled(!canUseWechatUpload)
 					.onClick(() => {
 						this.pickAvatarImage();
 					});
@@ -153,12 +155,13 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 					}),
 			);
 
-		containerEl.createEl('h3', { text: '公众号接口' });
-		containerEl.createEl('p', {
+		const wechatSection = this.createProGatedSection(containerEl, canUseWechatUpload);
+		wechatSection.createEl('h3', { text: '公众号接口' });
+		wechatSection.createEl('p', {
 			cls: 'wechat-publisher-setting-note',
 			text: '用于上传到草稿箱。AppSecret 会明文保存在当前库的插件数据里，微信后台还需要配置服务器 IP 白名单。',
 		});
-		new Setting(containerEl)
+		new Setting(wechatSection)
 			.setName('AppID')
 			.addText((text) =>
 				text
@@ -167,7 +170,7 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 					.onChange((value) => this.savePatch({ wechatAppId: value.trim() })),
 			);
 
-		new Setting(containerEl)
+		new Setting(wechatSection)
 			.setName('AppSecret')
 			.addText((text) => {
 				text.inputEl.type = 'password';
@@ -177,7 +180,7 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 					.onChange((value) => this.savePatch({ wechatAppSecret: value.trim() }));
 			});
 
-		new Setting(containerEl)
+		new Setting(wechatSection)
 			.setName('默认封面 media_id')
 			.setDesc('可手填，也可点击上传封面图自动生成。')
 			.addText((text) =>
@@ -187,7 +190,7 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 					.onChange((value) => this.savePatch({ wechatThumbMediaId: value.trim() })),
 			);
 
-		new Setting(containerEl)
+		new Setting(wechatSection)
 			.setName('上传封面图')
 			.setDesc('选择 JPG、PNG 或 GIF，插件会上传为公众号永久图片素材并写回 media_id。')
 			.addButton((button) => {
@@ -199,7 +202,7 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 				button.buttonEl.addClass('wechat-publisher-upload-cover-button');
 			});
 
-		new Setting(containerEl)
+		new Setting(wechatSection)
 			.setName('原文链接')
 			.addText((text) =>
 				text
@@ -208,7 +211,7 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 					.onChange((value) => this.savePatch({ wechatSourceUrl: value.trim() })),
 			);
 
-		new Setting(containerEl)
+		new Setting(wechatSection)
 			.setName('开启评论')
 			.setDesc('上传草稿时允许文章留言评论')
 			.addToggle((toggle) =>
@@ -216,6 +219,9 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 					.setValue(settings.wechatNeedOpenComment)
 					.onChange((value) => this.savePatch({ wechatNeedOpenComment: value })),
 			);
+		if (!canUseWechatUpload) {
+			this.disableControls(wechatSection);
+		}
 
 		new Setting(containerEl)
 			.setName('恢复排版默认')
@@ -266,6 +272,31 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 
 	private formatLicenseStatus(status: EntitlementStatus): string {
 		return formatEntitlementStatus(status);
+	}
+
+	private hasWechatUploadEntitlement(): boolean {
+		const status = this.getEntitlementStatus();
+		return status.active && status.plan === 'pro' && status.features.includes('wechat_upload');
+	}
+
+	private createProGatedSection(containerEl: HTMLElement, enabled: boolean): HTMLElement {
+		const section = containerEl.createDiv({
+			cls: enabled ? 'wechat-publisher-pro-gated-section' : 'wechat-publisher-pro-gated-section is-locked',
+		});
+		const content = section.createDiv({ cls: 'wechat-publisher-pro-gated-content' });
+		if (!enabled) {
+			section.createDiv({
+				cls: 'wechat-publisher-pro-gated-overlay',
+				text: '需 Pro 授权后可用',
+			});
+		}
+		return content;
+	}
+
+	private disableControls(containerEl: HTMLElement): void {
+		containerEl.querySelectorAll('input, button, select, textarea').forEach((control) => {
+			(control as HTMLInputElement | HTMLButtonElement | HTMLSelectElement | HTMLTextAreaElement).disabled = true;
+		});
 	}
 
 	private pickCoverImage(): void {

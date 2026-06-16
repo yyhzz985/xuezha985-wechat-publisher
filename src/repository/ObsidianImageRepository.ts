@@ -1,7 +1,9 @@
 import { normalizePath, TFile, type App } from 'obsidian';
+import type { PreviewImageResolver } from '../service/PreviewImageService';
 import type { LocalImageAsset, LocalImageResolver } from '../service/WeChatDraftService';
+import { isVaultLocalImageSource } from '../utils/imageSourceUtils';
 
-export class ObsidianImageRepository implements LocalImageResolver {
+export class ObsidianImageRepository implements LocalImageResolver, PreviewImageResolver {
 	constructor(private readonly app: App) {}
 
 	async resolve(src: string, sourcePath: string): Promise<LocalImageAsset | null> {
@@ -20,11 +22,15 @@ export class ObsidianImageRepository implements LocalImageResolver {
 		};
 	}
 
+	resolveResourcePath(src: string, sourcePath: string): string | null {
+		const file = this.resolveImageFile(src, sourcePath);
+		return file ? this.app.vault.getResourcePath(file) : null;
+	}
+
 	private resolveImageFile(src: string, sourcePath: string): TFile | null {
 		const cleanSrc = this.cleanImageSrc(src);
-		const direct = this.getTFile(cleanSrc);
-		if (direct) {
-			return direct;
+		if (!isVaultLocalImageSource(cleanSrc)) {
+			return null;
 		}
 
 		if (sourcePath) {
@@ -35,10 +41,13 @@ export class ObsidianImageRepository implements LocalImageResolver {
 
 			const baseFolder = sourcePath.split('/').slice(0, -1).join('/');
 			const relativePath = normalizePath(baseFolder ? `${baseFolder}/${cleanSrc}` : cleanSrc);
-			return this.getTFile(relativePath);
+			const relative = this.getTFile(relativePath);
+			if (relative) {
+				return relative;
+			}
 		}
 
-		return null;
+		return this.getTFile(cleanSrc);
 	}
 
 	private getTFile(path: string): TFile | null {

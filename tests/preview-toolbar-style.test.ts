@@ -22,6 +22,12 @@ test('uses icon-only copy buttons in preview surfaces', () => {
 	assert.match(previewModal, /setIcon\(copyButton,\s*'copy'\)/);
 });
 
+test('routes preview pane copy through controller copy workflow', () => {
+	assert.match(previewView, /private readonly copyPreviewArticle:/);
+	assert.match(previewView, /await this\.copyPreviewArticle\(\)/);
+	assert.doesNotMatch(previewView, /await this\.clipboardService\.copyArticle\(this\.article\)/);
+});
+
 test('uses one tooltip source for preview icon buttons', () => {
 	assert.match(previewView, /'aria-label': '上传到公众号草稿箱'/);
 	assert.match(previewView, /'aria-label': '设置'/);

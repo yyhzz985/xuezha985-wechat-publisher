@@ -7,6 +7,7 @@ const settingsTab = readFileSync('src/view/SettingsTab.ts', 'utf8');
 const main = readFileSync('src/main.ts', 'utf8');
 const settings = readFileSync('src/settings.ts', 'utf8');
 const styleUtils = readFileSync('src/utils/styleUtils.ts', 'utf8');
+const styles = readFileSync('styles.css', 'utf8');
 const entitlementService = readFileSync('src/service/EntitlementService.ts', 'utf8');
 const issueLicenseScript = readFileSync('worker/scripts/issue-license.ps1', 'utf8');
 const worker = readFileSync('worker/src/index.ts', 'utf8');
@@ -55,6 +56,22 @@ test('shows pro license controls without dangerous local storage clearing', () =
 	assert.doesNotMatch(settingsTab, /清空本地设置/);
 	assert.doesNotMatch(main, /请先填写授权服务 URL/);
 	assert.doesNotMatch(entitlementService, /请先填写授权服务 URL/);
+});
+
+test('locks wechat api settings and avatar upload behind pro entitlement', () => {
+	assert.match(settingsTab, /hasWechatUploadEntitlement/);
+	assert.match(previewView, /hasWechatUploadEntitlement/);
+	assert.match(settingsTab, /createProGatedSection/);
+	assert.match(previewView, /createProGatedSection/);
+	assert.match(settingsTab, /wechat-publisher-pro-gated-section/);
+	assert.match(previewView, /wechat-publisher-pro-gated-section/);
+	assert.match(settingsTab, /wechat-publisher-pro-gated-overlay/);
+	assert.match(previewView, /wechat-publisher-pro-gated-overlay/);
+	assert.match(settingsTab, /setDisabled\(!canUseWechatUpload\)/);
+	assert.match(previewView, /button\.disabled = !enabled/);
+	assert.match(styles, /\.wechat-publisher-pro-gated-section\.is-locked \.wechat-publisher-pro-gated-content/);
+	assert.match(styles, /filter:\s*blur/);
+	assert.match(styles, /\.wechat-publisher-pro-gated-overlay/);
 });
 
 test('wires license refresh and entitlement status through main without purchase page', () => {

@@ -44,7 +44,7 @@ interface EntitlementServiceOptions {
 }
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-const PRO_REQUIRED_MESSAGE = '公众号上传是 Pro 功能，请在设置中填写 Pro License Key';
+export const PRO_REQUIRED_MESSAGE = '需 Pro 授权后可用';
 
 export class EntitlementService {
 	private readonly now: () => Date;
@@ -120,14 +120,13 @@ export class EntitlementService {
 	}
 
 	getCachedStatus(): EntitlementStatus {
+		if (!this.getSettings().licenseKey.trim()) {
+			return this.freeStatus();
+		}
+
 		const cache = this.getSettings().entitlementCache;
 		if (!cache) {
-			return {
-				active: false,
-				plan: 'free',
-				features: [],
-				expiresAt: '',
-			};
+			return this.freeStatus();
 		}
 
 		return {
@@ -152,6 +151,15 @@ export class EntitlementService {
 			maxDevices: response.maxDevices,
 			usedDevices: response.usedDevices,
 			deviceBound: response.deviceBound,
+		};
+	}
+
+	private freeStatus(): EntitlementStatus {
+		return {
+			active: false,
+			plan: 'free',
+			features: [],
+			expiresAt: '',
 		};
 	}
 

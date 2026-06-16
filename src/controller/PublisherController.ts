@@ -2,6 +2,7 @@ import type { MarkdownView, Plugin } from 'obsidian';
 import type { PluginSettings, ProFeature } from '../settings';
 import { ClipboardService } from '../service/ClipboardService';
 import type { EntitlementStatus } from '../service/EntitlementService';
+import { PreviewImageService, type PreviewImageResolver } from '../service/PreviewImageService';
 import type { LocalImageAsset } from '../service/WeChatDraftService';
 import { type FormattedWeChatArticle, WeChatFormatService } from '../service/WeChatFormatService';
 import { formatMarkdownSelection, type MarkdownFormatAction } from '../utils/markdownEditUtils';
@@ -21,6 +22,11 @@ type DraftService = {
 		settings: PluginSettings,
 		context?: { sourcePath?: string },
 	): Promise<{ mediaId: string }>;
+	prepareArticleImages?(
+		article: FormattedWeChatArticle,
+		settings: PluginSettings,
+		context?: { sourcePath?: string },
+	): Promise<FormattedWeChatArticle>;
 	uploadCoverImage(asset: LocalImageAsset, settings: PluginSettings): Promise<{ mediaId: string; url: string }>;
 	uploadAvatarImage(asset: LocalImageAsset, settings: PluginSettings): Promise<{ url: string }>;
 };
@@ -47,7 +53,9 @@ const allowAllEntitlementGate: EntitlementGate = {
 
 export class PublisherController {
 	private lastPreviewMarkdown = '';
+	private lastPreviewSourcePath = '';
 	private lastMarkdownView: MarkdownView | null = null;
+	private readonly previewImageService: PreviewImageService;
 
 	constructor(
 		private readonly plugin: Plugin,
@@ -70,7 +78,10 @@ export class PublisherController {
 			},
 		},
 		private readonly entitlementService: EntitlementGate = allowAllEntitlementGate,
-	) {}
+		previewImageResolver?: PreviewImageResolver,
+	) {
+		this.previewImageService = new PreviewImageService(previewImageResolver);
+	}
 
 	register(): void {
 		this.plugin.addCommand({
@@ -159,7 +170,7 @@ export class PublisherController {
 		const view = this.plugin.app.workspace.getActiveViewOfType(this.markdownViewType);
 		if (!view) {
 			if (this.lastPreviewMarkdown.trim()) {
-				this.renderPreview(this.lastPreviewMarkdown, false);
+				this.renderPreview(this.lastPreviewMarkdown, this.lastPreviewSourcePath, false);
 			}
 			return;
 		}
@@ -188,6 +199,30 @@ export class PublisherController {
 		}
 
 		return this.uploadDraftFromView(view);
+	}
+
+	async copyPreviewArticle(): Promise<void> {
+		const view = this.getCurrentMarkdownView();
+		const markdown = view ? this.readMarkdownForPreview(view) : this.lastPreviewMarkdown;
+		const sourcePath = view?.file?.path ?? this.lastPreviewSourcePath;
+		if (!markdown.trim()) {
+			this.noticeView.showEmpty();
+			return;
+		}
+
+		try {
+			const settings = this.getSettings();
+			const article = await this.prepareArticleForCopy(
+				this.formatService.format(markdown, settings),
+				settings,
+				sourcePath,
+			);
+			await this.clipboardService.copyArticle(article);
+			this.noticeView.showSuccess();
+		} catch (error) {
+			console.error('[WeChat Publisher] copy failed', error);
+			this.noticeView.showError(error);
+		}
 	}
 
 	async uploadCoverImage(file: File): Promise<{ mediaId: string; url: string }> {
@@ -225,13 +260,35 @@ export class PublisherController {
 		}
 
 		try {
-			const article = this.formatService.format(markdown, this.getSettings());
+			const settings = this.getSettings();
+			const article = await this.prepareArticleForCopy(
+				this.formatService.format(markdown, settings),
+				settings,
+				view.file?.path,
+			);
 			await this.clipboardService.copyArticle(article);
 			this.noticeView.showSuccess();
 		} catch (error) {
 			console.error('[WeChat Publisher] copy failed', error);
 			this.noticeView.showError(error);
 		}
+	}
+
+	private async prepareArticleForCopy(
+		article: FormattedWeChatArticle,
+		settings: PluginSettings,
+		sourcePath: string | undefined,
+	): Promise<FormattedWeChatArticle> {
+		if (!this.draftService.prepareArticleImages || !this.hasWechatUploadEntitlement()) {
+			return article;
+		}
+
+		return this.draftService.prepareArticleImages(article, settings, { sourcePath });
+	}
+
+	private hasWechatUploadEntitlement(): boolean {
+		const status = this.entitlementService.getCachedStatus();
+		return status.active && status.plan === 'pro' && status.features.includes('wechat_upload');
 	}
 
 	private async uploadDraftFromView(view: MarkdownView): Promise<void> {
@@ -261,30 +318,35 @@ export class PublisherController {
 	private previewFromView(view: MarkdownView): void {
 		const markdown = this.readMarkdownForPreview(view);
 		this.lastPreviewMarkdown = markdown;
+		this.lastPreviewSourcePath = view.file?.path ?? '';
 		this.lastMarkdownView = view;
 		if (!markdown.trim()) {
 			this.noticeView.showEmpty();
 			return;
 		}
 
-		this.renderPreview(markdown, true);
+		this.renderPreview(markdown, this.lastPreviewSourcePath, true);
 	}
 
 	private updatePreviewFromView(view: MarkdownView, reveal: boolean): void {
 		const markdown = this.readMarkdownForPreview(view);
 		this.lastPreviewMarkdown = markdown;
+		this.lastPreviewSourcePath = view.file?.path ?? '';
 		this.lastMarkdownView = view;
 		if (!markdown.trim()) {
 			void this.previewArticle(null, reveal);
 			return;
 		}
 
-		this.renderPreview(markdown, reveal);
+		this.renderPreview(markdown, this.lastPreviewSourcePath, reveal);
 	}
 
-	private renderPreview(markdown: string, reveal: boolean): void {
+	private renderPreview(markdown: string, sourcePath: string, reveal: boolean): void {
 		try {
-			const article = this.formatService.format(markdown, this.getSettings());
+			const article = this.previewImageService.rewriteLocalImages(
+				this.formatService.format(markdown, this.getSettings()),
+				sourcePath,
+			);
 			void this.previewArticle(article, reveal);
 		} catch (error) {
 			console.error('[WeChat Publisher] preview failed', error);

@@ -13,7 +13,7 @@
 打开下载页，下载最新版本里的 zip 文件，例如：
 
 ```text
-xuezha985-wechat-publisher-0.1.0.zip
+xuezha985-wechat-publisher-0.1.1.zip
 ```
 
 不要下载 GitHub 页面上的 `Source code`，那个是源码包，不是 Obsidian 插件安装包。
@@ -106,13 +106,16 @@ xuezha985-wechat-publisher
 
 ## 8. Pro 激活
 
-免费功能可以预览和复制排版 HTML。
+免费功能可以预览和复制排版 HTML，不需要公众号 AppID / AppSecret。
+
+免费复制时，网络图片链接会保留；本地图片只会在 Obsidian 预览里显示，手动粘贴到公众号后台后不会显示。要让本地图片粘贴后也显示，需要 Pro 上传图片能力。
 
 Pro 功能包括：
 
 - 上传到公众号草稿箱
 - 上传封面图
 - 上传头像图
+- 复制时自动上传本地图片并替换成微信图片 URL
 
 有 Pro 激活码后：
 
@@ -120,7 +123,9 @@ Pro 功能包括：
 2. 找到 `License Key`
 3. 填入激活码
 4. 点击 `校验授权`
-5. 授权成功后即可使用上传功能
+5. 授权成功后，公众号接口配置区会解锁；配置 AppID / AppSecret 后即可使用上传功能
+
+未激活 Pro 时，公众号接口配置区会被锁定，不能填写 AppID / AppSecret。手动填写头像 URL 仍是免费功能；点击“上传头像图”选择本地图片是 Pro 功能。
 
 ## 9. 常见问题
 
@@ -137,7 +142,7 @@ Pro 功能包括：
 最常见错误是多了一层目录，例如：
 
 ```text
-.obsidian/plugins/xuezha985-wechat-publisher/xuezha985-wechat-publisher-0.1.0/manifest.json
+.obsidian/plugins/xuezha985-wechat-publisher/xuezha985-wechat-publisher-0.1.1/manifest.json
 ```
 
 这种目录结构是不对的。
@@ -155,3 +160,15 @@ Pro 功能包括：
 上传草稿箱是 Pro 功能，并且需要配置公众号 AppID、AppSecret、默认封面 media_id 和 IP 白名单。
 
 如果只是复制排版到公众号后台，不需要配置公众号 API。
+
+### 复制成功，但图片没显示
+
+先看图片类型：
+
+- 网络图片链接：只要微信后台能访问，复制后仍会显示
+- 本地图片：免费复制不会上传本地文件，所以粘贴到公众号后台后不会显示
+
+解决方式：
+
+- 使用 Pro 的复制或上传草稿箱功能，让插件自动把本地图片上传到微信公众号
+- 或者先把图片放到可公开访问的图床，再在 Markdown 里使用网络图片链接

@@ -15,7 +15,6 @@ import {
 	type PluginSettings,
 	type SubheadingStyle,
 } from '../settings';
-import type { ClipboardService } from '../service/ClipboardService';
 import type { EntitlementStatus } from '../service/EntitlementService';
 import type { FormattedWeChatArticle } from '../service/WeChatFormatService';
 import { formatLicenseStatus } from '../utils/licenseDisplayUtils';
@@ -91,10 +90,10 @@ export class WeChatPublisherPreviewView extends ItemView {
 
 	constructor(
 		leaf: WorkspaceLeaf,
-		private readonly clipboardService: ClipboardService,
 		private readonly noticeView: NoticeView,
 		private readonly getSettings: () => PluginSettings,
 		private readonly saveSettings: (settings: PluginSettings) => Promise<void>,
+		private readonly copyPreviewArticle: () => Promise<void> = async () => {},
 		private readonly applyFormat: (action: MarkdownFormatAction) => void = () => {},
 		private readonly uploadDraft: () => Promise<void> = async () => {},
 		private readonly uploadCoverImage: (file: File) => Promise<{ mediaId: string; url: string }> = async () => {
@@ -281,6 +280,7 @@ export class WeChatPublisherPreviewView extends ItemView {
 		}
 
 		const settings = this.getSettings();
+		const canUseWechatUpload = this.hasWechatUploadEntitlement();
 		this.settingsPanel.empty();
 
 		const header = this.settingsPanel.createDiv({ cls: 'wechat-publisher-inline-settings-header' });
@@ -313,7 +313,7 @@ export class WeChatPublisherPreviewView extends ItemView {
 		this.addText(content, '头像 URL', 'https://...', settings.avatarUrl, (value) =>
 			this.savePatch({ avatarUrl: value.trim() }),
 		);
-		this.addAvatarUpload(content);
+		this.addAvatarUpload(content, canUseWechatUpload);
 
 		content.createDiv({ cls: 'wechat-publisher-settings-divider' });
 		content.createEl('h4', { text: 'Pro 授权' });
@@ -324,32 +324,36 @@ export class WeChatPublisherPreviewView extends ItemView {
 		this.addLicenseRefresh(content);
 
 		content.createDiv({ cls: 'wechat-publisher-settings-divider' });
-		content.createEl('h4', { text: '公众号接口' });
-		content.createEl('p', {
+		const wechatContent = this.createProGatedSection(content, canUseWechatUpload);
+		wechatContent.createEl('h4', { text: '公众号接口' });
+		wechatContent.createEl('p', {
 			cls: 'wechat-publisher-settings-help',
 			text: '用于上传到草稿箱。AppSecret 会明文保存在当前库的插件数据里。',
 		});
-		this.addText(content, 'AppID', '公众号 AppID', settings.wechatAppId, (value) =>
+		this.addText(wechatContent, 'AppID', '公众号 AppID', settings.wechatAppId, (value) =>
 			this.savePatch({ wechatAppId: value.trim() }),
 		);
 		this.addText(
-			content,
+			wechatContent,
 			'AppSecret',
 			'公众号 AppSecret',
 			settings.wechatAppSecret,
 			(value) => this.savePatch({ wechatAppSecret: value.trim() }),
 			'password',
 		);
-		this.addText(content, '默认封面 media_id', '永久素材 media_id', settings.wechatThumbMediaId, (value) =>
+		this.addText(wechatContent, '默认封面 media_id', '永久素材 media_id', settings.wechatThumbMediaId, (value) =>
 			this.savePatch({ wechatThumbMediaId: value.trim() }),
 		);
-		this.addCoverUpload(content);
-		this.addText(content, '原文链接', 'https://...', settings.wechatSourceUrl, (value) =>
+		this.addCoverUpload(wechatContent);
+		this.addText(wechatContent, '原文链接', 'https://...', settings.wechatSourceUrl, (value) =>
 			this.savePatch({ wechatSourceUrl: value.trim() }),
 		);
-		this.addToggle(content, '开启评论', '上传草稿时允许文章留言评论', settings.wechatNeedOpenComment, (value) =>
+		this.addToggle(wechatContent, '开启评论', '上传草稿时允许文章留言评论', settings.wechatNeedOpenComment, (value) =>
 			this.savePatch({ wechatNeedOpenComment: value }),
 		);
+		if (!canUseWechatUpload) {
+			this.disableControls(wechatContent);
+		}
 
 		const resetLayoutButton = content.createEl('button', {
 			cls: 'wechat-publisher-clear-button',
@@ -513,6 +517,31 @@ export class WeChatPublisherPreviewView extends ItemView {
 		return field;
 	}
 
+	private hasWechatUploadEntitlement(): boolean {
+		const status = this.getEntitlementStatus();
+		return status.active && status.plan === 'pro' && status.features.includes('wechat_upload');
+	}
+
+	private createProGatedSection(container: HTMLElement, enabled: boolean): HTMLElement {
+		const section = container.createDiv({
+			cls: enabled ? 'wechat-publisher-pro-gated-section' : 'wechat-publisher-pro-gated-section is-locked',
+		});
+		const content = section.createDiv({ cls: 'wechat-publisher-pro-gated-content' });
+		if (!enabled) {
+			section.createDiv({
+				cls: 'wechat-publisher-pro-gated-overlay',
+				text: '需 Pro 授权后可用',
+			});
+		}
+		return content;
+	}
+
+	private disableControls(container: HTMLElement): void {
+		container.querySelectorAll('input, button, select, textarea').forEach((control) => {
+			(control as HTMLInputElement | HTMLButtonElement | HTMLSelectElement | HTMLTextAreaElement).disabled = true;
+		});
+	}
+
 	private addLicenseStatus(container: HTMLElement): void {
 		const status = this.getEntitlementStatus();
 		container.createEl('p', {
@@ -550,12 +579,17 @@ export class WeChatPublisherPreviewView extends ItemView {
 		});
 	}
 
-	private addAvatarUpload(container: HTMLElement): void {
+	private addAvatarUpload(container: HTMLElement, enabled = true): void {
 		const button = container.createEl('button', {
 			cls: 'wechat-publisher-upload-avatar-button',
 			text: '上传头像图',
 		});
 		button.type = 'button';
+		button.disabled = !enabled;
+		if (!enabled) {
+			button.title = '需 Pro 授权后可用';
+			button.setAttribute('aria-disabled', 'true');
+		}
 		button.addEventListener('click', () => {
 			this.pickAvatarImage();
 		});
@@ -636,8 +670,7 @@ export class WeChatPublisherPreviewView extends ItemView {
 		}
 
 		try {
-			await this.clipboardService.copyArticle(this.article);
-			this.noticeView.showSuccess();
+			await this.copyPreviewArticle();
 		} catch (error) {
 			this.noticeView.showError(error);
 		}

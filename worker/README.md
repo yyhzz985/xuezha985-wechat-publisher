@@ -110,8 +110,8 @@ CSV 字段：
 $body = @{
   licenseKey = "PRO-xxxx"
   deviceId = "codex-check"
-  pluginId = "wechat-publisher"
-  pluginVersion = "0.1.0"
+  pluginId = "xuezha985-wechat-publisher"
+  pluginVersion = "0.1.1"
   feature = "wechat_upload"
 } | ConvertTo-Json
 

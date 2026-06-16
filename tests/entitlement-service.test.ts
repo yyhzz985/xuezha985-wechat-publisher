@@ -70,6 +70,33 @@ test('allows pro feature from fresh cached entitlement', async () => {
 	});
 });
 
+test('ignores cached pro entitlement when license key is empty', async () => {
+	const { service } = createService(
+		{
+			...DEFAULT_SETTINGS,
+			deviceId: 'device-1',
+			licenseKey: '',
+			entitlementCache: PRO_CACHE,
+		},
+		{
+			async verify() {
+				throw new Error('should not request without license key');
+			},
+		},
+	);
+
+	assert.deepEqual(service.getCachedStatus(), {
+		active: false,
+		plan: 'free',
+		features: [],
+		expiresAt: '',
+	});
+	await assert.rejects(
+		() => service.ensureFeature('wechat_upload'),
+		/需 Pro 授权后可用/,
+	);
+});
+
 test('refreshes license and saves pro cache when no fresh cache exists', async () => {
 	const { service, saved } = createService(
 		{

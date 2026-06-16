@@ -1,5 +1,6 @@
 import type { PluginSettings } from '../settings';
 import { extractArticleMetadata } from '../utils/articleMetadataUtils';
+import { isVaultLocalImageSource } from '../utils/imageSourceUtils';
 import { escapeHtml } from '../utils/textUtils';
 import type { FormattedWeChatArticle } from './WeChatFormatService';
 
@@ -90,6 +91,20 @@ export class WeChatDraftService {
 		const articleWithImages = await this.uploadArticleImages(accessToken, article, context);
 		const response = await this.addDraft(accessToken, articleWithImages, markdown, settings);
 		return { mediaId: response.media_id };
+	}
+
+	async prepareArticleImages(
+		article: FormattedWeChatArticle,
+		settings: PluginSettings,
+		context: DraftUploadContext = {},
+	): Promise<FormattedWeChatArticle> {
+		if (this.extractArticleImageSources(article.html).length === 0) {
+			return article;
+		}
+
+		this.assertApiSettings(settings);
+		const accessToken = await this.getAccessToken(settings);
+		return this.uploadArticleImages(accessToken, article, context);
 	}
 
 	async uploadCoverImage(asset: LocalImageAsset, settings: PluginSettings): Promise<WeChatCoverImageResult> {
@@ -238,18 +253,14 @@ export class WeChatDraftService {
 		});
 	}
 
-	private isLocalImageSource(src: string): boolean {
-		return !/^(https?:|data:|\/\/)/i.test(src);
-	}
-
 	private shouldUploadArticleImageSource(src: string): boolean {
-		if (!src || /^data:/i.test(src) || /^\/\//.test(src)) {
+		if (!src || /^\/\//.test(src)) {
 			return false;
 		}
 		if (/^https?:\/\//i.test(src)) {
 			return !this.isWeChatHostedImageSource(src);
 		}
-		return this.isLocalImageSource(src);
+		return isVaultLocalImageSource(src);
 	}
 
 	private isWeChatHostedImageSource(src: string): boolean {

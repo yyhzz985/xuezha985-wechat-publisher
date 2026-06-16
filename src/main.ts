@@ -46,16 +46,17 @@ export default class WeChatPublisherPlugin extends Plugin {
 			clipboardService,
 			draftService,
 			entitlementService,
+			imageRepository,
 		);
 
 		this.registerView(
 			VIEW_TYPE_WECHAT_PUBLISHER_PREVIEW,
 			(leaf) => new WeChatPublisherPreviewView(
 				leaf,
-				clipboardService,
 				noticeView,
 				() => this.settings,
 				(settings) => this.saveSettings(settings),
+				() => this.publisherController.copyPreviewArticle(),
 				(action) => this.publisherController.applyFormat(action),
 				() => this.publisherController.uploadDraft(),
 				(file) => this.publisherController.uploadCoverImage(file),
