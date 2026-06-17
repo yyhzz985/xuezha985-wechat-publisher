@@ -149,13 +149,19 @@ test('switches h2 and h3 subheading markers', () => {
 test('keeps wechat links and rewrites external links', () => {
 	const service = new WeChatFormatService();
 	const result = service.format(
-		`[内链](https://mp.weixin.qq.com/s/example) 和 [外链](https://example.com/path)。`,
+		`[内链](https://mp.weixin.qq.com/s/example) 和 [外链](https://example.com/path)。
+
+原始外链 https://mp.knb.im/ 也要突出显示。`,
 		DEFAULT_SETTINGS,
 	);
 
 	assert.match(result.html, /href="https:\/\/mp\.weixin\.qq\.com\/s\/example"/);
 	assert.equal(result.html.includes('href="https://example.com/path"'), false);
-	assert.match(result.html, /外链（https:\/\/example\.com\/path）/);
+	assert.match(result.html, /class="knb-external-link-text"/);
+	assert.match(result.html, /class="knb-external-link-url"/);
+	assert.match(result.html, /color: #2f63b7/);
+	assert.match(result.html, /https:\/\/example\.com\/path/);
+	assert.match(result.html, /https:\/\/mp\.knb\.im\//);
 });
 
 test('adds reading meta when enabled', () => {
@@ -178,7 +184,8 @@ test('escapes fenced code block html', () => {
 	const result = service.format('```html\n<div>hi</div>\n```', DEFAULT_SETTINGS);
 
 	assert.equal(result.html.includes('<div>hi</div>'), false);
-	assert.match(result.html, /&lt;div&gt;hi&lt;\/div&gt;/);
+	assert.match(result.html, /&lt;/);
+	assert.match(result.html, /&gt;hi&lt;\//);
 });
 
 test('renders fenced code blocks with horizontal scrolling and line numbers', () => {
@@ -206,10 +213,33 @@ my-app/
 	assert.match(result.html, /class="code-scroll-area"/);
 	assert.equal(result.html.includes('class="code-scrollbar-track"'), false);
 	assert.equal(result.html.includes('class="code-scrollbar-thumb"'), false);
-	assert.match(result.html, /1&nbsp;&nbsp;my-app\//);
-	assert.match(result.html, /2&nbsp;&nbsp;.*public\//);
+	assert.match(result.html, /class="code-line-number"[^>]*>1<\/span>/);
+	assert.match(result.html, /class="code-line-content"[^>]*>my-app\//);
+	assert.match(result.html, /class="code-line-number"[^>]*>2<\/span>/);
+	assert.match(result.html, /public\//);
 	assert.equal(result.html.includes('class="line-no"'), false);
 	assert.equal(result.html.includes('display: inline-block; min-width: max-content'), false);
+});
+
+test('renders shiki syntax highlighting for fenced code blocks', () => {
+	const service = new WeChatFormatService();
+	const result = service.format(`\`\`\`js
+function greet(name) {
+  return \`Hello, ${'${name}'}!\`
+}
+
+console.log(greet('世界'))
+\`\`\`
+`, {
+		...DEFAULT_SETTINGS,
+		codeTheme: 'dark',
+	});
+
+	assert.match(result.html, /class="shiki github-dark"/);
+	assert.match(result.html, /class="code-line-number"/);
+	assert.match(result.html, /style="color:#F97583">function<\/span>/);
+	assert.match(result.html, /style="color:#B392F0">greet<\/span>/);
+	assert.match(result.html, /console\./);
 });
 
 test('renders obsidian image embeds as article images', () => {
@@ -217,6 +247,17 @@ test('renders obsidian image embeds as article images', () => {
 	const result = service.format('![[attachments/photo one.png|封面图]]', DEFAULT_SETTINGS);
 
 	assert.match(result.html, /<img src="attachments\/photo%20one\.png" alt="封面图"/);
+});
+
+test('renders image captions below markdown images', () => {
+	const service = new WeChatFormatService();
+	const result = service.format('![一张示例图片](https://mp.knb.im/light.jpg)', DEFAULT_SETTINGS);
+
+	assert.match(result.html, /class="knb-image-figure"/);
+	assert.match(result.html, /<img src="https:\/\/mp\.knb\.im\/light\.jpg" alt="一张示例图片"/);
+	assert.match(result.html, /class="knb-image-caption"/);
+	assert.match(result.html, /font-size: 13px/);
+	assert.match(result.html, />一张示例图片<\/p>/);
 });
 
 test('renders knb special containers', () => {
@@ -351,4 +392,16 @@ test('renders knb inline extensions and task list', () => {
 	assert.match(result.html, /<sup/);
 	assert.match(result.html, /✅/);
 	assert.match(result.html, /⬜/);
+});
+
+test('renders emoji shortcodes', () => {
+	const service = new WeChatFormatService();
+	const result = service.format('写文章可以用 emoji 短代码： :smile: :rocket: :sparkles: :tada: :star:', DEFAULT_SETTINGS);
+
+	assert.doesNotMatch(result.html, /:smile:/);
+	assert.match(result.html, /😄|😃|😊/);
+	assert.match(result.html, /🚀/);
+	assert.match(result.html, /✨/);
+	assert.match(result.html, /🎉/);
+	assert.match(result.html, /⭐/);
 });

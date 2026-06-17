@@ -15,6 +15,7 @@ GitHub 仓库地址：[https://github.com/yyhzz985/xuezha985-wechat-publisher](h
 - 支持当前整篇笔记或选中文本
 - 自动去掉 YAML frontmatter
 - 支持标题、段落、粗体、斜体、引用、列表、图片、分割线、链接、代码块、表格、脚注
+- 支持 Shiki 代码语法高亮、外站链接蓝色文字展示、图片说明小字和 emoji 短代码
 - 本地图片预览按 Obsidian 当前笔记解析，不绑定固定附件目录
 - 支持专有格式：全能导航、摘要、高亮、提示、说明、笔记、注意、危险、独白、多角色对话
 - 专有容器兼容 `:::tip` 和 `::: tip` 两种写法
@@ -35,7 +36,7 @@ GitHub 仓库地址：[https://github.com/yyhzz985/xuezha985-wechat-publisher](h
 下载最新版本里的 zip 文件，例如：
 
 ```text
-xuezha985-wechat-publisher-0.1.2.zip
+xuezha985-wechat-publisher-0.1.3.zip
 ```
 
 ### 第二步：解压文件
@@ -142,7 +143,7 @@ xuezha985-wechat-publisher
 最常见错误是多了一层目录，例如：
 
 ```text
-.obsidian/plugins/xuezha985-wechat-publisher/xuezha985-wechat-publisher-0.1.2/manifest.json
+.obsidian/plugins/xuezha985-wechat-publisher/xuezha985-wechat-publisher-0.1.3/manifest.json
 ```
 
 这种是不对的。
@@ -215,6 +216,7 @@ BRAT 适合自动更新；普通用户推荐优先使用上面的手动安装方
 ![本地图片](assets/image.png)
 ![[Obsidian图片.png]]
 [链接文字](https://example.com)
+:smile: :rocket: :sparkles:
 
 带脚注的文字[^1]
 
@@ -228,6 +230,10 @@ BRAT 适合自动更新；普通用户推荐优先使用上面的手动安装方
 console.log('hello');
 ```
 ````
+
+代码块会使用 Shiki 自动语法高亮；Markdown 图片的说明文字会显示为图片下方的小字。
+
+外站链接会改写为蓝色的 `文字（URL）` 形式；公众号内链会保留可点击链接。
 
 ## 专有格式
 

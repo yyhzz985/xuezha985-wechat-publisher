@@ -13,7 +13,7 @@
 打开下载页，下载最新版本里的 zip 文件，例如：
 
 ```text
-xuezha985-wechat-publisher-0.1.2.zip
+xuezha985-wechat-publisher-0.1.3.zip
 ```
 
 不要下载 GitHub 页面上的 `Source code`，那个是源码包，不是 Obsidian 插件安装包。
@@ -98,6 +98,8 @@ xuezha985-wechat-publisher
 4. 写完后点击右上角复制图标
 5. 到微信公众号后台编辑器里粘贴即可
 
+当前版本支持代码语法高亮、外站链接蓝色文字展示、图片说明小字和 emoji 短代码。
+
 右上角按钮从左到右依次是：
 
 ```text
@@ -142,7 +144,7 @@ Pro 功能包括：
 最常见错误是多了一层目录，例如：
 
 ```text
-.obsidian/plugins/xuezha985-wechat-publisher/xuezha985-wechat-publisher-0.1.2/manifest.json
+.obsidian/plugins/xuezha985-wechat-publisher/xuezha985-wechat-publisher-0.1.3/manifest.json
 ```
 
 这种目录结构是不对的。

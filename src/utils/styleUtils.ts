@@ -34,6 +34,8 @@ export const listItemStyle = 'margin: 0.4em 0; line-height: 28px;';
 export const listItemContentStyle = 'color: rgb(43, 43, 43); font-size: 15px; line-height: 28px; letter-spacing: 1px;';
 
 export const linkStyle = 'color: rgb(41, 148, 128); text-decoration: none; border-bottom: 1px solid rgba(41, 148, 128, 0.25);';
+export const externalLinkTextStyle = 'color: #2f63b7; text-decoration: none;';
+export const externalLinkUrlStyle = 'color: #2f63b7; text-decoration: none; letter-spacing: 0;';
 export const footnoteRefStyle = 'color: rgb(41, 148, 128); font-size: 0.78em; line-height: 1; vertical-align: super; margin-left: 1px;';
 export const footnotesStyle = 'margin: 1.8em 8px 0; padding-top: 0.75em; border-top: 1px dashed rgb(41, 148, 128); color: rgb(43, 43, 43); font-size: 13px; line-height: 24px; letter-spacing: 1px;';
 export const footnoteItemStyle = 'margin: 0.35em 0; padding: 0; color: rgb(43, 43, 43); font-size: 13px; line-height: 24px; letter-spacing: 1px; text-align: left;';
@@ -59,8 +61,12 @@ export function codeTagStyle(widthPx: number): string {
 }
 
 export const codeLineTextStyle = 'margin: 0; padding: 0; color: inherit; font-size: 13px; line-height: 19px; letter-spacing: 0; text-align: left; white-space: nowrap; word-break: keep-all; overflow-wrap: normal;';
+export const codeLineNumberStyle = 'display: inline-block; width: 2.2em; margin-right: 0.8em; color: #6a737d; text-align: right; user-select: none;';
+export const codeLineContentStyle = 'display: inline; color: inherit;';
 
-export const imageStyle = 'display: block; max-width: 100%; margin: 1.2em auto; border-radius: 0;';
+export const imageFigureStyle = 'margin: 1.2em 8px; padding: 0; text-align: center;';
+export const imageStyle = 'display: block; max-width: 100%; margin: 0 auto; border-radius: 0;';
+export const imageCaptionStyle = 'margin: 0.45em 0 0; color: #8a8a8a; font-size: 13px; line-height: 1.6; text-align: center; letter-spacing: 0;';
 
 export const hrStyle = 'margin: 2em 8px; border: 0; border-top: 1px dashed rgb(41, 148, 128);';
 
@@ -142,6 +148,8 @@ export interface WeChatStyleSet {
 	listItemStyle: string;
 	listItemContentStyle: string;
 	linkStyle: string;
+	externalLinkTextStyle: string;
+	externalLinkUrlStyle: string;
 	footnoteRefStyle: string;
 	footnotesStyle: string;
 	footnoteItemStyle: string;
@@ -154,7 +162,11 @@ export interface WeChatStyleSet {
 	codeScrollerStyle: string;
 	codeTagStyle(widthPx: number): string;
 	codeLineTextStyle: string;
+	codeLineNumberStyle: string;
+	codeLineContentStyle: string;
+	imageFigureStyle: string;
 	imageStyle: string;
+	imageCaptionStyle: string;
 	hrStyle: string;
 	introStyle: string;
 	introParagraphStyle: string;
@@ -331,6 +343,8 @@ export function createWeChatStyles(settings: PluginSettings): WeChatStyleSet {
 		listItemStyle,
 		listItemContentStyle: withContentWeight(applyPalette(listItemContentStyle, palette), contentWeight),
 		linkStyle: applyPalette(linkStyle, palette),
+		externalLinkTextStyle,
+		externalLinkUrlStyle,
 		footnoteRefStyle: applyPalette(footnoteRefStyle, palette),
 		footnotesStyle: withContentWeight(applyPalette(footnotesStyle, palette), contentWeight),
 		footnoteItemStyle: withContentWeight(applyPalette(footnoteItemStyle, palette), contentWeight),
@@ -343,7 +357,11 @@ export function createWeChatStyles(settings: PluginSettings): WeChatStyleSet {
 		codeScrollerStyle,
 		codeTagStyle,
 		codeLineTextStyle,
+		codeLineNumberStyle,
+		codeLineContentStyle,
+		imageFigureStyle,
 		imageStyle,
+		imageCaptionStyle,
 		hrStyle: applyPalette(hrStyle, palette),
 		introStyle: applyPalette(introStyle, palette),
 		introParagraphStyle: applyPalette(introParagraphStyle, palette),

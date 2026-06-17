@@ -1,6 +1,23 @@
 import MarkdownIt from 'markdown-it';
 import type Token from 'markdown-it/lib/token.mjs';
 import type { RenderRule } from 'markdown-it/lib/renderer.mjs';
+import { full as emojiPlugin } from 'markdown-it-emoji';
+import { createHighlighterCoreSync, type HighlighterCore } from 'shiki/core';
+import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
+import javascript from 'shiki/langs/javascript.mjs';
+import typescript from 'shiki/langs/typescript.mjs';
+import jsx from 'shiki/langs/jsx.mjs';
+import tsx from 'shiki/langs/tsx.mjs';
+import json from 'shiki/langs/json.mjs';
+import html from 'shiki/langs/html.mjs';
+import css from 'shiki/langs/css.mjs';
+import markdownLang from 'shiki/langs/markdown.mjs';
+import bash from 'shiki/langs/bash.mjs';
+import shellscript from 'shiki/langs/shellscript.mjs';
+import yaml from 'shiki/langs/yaml.mjs';
+import python from 'shiki/langs/python.mjs';
+import githubDark from 'shiki/themes/github-dark.mjs';
+import githubLight from 'shiki/themes/github-light.mjs';
 import type { CodeTheme, PluginSettings } from '../settings';
 import { isWeChatLink } from '../utils/linkUtils';
 import { normalizeObsidianImageEmbeds } from '../utils/obsidianImageUtils';
@@ -63,6 +80,53 @@ type ChatRoleIconMap = Map<string, number>;
 const CHAT_ICON_SYMBOLS = ['💬', '🗨️'];
 const CHAT_ICON_VARIANT_COUNT = CHAT_ICON_SYMBOLS.length;
 
+type ShikiToken = {
+	content: string;
+	color?: string;
+	fontStyle?: number;
+};
+
+type ShikiTokenLine = ShikiToken[];
+
+const CODE_LANGUAGE_ALIASES: Record<string, string> = {
+	js: 'javascript',
+	javascript: 'javascript',
+	mjs: 'javascript',
+	cjs: 'javascript',
+	ts: 'typescript',
+	typescript: 'typescript',
+	jsx: 'jsx',
+	tsx: 'tsx',
+	json: 'json',
+	html: 'html',
+	xml: 'html',
+	css: 'css',
+	md: 'markdown',
+	markdown: 'markdown',
+	bash: 'bash',
+	sh: 'shellscript',
+	shell: 'shellscript',
+	zsh: 'shellscript',
+	yml: 'yaml',
+	yaml: 'yaml',
+	py: 'python',
+	python: 'python',
+};
+
+let shikiHighlighter: HighlighterCore | null = null;
+
+function getShikiHighlighter(): HighlighterCore {
+	if (!shikiHighlighter) {
+		shikiHighlighter = createHighlighterCoreSync({
+			themes: [githubDark, githubLight],
+			langs: [javascript, typescript, jsx, tsx, json, html, css, markdownLang, bash, shellscript, yaml, python],
+			engine: createJavaScriptRegexEngine(),
+		});
+	}
+
+	return shikiHighlighter;
+}
+
 const CONTAINER_TITLES: Record<string, { icon: string; title: string }> = {
 	tip: { icon: '💡', title: '提示' },
 	info: { icon: 'ℹ️', title: '说明' },
@@ -106,6 +170,7 @@ export class WeChatFormatService {
 		});
 		const chatRoleIcons: ChatRoleIconMap = new Map();
 
+		md.use(emojiPlugin);
 		this.registerFootnoteRules(md, footnotes, styles);
 		this.registerContainerRule(md);
 		this.registerTocRule(md);
@@ -201,7 +266,7 @@ export class WeChatFormatService {
 			const href = tokens[index].attrGet('href') ?? '';
 			if (!isWeChatLink(href)) {
 				externalLinks.push(href);
-				return '';
+				return `<span class="knb-external-link-text" style="${styles.externalLinkTextStyle}">`;
 			}
 			return `<a href="${escapeHtml(href)}" style="${styles.linkStyle}">`;
 		};
@@ -209,7 +274,7 @@ export class WeChatFormatService {
 		md.renderer.rules.link_close = () => {
 			const href = externalLinks.pop();
 			if (href !== undefined) {
-				return `（${escapeHtml(href)}）`;
+				return `</span>（<span class="knb-external-link-url" style="${styles.externalLinkUrlStyle}">${escapeHtml(href)}</span>）`;
 			}
 			return '</a>';
 		};
@@ -217,7 +282,8 @@ export class WeChatFormatService {
 		md.renderer.rules.image = (tokens, index) => this.renderImage(tokens[index], styles);
 		md.renderer.rules.code_inline = (tokens, index) =>
 			`<code style="${styles.inlineCodeStyle}">${this.renderPlainInline(tokens[index].content)}</code>`;
-		md.renderer.rules.fence = (tokens, index) => this.renderCodeBlock(tokens[index].content, settings.codeTheme, styles);
+		md.renderer.rules.fence = (tokens, index) =>
+			this.renderCodeBlock(tokens[index].content, tokens[index].info, settings.codeTheme, styles);
 		md.renderer.rules.code_block = md.renderer.rules.fence as RenderRule;
 		md.renderer.rules.knb_container = (tokens, index) =>
 			this.renderContainer(tokens[index].info, tokens[index].content, md, styles, chatRoleIcons);
@@ -341,7 +407,7 @@ export class WeChatFormatService {
 	}
 
 	private renderText(text: string, styles: WeChatStyleSet): string {
-		const value = this.renderPlainInline(text);
+		const value = this.renderPlainInline(text, styles);
 		return value
 			.replace(/==(.+?)==/g, `<mark style="${styles.markStyle}">$1</mark>`)
 			.replace(/\+\+(.+?)\+\+/g, `<u style="${styles.underlineStyle}">$1</u>`)
@@ -351,8 +417,21 @@ export class WeChatFormatService {
 			.replace(/^\[\s\]\s+/, '⬜ ');
 	}
 
-	private renderPlainInline(text: string): string {
-		return escapeHtml(addCjkSpacing(text));
+	private renderPlainInline(text: string, styles?: WeChatStyleSet): string {
+		const escaped = escapeHtml(addCjkSpacing(text));
+		if (!styles) {
+			return escaped;
+		}
+		return this.renderRawExternalUrls(escaped, styles);
+	}
+
+	private renderRawExternalUrls(text: string, styles: WeChatStyleSet): string {
+		return text.replace(/https?:\/\/[^\s<）)]+/g, (url) => {
+			if (isWeChatLink(url)) {
+				return url;
+			}
+			return `<span class="knb-external-link-url" style="${styles.externalLinkUrlStyle}">${url}</span>`;
+		});
 	}
 
 	private renderIntroContent(content: string, md: MarkdownIt, styles: WeChatStyleSet): string {
@@ -371,7 +450,10 @@ export class WeChatFormatService {
 	private renderImage(token: Token, styles: WeChatStyleSet): string {
 		const src = token.attrGet('src') ?? '';
 		const alt = token.content ? ` alt="${this.renderPlainInline(token.content)}"` : '';
-		return `<img src="${escapeHtml(src)}"${alt} style="${styles.imageStyle}">`;
+		const caption = token.content
+			? `<p class="knb-image-caption" style="${styles.imageCaptionStyle}">${this.renderPlainInline(token.content)}</p>`
+			: '';
+		return `<section class="knb-image-figure" style="${styles.imageFigureStyle}"><img src="${escapeHtml(src)}"${alt} style="${styles.imageStyle}">${caption}</section>`;
 	}
 
 	private renderFootnotes(footnotes: FootnoteState, md: MarkdownIt, styles: WeChatStyleSet): string {
@@ -391,12 +473,21 @@ export class WeChatFormatService {
 		return `<section class="knb-footnotes" style="${styles.footnotesStyle}">${rows}</section>`;
 	}
 
-	private renderCodeBlock(content: string, theme: CodeTheme, styles: WeChatStyleSet): string {
+	private renderCodeBlock(content: string, info: string, theme: CodeTheme, styles: WeChatStyleSet): string {
 		const lines = content.replace(/\n$/, '').split('\n');
 		const numberWidth = String(lines.length).length;
+		const highlightedLines = this.highlightCodeLines(content, info, theme);
 		const rows = lines
-			.map((line, index) => `${String(index + 1).padStart(numberWidth, ' ')}  ${line}`)
-			.map((line) => `<p style="${styles.codeLineTextStyle}">${escapeHtmlPreservingSpaces(line)}</p>`)
+			.map((line, index) => {
+				const lineNumber = String(index + 1).padStart(numberWidth, ' ');
+				const lineContent = highlightedLines[index] ?? escapeHtmlPreservingSpaces(line);
+				return [
+					`<p style="${styles.codeLineTextStyle}">`,
+					`<span class="code-line-number" style="${styles.codeLineNumberStyle}">${lineNumber}</span>`,
+					`<span class="code-line-content" style="${styles.codeLineContentStyle}">${lineContent}</span>`,
+					'</p>',
+				].join('');
+			})
 			.join('');
 		const codeWidthPx = Math.max(
 			360,
@@ -411,6 +502,50 @@ export class WeChatFormatService {
 			'</section>',
 			'</section>',
 		].join('');
+	}
+
+	private highlightCodeLines(content: string, info: string, theme: CodeTheme): string[] {
+		const lang = this.normalizeCodeLanguage(info);
+		if (!lang) {
+			return content.replace(/\n$/, '').split('\n').map((line) => escapeHtmlPreservingSpaces(line));
+		}
+
+		try {
+			const highlighter = getShikiHighlighter();
+			const tokenLines = highlighter.codeToTokens(content.replace(/\n$/, ''), {
+				lang,
+				theme: theme === 'dark' ? 'github-dark' : 'github-light',
+			}).tokens as ShikiTokenLine[];
+			return tokenLines.map((line) => line.map((token) => this.renderShikiToken(token)).join(''));
+		} catch {
+			return content.replace(/\n$/, '').split('\n').map((line) => escapeHtmlPreservingSpaces(line));
+		}
+	}
+
+	private normalizeCodeLanguage(info: string): string | null {
+		const language = info.trim().split(/\s+/)[0]?.toLowerCase();
+		if (!language) {
+			return null;
+		}
+		return CODE_LANGUAGE_ALIASES[language] ?? null;
+	}
+
+	private renderShikiToken(token: ShikiToken): string {
+		const styles: string[] = [];
+		if (token.color) {
+			styles.push(`color:${token.color.toUpperCase()}`);
+		}
+		if (token.fontStyle !== undefined && token.fontStyle > 0 && (token.fontStyle & 1) === 1) {
+			styles.push('font-style:italic');
+		}
+		if (token.fontStyle !== undefined && token.fontStyle > 0 && (token.fontStyle & 2) === 2) {
+			styles.push('font-weight:700');
+		}
+		if (token.fontStyle !== undefined && token.fontStyle > 0 && (token.fontStyle & 4) === 4) {
+			styles.push('text-decoration:underline');
+		}
+		const styleAttr = styles.length > 0 ? ` style="${styles.join(';')}"` : '';
+		return `<span${styleAttr}>${escapeHtmlPreservingSpaces(token.content)}</span>`;
 	}
 
 	private renderContainer(

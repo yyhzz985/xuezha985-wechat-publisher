@@ -340,3 +340,16 @@
 - 构建产物已同步到 `D:\【仓库】obsidian笔记\X-Note\.obsidian\plugins\xuezha985-wechat-publisher`，只覆盖 `main.js`、`manifest.json`、`styles.css`，未触碰 `data.json`。
 - Review 查 Bug：修复限定在 Markdown 转公众号 HTML 的 Service 层和样式工具层，没有改 View、上传、授权、公众号接口和本地数据配置。
 - 第一性原理分析：问题本质是 Markdown 扩展语法解析缺失，不是预览 CSS 问题；最小修复是在解析层兼容用户实际写法，并给脚注补齐明确的文末输出。
+
+## 2026-06-17 v0.1.3 代码高亮、外链、图片说明与 emoji 修复
+
+- 恢复围栏代码块的 Shiki 语法高亮，支持亮色 / 暗色代码主题，并保留横向滚动和行号。
+- 恢复外站链接展示：公众号内链继续保留可点击；其他外站链接改写为蓝色 `文字（URL）`，裸外链也按蓝色 URL 展示。
+- 恢复 Markdown 图片说明：`![说明](url)` 会输出图片和下方小字说明；Obsidian 图片嵌入仍按当前笔记路径解析。
+- 恢复 emoji 短代码渲染：`:smile:`、`:rocket:`、`:sparkles:` 等会转换为真实 emoji。
+- 更新 `README.md`、`docs/install-guide.md`、`docs/plugin-help.md`、`worker/README.md`、版本元数据和文档测试，版本号升为 `0.1.3`。
+- 新增回归测试覆盖 Shiki 代码高亮、图片说明、emoji 短代码和文档同步，避免后续重新退回原样显示。
+- 验证：`npm test` 83 项通过；`npm run package:plugin` 通过，生成 `dist/xuezha985-wechat-publisher-0.1.3.zip`，SHA-256 为 `28E08AFDBBD130133EBC26867400F653E721009B309C88DE47D9FE13588A212F`。
+- BRAT 发布资产需要同时上传散装 `manifest.json`、`main.js`、`styles.css` 和手动安装 zip，避免 BRAT 找不到 release manifest。
+- Review 查 Bug：修复仍限定在 Markdown 转公众号 HTML 的 Service 层、样式工具层、文档和测试；没有改上传、授权、公众号 API、CI/CD 或本地密钥配置。
+- 第一性原理分析：这次问题本质是 Markdown 渲染能力缺口，不是粘贴或公众号接口问题；最小稳定路径是恢复解析层能力并用测试锁住输出 HTML。
