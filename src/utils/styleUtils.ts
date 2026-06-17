@@ -34,6 +34,11 @@ export const listItemStyle = 'margin: 0.4em 0; line-height: 28px;';
 export const listItemContentStyle = 'color: rgb(43, 43, 43); font-size: 15px; line-height: 28px; letter-spacing: 1px;';
 
 export const linkStyle = 'color: rgb(41, 148, 128); text-decoration: none; border-bottom: 1px solid rgba(41, 148, 128, 0.25);';
+export const footnoteRefStyle = 'color: rgb(41, 148, 128); font-size: 0.78em; line-height: 1; vertical-align: super; margin-left: 1px;';
+export const footnotesStyle = 'margin: 1.8em 8px 0; padding-top: 0.75em; border-top: 1px dashed rgb(41, 148, 128); color: rgb(43, 43, 43); font-size: 13px; line-height: 24px; letter-spacing: 1px;';
+export const footnoteItemStyle = 'margin: 0.35em 0; padding: 0; color: rgb(43, 43, 43); font-size: 13px; line-height: 24px; letter-spacing: 1px; text-align: left;';
+export const footnoteIndexStyle = 'display: inline-block; margin-right: 0.45em; color: rgb(41, 148, 128); font-weight: 600;';
+export const footnoteTextStyle = 'color: rgb(43, 43, 43);';
 
 export const inlineCodeStyle = 'margin: 0 2px; padding: 2px 5px; border-radius: 4px; background: rgba(41, 148, 128, 0.08); color: rgb(41, 148, 128); font-size: 14px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;';
 
@@ -137,6 +142,11 @@ export interface WeChatStyleSet {
 	listItemStyle: string;
 	listItemContentStyle: string;
 	linkStyle: string;
+	footnoteRefStyle: string;
+	footnotesStyle: string;
+	footnoteItemStyle: string;
+	footnoteIndexStyle: string;
+	footnoteTextStyle: string;
 	inlineCodeStyle: string;
 	markStyle: string;
 	underlineStyle: string;
@@ -321,6 +331,11 @@ export function createWeChatStyles(settings: PluginSettings): WeChatStyleSet {
 		listItemStyle,
 		listItemContentStyle: withContentWeight(applyPalette(listItemContentStyle, palette), contentWeight),
 		linkStyle: applyPalette(linkStyle, palette),
+		footnoteRefStyle: applyPalette(footnoteRefStyle, palette),
+		footnotesStyle: withContentWeight(applyPalette(footnotesStyle, palette), contentWeight),
+		footnoteItemStyle: withContentWeight(applyPalette(footnoteItemStyle, palette), contentWeight),
+		footnoteIndexStyle: withHeadingWeight(applyPalette(footnoteIndexStyle, palette), headingWeight),
+		footnoteTextStyle: withContentWeight(applyPalette(footnoteTextStyle, palette), contentWeight),
 		inlineCodeStyle: applyPalette(inlineCodeStyle, palette),
 		markStyle: applyPalette(markStyle, palette),
 		underlineStyle: applyPalette(underlineStyle, palette),

@@ -272,6 +272,34 @@ test('renders knb special containers', () => {
 	assert.equal((result.html.match(/>🗨️<\/span>/g) ?? []).length, 1);
 });
 
+test('renders knb special containers with a space after marker', () => {
+	const service = new WeChatFormatService();
+	const result = service.format(`::: tip
+这是一段提示。
+:::
+`, DEFAULT_SETTINGS);
+
+	assert.equal(result.html.includes('::: tip'), false);
+	assert.match(result.html, /knb-callout-tip/);
+	assert.match(result.html, /💡 提示/);
+	assert.match(result.html, /这是一段提示/);
+});
+
+test('renders footnotes as endnotes', () => {
+	const service = new WeChatFormatService();
+	const result = service.format(`正文里引用脚注[^1]。
+
+[^1]: 这是脚注内容。
+`, DEFAULT_SETTINGS);
+
+	assert.equal(result.html.includes('[^1]'), false);
+	assert.equal(result.html.includes('[^1]:'), false);
+	assert.match(result.html, /class="knb-footnote-ref"/);
+	assert.match(result.html, /class="knb-footnotes"/);
+	assert.match(result.html, /<span class="knb-footnote-index"/);
+	assert.match(result.html, /这是脚注内容/);
+});
+
 test('keeps markdown tables inside article margins', () => {
 	const service = new WeChatFormatService();
 	const result = service.format(`| 文件 | 作用 |

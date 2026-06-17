@@ -14,9 +14,10 @@ GitHub 仓库地址：[https://github.com/yyhzz985/xuezha985-wechat-publisher](h
 - 一键复制为微信公众号 HTML
 - 支持当前整篇笔记或选中文本
 - 自动去掉 YAML frontmatter
-- 支持标题、段落、粗体、斜体、引用、列表、图片、分割线、链接、代码块、表格
+- 支持标题、段落、粗体、斜体、引用、列表、图片、分割线、链接、代码块、表格、脚注
 - 本地图片预览按 Obsidian 当前笔记解析，不绑定固定附件目录
 - 支持专有格式：全能导航、摘要、高亮、提示、说明、笔记、注意、危险、独白、多角色对话
+- 专有容器兼容 `:::tip` 和 `::: tip` 两种写法
 - 支持主题、字重、小标题风格、代码主题、阅读时间模块配置
 - 免费功能：预览、排版设置、复制 HTML、复制网络图片链接
 - Pro 功能：上传草稿箱、上传封面图、上传头像图、复制时自动上传本地图片
@@ -34,7 +35,7 @@ GitHub 仓库地址：[https://github.com/yyhzz985/xuezha985-wechat-publisher](h
 下载最新版本里的 zip 文件，例如：
 
 ```text
-xuezha985-wechat-publisher-0.1.1.zip
+xuezha985-wechat-publisher-0.1.2.zip
 ```
 
 ### 第二步：解压文件
@@ -141,7 +142,7 @@ xuezha985-wechat-publisher
 最常见错误是多了一层目录，例如：
 
 ```text
-.obsidian/plugins/xuezha985-wechat-publisher/xuezha985-wechat-publisher-0.1.1/manifest.json
+.obsidian/plugins/xuezha985-wechat-publisher/xuezha985-wechat-publisher-0.1.2/manifest.json
 ```
 
 这种是不对的。
@@ -214,6 +215,10 @@ BRAT 适合自动更新；普通用户推荐优先使用上面的手动安装方
 ![本地图片](assets/image.png)
 ![[Obsidian图片.png]]
 [链接文字](https://example.com)
+
+带脚注的文字[^1]
+
+[^1]: 这里是脚注内容。
 ```
 
 代码块：
@@ -256,6 +261,14 @@ console.log('hello');
 
 ```markdown
 :::tip
+这里写提示。
+:::
+```
+
+也可以写成：
+
+```markdown
+::: tip
 这里写提示。
 :::
 ```

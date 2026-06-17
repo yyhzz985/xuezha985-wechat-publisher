@@ -329,3 +329,14 @@
 - 修正 Worker 抽查校验示例里的 `pluginId` 和 `pluginVersion`，避免继续按旧插件 ID 测试授权。
 - Review 查 Bug：文档没有要求免费用户填写公众号接口；没有引入图片目录配置项；没有把 AppSecret、文章正文或本地图片上传到授权服务器。
 - 第一性原理分析：免费能力的核心是“把已有 HTML 复制出去”，不应该依赖微信接口；本地图片要在公众号里显示，核心是必须变成微信可访问 URL，因此只能放在 Pro 的微信上传链路里。
+
+## 2026-06-17 v0.1.2 专有容器与脚注渲染修复
+
+- 修复 `::: tip`、`::: warning` 这类冒号后带空格的专有容器语法不渲染、在公众号预览中原样显示的问题；现在 `:::tip` 和 `::: tip` 都会走同一套容器渲染。
+- 新增脚注渲染链路：`[^1]` 会在正文中显示脚注序号，`[^1]:` 定义不再出现在正文里，文末会自动汇总脚注内容。
+- 更新 `README.md`、`docs/install-guide.md`、`docs/plugin-help.md`、`worker/README.md` 和版本元数据，版本号升为 `0.1.2`。
+- 新增回归测试覆盖空格容器和脚注文末汇总，避免后续重新退回原样显示。
+- 验证：`npm test` 79 项通过；`npm run package:plugin` 通过，生成 `dist/xuezha985-wechat-publisher-0.1.2.zip`，SHA-256 为 `2A007B6B52417F6AB94DAA711158EB702FA7C1DDD54DA88F3520FB2B769D9215`。
+- 构建产物已同步到 `D:\【仓库】obsidian笔记\X-Note\.obsidian\plugins\xuezha985-wechat-publisher`，只覆盖 `main.js`、`manifest.json`、`styles.css`，未触碰 `data.json`。
+- Review 查 Bug：修复限定在 Markdown 转公众号 HTML 的 Service 层和样式工具层，没有改 View、上传、授权、公众号接口和本地数据配置。
+- 第一性原理分析：问题本质是 Markdown 扩展语法解析缺失，不是预览 CSS 问题；最小修复是在解析层兼容用户实际写法，并给脚注补齐明确的文末输出。

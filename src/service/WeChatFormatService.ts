@@ -30,12 +30,32 @@ interface TocEntry {
 	length: number;
 }
 
+interface FootnoteEntry {
+	id: string;
+	index: number;
+	content: string;
+	referenced: boolean;
+}
+
+interface FootnoteState {
+	definitions: Map<string, FootnoteEntry>;
+	order: FootnoteEntry[];
+}
+
 type BlockState = {
 	src: string;
 	bMarks: number[];
 	eMarks: number[];
 	tShift: number[];
+	blkIndent: number;
 	line: number;
+	push(type: string, tag: string, nesting: number): Token;
+};
+
+type InlineState = {
+	src: string;
+	pos: number;
+	posMax: number;
 	push(type: string, tag: string, nesting: number): Token;
 };
 
@@ -57,13 +77,15 @@ export class WeChatFormatService {
 		const cleanedMarkdown = normalizeObsidianImageEmbeds(removeYamlFrontmatter(markdown)).trim();
 		const tocEntries = this.extractToc(cleanedMarkdown);
 		const styles = createWeChatStyles(settings);
-		const renderer = this.createRenderer(settings, tocEntries, styles);
+		const footnotes: FootnoteState = { definitions: new Map(), order: [] };
+		const renderer = this.createRenderer(settings, tocEntries, styles, footnotes);
 		const bodyHtml = renderer.render(cleanedMarkdown);
-		const plainText = htmlToPlainText(bodyHtml);
+		const footnoteHtml = this.renderFootnotes(footnotes, renderer, styles);
+		const plainText = htmlToPlainText(bodyHtml + footnoteHtml);
 		const metaHtml = settings.showReadingTime
 			? this.renderReadingMeta(settings, plainText, styles)
 			: '';
-		const html = `<section class="wechat-markdown-root" style="${styles.articleStyle}">${metaHtml}${bodyHtml}</section>`;
+		const html = `<section class="wechat-markdown-root" style="${styles.articleStyle}">${metaHtml}${bodyHtml}${footnoteHtml}</section>`;
 
 		return {
 			html,
@@ -71,7 +93,7 @@ export class WeChatFormatService {
 		};
 	}
 
-	private createRenderer(settings: PluginSettings, tocEntries: TocEntry[], styles: WeChatStyleSet): MarkdownIt {
+	private createRenderer(settings: PluginSettings, tocEntries: TocEntry[], styles: WeChatStyleSet, footnotes: FootnoteState): MarkdownIt {
 		let h2Index = 0;
 		let activeH2Index = 0;
 		let h3IndexInSection = 0;
@@ -84,6 +106,7 @@ export class WeChatFormatService {
 		});
 		const chatRoleIcons: ChatRoleIconMap = new Map();
 
+		this.registerFootnoteRules(md, footnotes, styles);
 		this.registerContainerRule(md);
 		this.registerTocRule(md);
 
@@ -203,12 +226,74 @@ export class WeChatFormatService {
 		return md;
 	}
 
+	private registerFootnoteRules(md: MarkdownIt, footnotes: FootnoteState, styles: WeChatStyleSet): void {
+		md.block.ruler.before('reference', 'knb_footnote_def', (state: BlockState, startLine: number, endLine: number, silent: boolean) => {
+			const start = state.bMarks[startLine] + state.tShift[startLine];
+			const end = state.eMarks[startLine];
+			const marker = state.src.slice(start, end);
+			const match = marker.match(/^\[\^([^\]\s]+)\]:\s*(.*)$/);
+			if (!match) {
+				return false;
+			}
+			if (silent) {
+				return true;
+			}
+
+			const contentLines = [match[2]];
+			let nextLine = startLine + 1;
+			while (nextLine < endLine) {
+				const lineStart = state.bMarks[nextLine] + state.tShift[nextLine];
+				const lineEnd = state.eMarks[nextLine];
+				const line = state.src.slice(lineStart, lineEnd);
+				if (!line.trim() || state.tShift[nextLine] < state.blkIndent + 2) {
+					break;
+				}
+				contentLines.push(line.trim());
+				nextLine += 1;
+			}
+
+			footnotes.definitions.set(match[1], {
+				id: match[1],
+				index: 0,
+				content: contentLines.join(' ').trim(),
+				referenced: false,
+			});
+			state.line = nextLine;
+			return true;
+		});
+
+		md.inline.ruler.before('link', 'knb_footnote_ref', (state: InlineState, silent: boolean) => {
+			if (state.src.charCodeAt(state.pos) !== 0x5b || state.src.charCodeAt(state.pos + 1) !== 0x5e) {
+				return false;
+			}
+			const match = state.src.slice(state.pos, state.posMax).match(/^\[\^([^\]\s]+)\]/);
+			const entry = match ? footnotes.definitions.get(match[1]) : undefined;
+			if (!match || !entry) {
+				return false;
+			}
+			if (!silent) {
+				if (!entry.referenced) {
+					entry.index = footnotes.order.length + 1;
+					entry.referenced = true;
+					footnotes.order.push(entry);
+				}
+				const token = state.push('knb_footnote_ref', 'sup', 0);
+				token.meta = { id: entry.id, index: entry.index };
+			}
+			state.pos += match[0].length;
+			return true;
+		});
+
+		md.renderer.rules.knb_footnote_ref = (tokens, index) =>
+			`<sup class="knb-footnote-ref" style="${styles.footnoteRefStyle}">[${tokens[index].meta.index}]</sup>`;
+	}
+
 	private registerContainerRule(md: MarkdownIt): void {
 		md.block.ruler.before('fence', 'knb_container', (state: BlockState, startLine: number, endLine: number, silent: boolean) => {
 			const start = state.bMarks[startLine] + state.tShift[startLine];
 			const end = state.eMarks[startLine];
 			const marker = state.src.slice(start, end).trim();
-			const match = marker.match(/^:::(intro|highlight|tip|info|note|warning|danger|say|chat)\s*$/);
+			const match = marker.match(/^:::\s*(intro|highlight|tip|info|note|warning|danger|say|chat)\s*$/);
 			if (!match) {
 				return false;
 			}
@@ -287,6 +372,23 @@ export class WeChatFormatService {
 		const src = token.attrGet('src') ?? '';
 		const alt = token.content ? ` alt="${this.renderPlainInline(token.content)}"` : '';
 		return `<img src="${escapeHtml(src)}"${alt} style="${styles.imageStyle}">`;
+	}
+
+	private renderFootnotes(footnotes: FootnoteState, md: MarkdownIt, styles: WeChatStyleSet): string {
+		if (footnotes.order.length === 0) {
+			return '';
+		}
+
+		const rows = footnotes.order
+			.map((entry) => [
+				`<p class="knb-footnote-item" style="${styles.footnoteItemStyle}">`,
+				`<span class="knb-footnote-index" style="${styles.footnoteIndexStyle}">[${entry.index}]</span>`,
+				`<span class="knb-footnote-text" style="${styles.footnoteTextStyle}">${md.renderInline(entry.content)}</span>`,
+				'</p>',
+			].join(''))
+			.join('');
+
+		return `<section class="knb-footnotes" style="${styles.footnotesStyle}">${rows}</section>`;
 	}
 
 	private renderCodeBlock(content: string, theme: CodeTheme, styles: WeChatStyleSet): string {

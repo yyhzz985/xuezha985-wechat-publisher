@@ -1,7 +1,7 @@
 {
 	"id": "xuezha985-wechat-publisher",
 	"name": "公众号一键排版上传",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"minAppVersion": "1.0.0",
 	"description": "Copy the current note or selection as possible-bar styled WeChat Official Account HTML.",
 	"author": "xuezha985",
