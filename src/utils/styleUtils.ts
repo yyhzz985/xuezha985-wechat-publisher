@@ -34,10 +34,10 @@ export const listItemStyle = 'margin: 0.4em 0; line-height: 28px;';
 export const listItemContentStyle = 'color: rgb(43, 43, 43); font-size: 15px; line-height: 28px; letter-spacing: 1px;';
 
 export const linkStyle = 'color: rgb(41, 148, 128); text-decoration: none; border-bottom: 1px solid rgba(41, 148, 128, 0.25);';
-export const externalLinkTextStyle = 'color: #2f63b7; text-decoration: none;';
+export const externalLinkTextStyle = 'color: inherit; text-decoration: none;';
 export const externalLinkUrlStyle = 'color: #2f63b7; text-decoration: none; letter-spacing: 0;';
 export const footnoteRefStyle = 'color: rgb(41, 148, 128); font-size: 0.78em; line-height: 1; vertical-align: super; margin-left: 1px;';
-export const footnotesStyle = 'margin: 1.8em 8px 0; padding-top: 0.75em; border-top: 1px dashed rgb(41, 148, 128); color: rgb(43, 43, 43); font-size: 13px; line-height: 24px; letter-spacing: 1px;';
+export const footnotesStyle = 'margin: 1.8em 8px 0; padding-top: 0.75em; border-top: 1px solid rgb(41, 148, 128); color: rgb(43, 43, 43); font-size: 13px; line-height: 24px; letter-spacing: 1px;';
 export const footnoteItemStyle = 'margin: 0.35em 0; padding: 0; color: rgb(43, 43, 43); font-size: 13px; line-height: 24px; letter-spacing: 1px; text-align: left;';
 export const footnoteIndexStyle = 'display: inline-block; margin-right: 0.45em; color: rgb(41, 148, 128); font-weight: 600;';
 export const footnoteTextStyle = 'color: rgb(43, 43, 43);';
@@ -68,7 +68,7 @@ export const imageFigureStyle = 'margin: 1.2em 8px; padding: 0; text-align: cent
 export const imageStyle = 'display: block; max-width: 100%; margin: 0 auto; border-radius: 0;';
 export const imageCaptionStyle = 'margin: 0.45em 0 0; color: #8a8a8a; font-size: 13px; line-height: 1.6; text-align: center; letter-spacing: 0;';
 
-export const hrStyle = 'margin: 2em 8px; border: 0; border-top: 1px dashed rgb(41, 148, 128);';
+export const hrStyle = 'margin: 2em 8px; border: 0; border-top: 1px solid rgb(41, 148, 128);';
 
 export const introStyle = 'margin: 1.6em 8px 2em; padding: 0.9em 0.4em; border: 0; border-top: 1px dashed rgb(41, 148, 128); border-bottom: 1px dashed rgb(41, 148, 128); border-radius: 0; background: transparent;';
 export const introParagraphStyle = 'margin: 0.3em 0; color: rgb(60, 90, 80); font-size: 15px; line-height: 1.85; letter-spacing: 0.04em; text-align: left;';
@@ -84,7 +84,7 @@ export const tocRowStyle = 'margin: 0 0 0.7em; padding: 0; box-sizing: border-bo
 export const tocLineStyle = 'margin: 0 0 0.2em; color: rgb(43, 43, 43); font-size: 14px; line-height: 1.5; letter-spacing: 0;';
 export const tocIndexStyle = 'display: inline-block; min-width: 1.4em; margin-right: 0.45em; color: rgb(41, 148, 128); font-weight: 700;';
 export const tocTrackStyle = 'height: 3px; background: #efefef; overflow: hidden; line-height: 0; font-size: 0;';
-export const tocFillStyle = 'display: block; height: 3px; background: linear-gradient(to right, rgb(41, 148, 128), rgb(73, 200, 149)); line-height: 0; font-size: 0;';
+export const tocFillStyle = 'display: block; height: 3px; max-width: 100%; background: rgb(41, 148, 128); line-height: 3px; font-size: 0; overflow: hidden;';
 
 export const tableWrapStyle = 'margin: 1.2em 8px; max-width: 100%; overflow-x: auto; box-sizing: border-box;';
 export const tableStyle = 'width: 100%; max-width: 100%; border-collapse: collapse; table-layout: fixed; color: rgb(43, 43, 43); font-size: 15px; line-height: 28px; letter-spacing: 1px;';

@@ -157,9 +157,9 @@ test('keeps wechat links and rewrites external links', () => {
 
 	assert.match(result.html, /href="https:\/\/mp\.weixin\.qq\.com\/s\/example"/);
 	assert.equal(result.html.includes('href="https://example.com/path"'), false);
-	assert.match(result.html, /class="knb-external-link-text"/);
-	assert.match(result.html, /class="knb-external-link-url"/);
-	assert.match(result.html, /color: #2f63b7/);
+	assert.match(result.html, /class="knb-external-link-text" style="color: inherit; text-decoration: none;"/);
+	assert.equal(result.html.includes('class="knb-external-link-text" style="color: #2f63b7'), false);
+	assert.match(result.html, /class="knb-external-link-url" style="color: #2f63b7/);
 	assert.match(result.html, /https:\/\/example\.com\/path/);
 	assert.match(result.html, /https:\/\/mp\.knb\.im\//);
 });
@@ -338,7 +338,17 @@ test('renders footnotes as endnotes', () => {
 	assert.match(result.html, /class="knb-footnote-ref"/);
 	assert.match(result.html, /class="knb-footnotes"/);
 	assert.match(result.html, /<span class="knb-footnote-index"/);
+	assert.match(result.html, /class="knb-footnotes"[^>]*border-top: 1px solid/);
+	assert.equal(result.html.includes('class="knb-footnotes" style="margin: 1.8em 8px 0; padding-top: 0.75em; border-top: 1px dashed'), false);
 	assert.match(result.html, /这是脚注内容/);
+});
+
+test('renders horizontal rules as thin solid separators', () => {
+	const service = new WeChatFormatService();
+	const result = service.format('正文\n\n---\n\n继续', DEFAULT_SETTINGS);
+
+	assert.match(result.html, /<hr style="[^"]*border-top: 1px solid/);
+	assert.equal(result.html.includes('border-top: 1px dashed'), false);
 });
 
 test('keeps markdown tables inside article margins', () => {
@@ -373,6 +383,8 @@ test('renders toc marker from h2 headings', () => {
 	assert.match(result.html, /class="knb-toc-index"/);
 	assert.match(result.html, /class="knb-toc-track"/);
 	assert.match(result.html, /class="knb-toc-fill"/);
+	assert.match(result.html, /<section class="knb-toc-fill"[^>]*width:\d+%;[^>]*>&nbsp;<\/section>/);
+	assert.equal(result.html.includes('<span class="knb-toc-fill"'), false);
 	assert.match(result.html, /第一章/);
 	assert.match(result.html, /第二章/);
 	assert.equal(result.html.includes('字</span>'), false);

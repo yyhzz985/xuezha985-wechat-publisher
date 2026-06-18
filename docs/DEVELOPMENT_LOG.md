@@ -353,3 +353,15 @@
 - BRAT 发布资产需要同时上传散装 `manifest.json`、`main.js`、`styles.css` 和手动安装 zip，避免 BRAT 找不到 release manifest。
 - Review 查 Bug：修复仍限定在 Markdown 转公众号 HTML 的 Service 层、样式工具层、文档和测试；没有改上传、授权、公众号 API、CI/CD 或本地密钥配置。
 - 第一性原理分析：这次问题本质是 Markdown 渲染能力缺口，不是粘贴或公众号接口问题；最小稳定路径是恢复解析层能力并用测试锁住输出 HTML。
+
+## 2026-06-18 v0.1.4 分割线、导航条与外链颜色修复
+
+- 分割线和脚注上方分隔线统一改为 1px 细实线，避免继续显示虚线。
+- 全文导航进度条改用带 `&nbsp;` 的 `section` 块输出，避免微信公众号编辑器吞掉空 `span`，导致发布后台不显示长度条。
+- 外站 Markdown 链接继续改写为 `文字（URL）`，但链接文字继承正文原色，只有括号里的 URL 使用蓝色；裸外链仍以蓝色 URL 展示。
+- 更新 `README.md`、`docs/install-guide.md`、`docs/plugin-help.md`、`worker/README.md`、版本元数据和文档测试，版本号升为 `0.1.4`。
+- 新增回归测试覆盖细实线、脚注分隔线、导航条非空块输出和外链文字颜色，避免后续退回旧行为。
+- 验证：`npm test` 84 项通过；`npm run package:plugin` 通过，生成 `dist/xuezha985-wechat-publisher-0.1.4.zip`，SHA-256 为 `AF5CC9496A4704E6A92A0B0650656B3563526D2B070222E2605A929EF240801C`。
+- BRAT 发布资产仍需同时上传散装 `manifest.json`、`main.js`、`styles.css` 和手动安装 zip，保证自动更新可以读取 release manifest。
+- Review 查 Bug：修复限定在 Markdown 转公众号 HTML 的 Service 层、样式工具层、文档和测试；没有改上传、授权、公众号 API、CI/CD、生产 Worker 或本地密钥配置。
+- 第一性原理分析：这次问题本质是输出 HTML 在微信公众号编辑器里的兼容性和样式语义错误。最小稳定路径是用更稳的内联结构表达导航条，并把外链文字颜色和 URL 颜色拆开。

@@ -26,10 +26,10 @@ test('documents free copy and pro local image handling consistently', () => {
 });
 
 test('documents current package version and license verification plugin id', () => {
-	assert.match(readme, /xuezha985-wechat-publisher-0\.1\.3\.zip/);
-	assert.match(installGuide, /xuezha985-wechat-publisher-0\.1\.3\.zip/);
+	assert.match(readme, /xuezha985-wechat-publisher-0\.1\.4\.zip/);
+	assert.match(installGuide, /xuezha985-wechat-publisher-0\.1\.4\.zip/);
 	assert.match(workerReadme, /pluginId = "xuezha985-wechat-publisher"/);
-	assert.match(workerReadme, /pluginVersion = "0\.1\.3"/);
+	assert.match(workerReadme, /pluginVersion = "0\.1\.4"/);
 	assert.doesNotMatch(workerReadme, /pluginId = "wechat-publisher"/);
 	assert.doesNotMatch(readme, /免费功能不影响复制排版/);
 	assert.doesNotMatch(installGuide, /免费功能不影响复制排版/);
@@ -46,13 +46,13 @@ test('documents footnotes and spaced custom container markers', () => {
 test('documents restored markdown rendering details', () => {
 	for (const doc of [readme, installGuide]) {
 		assert.match(doc, /代码语法高亮/);
-		assert.match(doc, /外站链接蓝色/);
+		assert.match(doc, /外站链接文字原色且 URL 蓝色/);
 		assert.match(doc, /图片说明小字/);
 		assert.match(doc, /emoji 短代码/);
 	}
 
 	assert.match(help, /Shiki 自动语法高亮/);
-	assert.match(help, /蓝色「文字（URL）」/);
+	assert.match(help, /文字（蓝色 URL）/);
 	assert.match(help, /图片下方小字说明/);
 	assert.match(help, /:rocket:/);
 });

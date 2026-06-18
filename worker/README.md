@@ -111,7 +111,7 @@ $body = @{
   licenseKey = "PRO-xxxx"
   deviceId = "codex-check"
   pluginId = "xuezha985-wechat-publisher"
-  pluginVersion = "0.1.3"
+  pluginVersion = "0.1.4"
   feature = "wechat_upload"
 } | ConvertTo-Json
 

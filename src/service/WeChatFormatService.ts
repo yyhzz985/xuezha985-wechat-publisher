@@ -629,7 +629,7 @@ export class WeChatFormatService {
 				return [
 					`<section style="${styles.tocRowStyle}">`,
 					`<p style="${styles.tocLineStyle}"><span class="knb-toc-index" style="${styles.tocIndexStyle}">${index + 1}</span>${this.renderPlainInline(entry.title)}</p>`,
-					`<section class="knb-toc-track" style="${styles.tocTrackStyle}"><span class="knb-toc-fill" style="${styles.tocFillStyle} width:${width}%;"></span></section>`,
+					`<section class="knb-toc-track" style="${styles.tocTrackStyle}"><section class="knb-toc-fill" style="${styles.tocFillStyle} width:${width}%;">&nbsp;</section></section>`,
 					'</section>',
 				].join('');
 			})
