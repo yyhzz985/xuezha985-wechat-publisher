@@ -22,7 +22,8 @@ git diff --check
 
 - 已创建本地 checkpoint：`de4e51a`，message 为 `checkpoint: current project state`。
 - `git diff --check`：退出码 0，无 whitespace error；输出了 Windows line ending 提示。
-- `git status --short --branch --untracked-files=all`：`main...origin/main [ahead 1]`，计划文档有已跟踪修改。
+- 已创建计划 checkpoint：`0d5991c`，message 为 `checkpoint: official plugin submission plan`。
+- `git status --short --branch --untracked-files=all`：`main...origin/main [ahead 2]`，工作区 clean。
 
 ## 已知缺口
 

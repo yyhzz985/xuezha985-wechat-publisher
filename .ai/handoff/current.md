@@ -11,7 +11,8 @@
 - 当前版本是 `0.1.4`。
 - 当前分支是 `main`，跟踪 `origin/main`。
 - 已创建本地 checkpoint：`de4e51a`，commit message 为 `checkpoint: current project state`。
-- 当前计划文档更新发生在 checkpoint 之后，需另行验证并可再建 checkpoint。
+- 已创建计划 checkpoint：`0d5991c`，commit message 为 `checkpoint: official plugin submission plan`。
+- 当前工作区 clean，分支 `main` 相对 `origin/main` ahead 2。
 
 ## 本轮已完成
 
@@ -25,6 +26,7 @@
 - 将当前任务改为 `OBS-PUBLISH-001`，用于官方插件社区上架前合规整改。
 - 将上架拆成命名、`isDesktopOnly`、README/隐私、release asset 验证、本地验证、公开发布提交几个子任务。
 - 记录公开发布红线：GitHub Release、push、官方 PR 都需要主人单独确认。
+- 创建计划 checkpoint：`0d5991c`。
 
 ## 已变更文件
 

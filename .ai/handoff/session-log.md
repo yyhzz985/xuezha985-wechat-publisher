@@ -22,3 +22,4 @@
 - 按用户要求，将 product-dev-workflow 项目契约文档中文化，范围限于 `AGENTS.md`、`docs/00-07`、`tasks/` 和 `.ai/`。
 - 按用户要求创建本地 git checkpoint：`de4e51a`，message 为 `checkpoint: current project state`。
 - 整理官方插件社区上架计划，把当前任务设为 `OBS-PUBLISH-001`，并拆分命名、`isDesktopOnly`、README/隐私、release asset、本地验证和公开发布提交子任务。
+- 创建计划 checkpoint：`0d5991c`，message 为 `checkpoint: official plugin submission plan`。
