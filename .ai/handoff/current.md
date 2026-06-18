@@ -8,7 +8,7 @@
 
 - 本项目是用于公众号 Markdown 预览、复制和 Pro 上传的 Obsidian 插件。
 - Cloudflare Worker 处理 License 校验和 admin license 操作。
-- 当前版本是 `0.1.4`。
+- 当前版本是 `0.1.5`。
 - 当前官方展示名是 `Kenengba WeChat Publisher`。
 - 当前 `manifest.json` 设置为 `isDesktopOnly: true`。
 - 当前分支是 `main`，跟踪 `origin/main`。
@@ -29,6 +29,7 @@
 - 新增 `tests/release-assets.test.ts`，并更新文档和 manifest 相关测试。
 - 运行并通过 `npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets`、`git diff --check`。
 - 未 push、未创建 GitHub Release、未提交官方社区 PR、未 deploy。
+- 主人随后明确说“公开”，进入公开发布阶段；由于远端已有 `0.1.4` release 和 tag，本轮将当前合规整改版本升为 `0.1.5`，避免复用旧 tag。
 
 ## 历史已完成
 
@@ -132,7 +133,7 @@ git diff --check
 
 - `npm test`：87 tests，87 pass。
 - `npm run build`：通过。
-- `npm run package:plugin`：通过，生成并验证 `dist/xuezha985-wechat-publisher-0.1.4-20260618-135324.zip`。
+- `npm run package:plugin`：通过，生成并验证 `dist/xuezha985-wechat-publisher-0.1.5.zip`。
 - `npm run verify:release-assets`：通过。
 - `git diff --check`：通过，只有 Windows line ending 提示。
 - 没有跑 Obsidian runtime smoke test。
@@ -141,7 +142,7 @@ git diff --check
 ## 下一步
 
 1. 如主人要继续提审，先确认是否需要干净 Obsidian vault 手动 smoke test。
-2. 如主人明确批准公开发布，再创建 GitHub Release；Release tag 必须等于 `manifest.json` 的 `0.1.4`，不要加 `v` 前缀。
+2. 如主人明确批准公开发布，再创建 GitHub Release；Release tag 必须等于 `manifest.json` 的 `0.1.5`，不要加 `v` 前缀。
 3. Release 资产必须单独包含 `manifest.json`、`main.js`、`styles.css` 和 zip。
 4. push、GitHub Release、官方社区 PR 都需要主人单独确认。
 

@@ -365,3 +365,13 @@
 - BRAT 发布资产仍需同时上传散装 `manifest.json`、`main.js`、`styles.css` 和手动安装 zip，保证自动更新可以读取 release manifest。
 - Review 查 Bug：修复限定在 Markdown 转公众号 HTML 的 Service 层、样式工具层、文档和测试；没有改上传、授权、公众号 API、CI/CD、生产 Worker 或本地密钥配置。
 - 第一性原理分析：这次问题本质是输出 HTML 在微信公众号编辑器里的兼容性和样式语义错误。最小稳定路径是用更稳的内联结构表达导航条，并把外链文字颜色和 URL 颜色拆开。
+
+## 2026-06-18 v0.1.5 官方社区上架前合规整改
+
+- 将官方社区展示名改为 `Kenengba WeChat Publisher`，避免中文展示名和现有社区插件名撞名风险。
+- 将 `isDesktopOnly` 改为 `true`，因为当前富文本复制路径保留 Electron clipboard fallback，暂不声明移动端兼容。
+- 补齐根目录 `LICENSE`，并补充 README、安装说明和插件内帮助里的隐私、网络请求、免费 / Pro 边界、桌面端限制和反馈入口。
+- 新增 `scripts/verify-release-assets.ps1`，并接入 `npm run package:plugin`，确保 GitHub Release 需要单独上传 `manifest.json`、`main.js`、`styles.css` 和 zip。
+- 版本号升为 `0.1.5`，同步更新 `manifest.json`、`versions.json`、`package.json`、`package-lock.json`、README、安装文档、Worker README 和文档测试。
+- 验证：`npm test` 87 项通过；`npm run build` 通过；`npm run package:plugin` 通过，生成 `dist/xuezha985-wechat-publisher-0.1.5.zip`，SHA-256 为 `29844B8F5137C030325675BDC50F29AAD4198CCBC75BFAF51E12EF389CB5298E`。
+- Review 查 Bug：没有执行 push、GitHub Release、官方社区 PR、deploy、Worker production config、D1 schema/data 或 secrets 操作；公开发布阶段需主人单独确认。

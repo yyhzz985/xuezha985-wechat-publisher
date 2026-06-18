@@ -39,7 +39,7 @@ GitHub 仓库地址：[https://github.com/yyhzz985/xuezha985-wechat-publisher](h
 下载最新版本里的 zip 文件，例如：
 
 ```text
-xuezha985-wechat-publisher-0.1.4.zip
+xuezha985-wechat-publisher-0.1.5.zip
 ```
 
 ### 第二步：解压文件
@@ -148,7 +148,7 @@ xuezha985-wechat-publisher
 最常见错误是多了一层目录，例如：
 
 ```text
-.obsidian/plugins/xuezha985-wechat-publisher/xuezha985-wechat-publisher-0.1.4/manifest.json
+.obsidian/plugins/xuezha985-wechat-publisher/xuezha985-wechat-publisher-0.1.5/manifest.json
 ```
 
 这种是不对的。
@@ -423,7 +423,7 @@ npm run verify:release-assets
 manifest.json
 main.js
 styles.css
-xuezha985-wechat-publisher-0.1.4.zip
+xuezha985-wechat-publisher-0.1.5.zip
 ```
 
 zip 只用于手动安装，不能替代单独的 `manifest.json`、`main.js` 和 `styles.css`。创建 GitHub Release、push 和提交 Obsidian 官方社区 PR 都属于公开发布动作，需要单独确认。

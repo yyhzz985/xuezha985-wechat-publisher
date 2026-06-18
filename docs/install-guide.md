@@ -15,7 +15,7 @@
 打开下载页，下载最新版本里的 zip 文件，例如：
 
 ```text
-xuezha985-wechat-publisher-0.1.4.zip
+xuezha985-wechat-publisher-0.1.5.zip
 ```
 
 不要下载 GitHub 页面上的 `Source code`，那个是源码包，不是 Obsidian 插件安装包。
@@ -156,7 +156,7 @@ Pro 功能包括：
 最常见错误是多了一层目录，例如：
 
 ```text
-.obsidian/plugins/xuezha985-wechat-publisher/xuezha985-wechat-publisher-0.1.4/manifest.json
+.obsidian/plugins/xuezha985-wechat-publisher/xuezha985-wechat-publisher-0.1.5/manifest.json
 ```
 
 这种目录结构是不对的。
