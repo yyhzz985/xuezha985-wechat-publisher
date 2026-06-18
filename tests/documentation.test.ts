@@ -26,10 +26,10 @@ test('documents free copy and pro local image handling consistently', () => {
 });
 
 test('documents current package version and license verification plugin id', () => {
-	assert.match(readme, /xuezha985-wechat-publisher-0\.1\.5\.zip/);
-	assert.match(installGuide, /xuezha985-wechat-publisher-0\.1\.5\.zip/);
-	assert.match(workerReadme, /pluginId = "xuezha985-wechat-publisher"/);
-	assert.match(workerReadme, /pluginVersion = "0\.1\.5"/);
+	assert.match(readme, /kenengba-wechat-publisher-0\.1\.6\.zip/);
+	assert.match(installGuide, /kenengba-wechat-publisher-0\.1\.6\.zip/);
+	assert.match(workerReadme, /pluginId = "kenengba-wechat-publisher"/);
+	assert.match(workerReadme, /pluginVersion = "0\.1\.6"/);
 	assert.doesNotMatch(workerReadme, /pluginId = "wechat-publisher"/);
 	assert.doesNotMatch(readme, /免费功能不影响复制排版/);
 	assert.doesNotMatch(installGuide, /免费功能不影响复制排版/);

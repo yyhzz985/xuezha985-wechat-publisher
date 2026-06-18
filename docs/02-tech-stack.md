@@ -30,8 +30,8 @@
 | 锁文件 | `package-lock.json`, lockfileVersion 3 |
 | 已观察 Node | `v22.22.1` |
 | 已观察 npm | `10.9.4` |
-| 根 package | `obsidian-xuezha985-wechat-publisher` |
-| 当前版本 | `0.1.5` |
+| 根 package | `obsidian-kenengba-wechat-publisher` |
+| 当前版本 | `0.1.6` |
 
 ## 依赖
 

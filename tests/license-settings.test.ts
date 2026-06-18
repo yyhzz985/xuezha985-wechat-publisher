@@ -16,14 +16,14 @@ const manifest = JSON.parse(readFileSync('manifest.json', 'utf8')) as { id: stri
 const packageJson = JSON.parse(readFileSync('package.json', 'utf8')) as { name: string };
 
 test('uses a unique plugin id that does not collide with public wechat publisher plugins', () => {
-	assert.equal(manifest.id, 'xuezha985-wechat-publisher');
+	assert.equal(manifest.id, 'kenengba-wechat-publisher');
 	assert.equal(manifest.name, 'Kenengba WeChat Publisher');
 	assert.equal(manifest.author, 'xuezha985');
 	assert.equal(manifest.isDesktopOnly, true);
-	assert.equal(packageJson.name, 'obsidian-xuezha985-wechat-publisher');
+	assert.equal(packageJson.name, 'obsidian-kenengba-wechat-publisher');
 	assert.notEqual(manifest.id, 'wechat-publisher');
-	assert.match(previewView, /xuezha985-wechat-publisher-preview/);
-	assert.doesNotMatch(previewView, /kenengba-wechat-publisher-preview/);
+	assert.match(previewView, /kenengba-wechat-publisher-preview/);
+	assert.doesNotMatch(previewView, /xuezha985-wechat-publisher-preview/);
 	assert.doesNotMatch(previewView, /'wechat-publisher-preview'/);
 });
 

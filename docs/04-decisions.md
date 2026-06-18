@@ -15,6 +15,7 @@
 | D009 | 2026-06-18 | `manifest.name` 使用 `Kenengba WeChat Publisher` | 官方文档建议使用英文 Basic Latin 名称，且当前社区已有 `WeChat Publisher` 等近似名称，需要避免撞名 | 生效 |
 | D010 | 2026-06-18 | `isDesktopOnly` 改为 `true` | 插件复制路径存在 Electron clipboard fallback，当前没有完成移动端兼容验证 | 生效 |
 | D011 | 2026-06-18 | `npm run package:plugin` 后自动运行 release asset 验证 | GitHub Release 需要单独上传 `manifest.json`、`main.js`、`styles.css`，zip 不能替代它们 | 生效 |
+| D012 | 2026-06-18 | `manifest.id` 使用 `kenengba-wechat-publisher` | 官方社区提交页拒绝带数字的 `xuezha985-wechat-publisher`；新 ID 只含小写英文字母和连字符，并避开已有 `wechat-publisher` 撞名 | 生效 |
 
 ## 已拒绝选项
 

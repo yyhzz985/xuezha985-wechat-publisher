@@ -16,6 +16,9 @@ const verifyScript = readFileSync('scripts/verify-release-assets.ps1', 'utf8');
 
 test('keeps official manifest metadata ready for community review', () => {
 	assert.equal(manifest.name, 'Kenengba WeChat Publisher');
+	assert.equal(manifest.id, 'kenengba-wechat-publisher');
+	assert.match(manifest.id, /^[a-z-]+$/);
+	assert.doesNotMatch(manifest.id, /obsidian|plugin$/);
 	assert.match(manifest.name, /^[\x20-\x7E]+$/);
 	assert.doesNotMatch(manifest.name, /\b(Obsidian|Plugin)\b/i);
 	assert.equal(manifest.isDesktopOnly, true);
@@ -31,6 +34,7 @@ test('verifies release assets as separate files and package zip contents', () =>
 		assert.match(verifyScript, new RegExp(asset.replace('.', '\\.')));
 	}
 	assert.match(verifyScript, /Package zip must contain exactly manifest\.json, main\.js, and styles\.css/);
+	assert.match(verifyScript, /\^\[a-z-\]\+\$/);
 	assert.match(verifyScript, /separate GitHub Release assets/);
 	assert.match(verifyScript, /must not replace the separate manifest\.json, main\.js, and styles\.css assets/);
 });

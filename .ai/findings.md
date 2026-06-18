@@ -15,6 +15,7 @@
 | F007 | 高 | 已解决 | 移动端兼容 | 旧 `manifest.json` 为 `isDesktopOnly: false`，但 `ClipboardService` 存在 `runtimeRequire('electron').clipboard` fallback | 已改为 `isDesktopOnly: true`，文档说明桌面端限制 | `npm test`、`npm run build` |
 | F008 | 中 | 已解决 | 官方上架文档 | README 需要更明确的隐私/网络请求/免费与 Pro 边界说明 | 已整理 README、`docs/install-guide.md` 和 `docs/plugin-help.md` | `npm test` |
 | F009 | 中 | 已解决 | License 文件 | `package.json` 声明 `MIT`，但官方上架前需要确认根目录 `LICENSE` 存在 | 已补 `LICENSE` 并保留 README MIT 说明 | `npm test`、`npm run verify:release-assets` |
+| F010 | 高 | 已解决 | 官方社区提交 | 官方社区提交页提示 `The plugin ID in your manifest.json is not allowed`；旧 `manifest.id` 为 `xuezha985-wechat-publisher`，包含数字 | 本地改为 `kenengba-wechat-publisher`，版本升为 `0.1.6`，release 校验脚本收紧为只允许小写英文字母和连字符 | `npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets`、`git diff --check` |
 
 ## 规则
 

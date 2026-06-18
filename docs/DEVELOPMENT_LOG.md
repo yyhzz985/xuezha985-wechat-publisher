@@ -375,3 +375,13 @@
 - 版本号升为 `0.1.5`，同步更新 `manifest.json`、`versions.json`、`package.json`、`package-lock.json`、README、安装文档、Worker README 和文档测试。
 - 验证：`npm test` 87 项通过；`npm run build` 通过；`npm run package:plugin` 通过，生成 `dist/xuezha985-wechat-publisher-0.1.5.zip`，SHA-256 为 `29844B8F5137C030325675BDC50F29AAD4198CCBC75BFAF51E12EF389CB5298E`。
 - Review 查 Bug：没有执行 push、GitHub Release、官方社区 PR、deploy、Worker production config、D1 schema/data 或 secrets 操作；公开发布阶段需主人单独确认。
+
+## 2026-06-18 v0.1.6 官方社区表单 ID 修复
+
+- 官方社区新提交页拒绝 `xuezha985-wechat-publisher`，提示 `The plugin ID in your manifest.json is not allowed`。
+- 根因判断：新插件 `manifest.id` 不能包含数字；`985` 触发表单校验失败。
+- 将 `manifest.id` 改为 `kenengba-wechat-publisher`，并将预览 view type 改为 `kenengba-wechat-publisher-preview`。
+- 版本号升为 `0.1.6`，避免复用已公开且 manifest 无效的 `0.1.5` Release。
+- 同步更新 README、安装文档、Worker README 示例、`versions.json`、`package.json`、`package-lock.json` 和相关测试。
+- 收紧 `scripts/verify-release-assets.ps1`：`manifest.id` 只允许小写英文字母和连字符，不允许数字。
+- 验证：`npm test` 87 项通过；尚未 push、尚未创建 tag、尚未创建 GitHub Release，公开发布前必须再次得到主人确认。

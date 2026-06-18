@@ -72,7 +72,9 @@
 - `npm run package:plugin` 会在生成 zip 后运行 `scripts/verify-release-assets.ps1`，检查 zip 根目录内容、manifest 元数据和 `versions.json` 映射。
 - `manifest.json` 的 `version`、Git tag、release asset 内的 `manifest.json` 必须一致。
 - `versions.json` 必须包含当前版本到最低 Obsidian 版本的映射。
+- `manifest.id` 只允许小写英文字母和连字符；不要使用数字、`obsidian`，也不要以 `plugin` 结尾。
 - 当前 `manifest.name` 为 `Kenengba WeChat Publisher`，使用 Basic Latin 英文展示名。
+- 当前 `manifest.id` 为 `kenengba-wechat-publisher`。
 - 当前 `isDesktopOnly: true`；插件使用 Electron clipboard fallback，README 和帮助文档必须说明桌面端限制。
 - 如果以后改回 `isDesktopOnly: false`，必须完成移动端兼容审计；如果保留 Electron / Node-only 依赖，继续保持 `true` 并同步文档。
 - README 必须写清网络请求、数据保存位置、免费/Pro 边界和隐私说明。

@@ -12,12 +12,12 @@
 
 完成 Obsidian 官方插件社区上架前合规整改准备。
 
-当前状态：`OBS-PUBLISH-001` 已完成本地合规整改和自动验证。下一步如需正式上架，需要主人单独确认 GitHub Release、push 和 `obsidian-releases` PR。
+当前状态：`OBS-PUBLISH-001` 已完成本地合规整改和自动验证。`0.1.5` 已公开，但官方社区新提交表单拒绝旧 `manifest.id`；当前转入 `OBS-PUBLISH-008`，本地准备 `0.1.6` 和 `kenengba-wechat-publisher` ID 修复。下一步如需正式上架，需要主人单独确认 push、GitHub Release 和官方社区提交。
 
 ## 官方社区上架准备
 
 1. 已确认官方社区展示名：`Kenengba WeChat Publisher`。
-2. 已检查 `manifest.json`：`id`、`name`、`version`、`minAppVersion`、`description`、`author`、`isDesktopOnly`。
+2. 已检查 `manifest.json`：`id`、`name`、`version`、`minAppVersion`、`description`、`author`、`isDesktopOnly`。当前 `id` 为 `kenengba-wechat-publisher`，只含小写英文字母和连字符。
 3. 已决定桌面端策略：`isDesktopOnly: true`。
 4. 已补齐 `LICENSE` 和 README 隐私 / 网络请求说明。
 5. 已增加 release/package 验证，确保 GitHub Release 需要单独包含 `manifest.json`、`main.js`、`styles.css`。

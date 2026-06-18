@@ -35,3 +35,9 @@
 - 已创建 GitHub Release：`https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/tag/0.1.5`，包含独立的 `manifest.json`、`main.js`、`styles.css` 和 zip。
 - 已 fork `obsidianmd/obsidian-releases` 到 `yyhzz985/obsidian-releases`，并推送分支 `add-xuezha985-wechat-publisher`。
 - 自动创建官方 PR 失败：`gh pr create` GraphQL 权限错误，REST API 返回 404；需要主人手动打开 compare 页面创建 PR。
+- 主人打开官方社区新提交页后，表单拒绝 `0.1.5` 的旧 `manifest.id`：`xuezha985-wechat-publisher`，提示 `The plugin ID in your manifest.json is not allowed`。
+- 本地将 `manifest.id` 改为 `kenengba-wechat-publisher`，将版本升为 `0.1.6`，并同步 view type、README、安装文档、Worker README 示例、版本 metadata 和测试。
+- 收紧 `scripts/verify-release-assets.ps1`，把 ID 校验改为只允许小写英文字母和连字符。
+- 验证通过：`npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets`、`git diff --check`。
+- 生成本地包：`dist/kenengba-wechat-publisher-0.1.6.zip`，SHA-256 为 `2909B853545D9BE36E0C978B70CC6911B956EEEACD0CC27A54F64AFDF2622076`。
+- 未 push、未创建 tag、未创建 GitHub Release、未重新提交官方社区；下一步必须先问主人是否允许公开发布 `0.1.6`。

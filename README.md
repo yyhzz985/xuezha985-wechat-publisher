@@ -39,7 +39,7 @@ GitHub 仓库地址：[https://github.com/yyhzz985/xuezha985-wechat-publisher](h
 下载最新版本里的 zip 文件，例如：
 
 ```text
-xuezha985-wechat-publisher-0.1.5.zip
+kenengba-wechat-publisher-0.1.6.zip
 ```
 
 ### 第二步：解压文件
@@ -73,19 +73,19 @@ styles.css
 在你的 Obsidian 库里创建这个目录：
 
 ```text
-.obsidian/plugins/xuezha985-wechat-publisher/
+.obsidian/plugins/kenengba-wechat-publisher/
 ```
 
 Windows 示例：
 
 ```text
-D:\你的Obsidian库\.obsidian\plugins\xuezha985-wechat-publisher\
+D:\你的Obsidian库\.obsidian\plugins\kenengba-wechat-publisher\
 ```
 
 macOS 示例：
 
 ```text
-/Users/你的用户名/你的Obsidian库/.obsidian/plugins/xuezha985-wechat-publisher/
+/Users/你的用户名/你的Obsidian库/.obsidian/plugins/kenengba-wechat-publisher/
 ```
 
 ### 第五步：放入插件文件
@@ -93,15 +93,15 @@ macOS 示例：
 把解压出来的 3 个文件放进刚才创建的目录：
 
 ```text
-.obsidian/plugins/xuezha985-wechat-publisher/manifest.json
-.obsidian/plugins/xuezha985-wechat-publisher/main.js
-.obsidian/plugins/xuezha985-wechat-publisher/styles.css
+.obsidian/plugins/kenengba-wechat-publisher/manifest.json
+.obsidian/plugins/kenengba-wechat-publisher/main.js
+.obsidian/plugins/kenengba-wechat-publisher/styles.css
 ```
 
 目录名必须是：
 
 ```text
-xuezha985-wechat-publisher
+kenengba-wechat-publisher
 ```
 
 不要改成中文，也不要多一层文件夹。
@@ -140,15 +140,15 @@ xuezha985-wechat-publisher
 检查这 3 个文件是不是放在正确目录：
 
 ```text
-.obsidian/plugins/xuezha985-wechat-publisher/manifest.json
-.obsidian/plugins/xuezha985-wechat-publisher/main.js
-.obsidian/plugins/xuezha985-wechat-publisher/styles.css
+.obsidian/plugins/kenengba-wechat-publisher/manifest.json
+.obsidian/plugins/kenengba-wechat-publisher/main.js
+.obsidian/plugins/kenengba-wechat-publisher/styles.css
 ```
 
 最常见错误是多了一层目录，例如：
 
 ```text
-.obsidian/plugins/xuezha985-wechat-publisher/xuezha985-wechat-publisher-0.1.5/manifest.json
+.obsidian/plugins/kenengba-wechat-publisher/kenengba-wechat-publisher-0.1.6/manifest.json
 ```
 
 这种是不对的。
@@ -423,7 +423,7 @@ npm run verify:release-assets
 manifest.json
 main.js
 styles.css
-xuezha985-wechat-publisher-0.1.5.zip
+kenengba-wechat-publisher-0.1.6.zip
 ```
 
 zip 只用于手动安装，不能替代单独的 `manifest.json`、`main.js` 和 `styles.css`。创建 GitHub Release、push 和提交 Obsidian 官方社区 PR 都属于公开发布动作，需要单独确认。

@@ -26,8 +26,8 @@ if ($manifest.name -notmatch '^[\x20-\x7E]+$') {
 if ($manifest.name -match '(?i)\b(obsidian|plugin)\b') {
 	throw 'manifest.name must not contain Obsidian or Plugin.'
 }
-if ($manifest.id -notmatch '^[a-z0-9-]+$' -or $manifest.id.EndsWith('plugin') -or $manifest.id.Contains('obsidian')) {
-	throw 'manifest.id must be lowercase, hyphenated, and must not end with plugin or contain obsidian.'
+if ($manifest.id -notmatch '^[a-z-]+$' -or $manifest.id.EndsWith('plugin') -or $manifest.id.Contains('obsidian')) {
+	throw 'manifest.id must contain only lowercase letters and hyphens, and must not end with plugin or contain obsidian.'
 }
 if ($manifest.isDesktopOnly -isnot [bool]) {
 	throw 'manifest.isDesktopOnly must be a boolean.'

@@ -431,7 +431,7 @@ test('copies html without uploading images when stale pro cache remains but lice
 			},
 		},
 		{
-			pluginId: 'xuezha985-wechat-publisher',
+			pluginId: 'kenengba-wechat-publisher',
 			pluginVersion: '0.1.1',
 			now: () => new Date('2026-06-16T12:00:00.000Z'),
 		},

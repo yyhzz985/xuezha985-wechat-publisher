@@ -1,6 +1,6 @@
 {
-	"name": "obsidian-xuezha985-wechat-publisher",
-	"version": "0.1.5",
+	"name": "obsidian-kenengba-wechat-publisher",
+	"version": "0.1.6",
 	"description": "Copy Obsidian Markdown as WeChat Official Account styled HTML.",
 	"main": "main.js",
 	"type": "module",

@@ -2,7 +2,8 @@
 
 ## 当前阻塞
 
-- 官方社区 PR 创建阻塞：`gh pr create` 被 GitHub GraphQL 拒绝，REST API 创建 PR 返回 404；需要主人手动打开 compare 页面提交。
+- 公开发布阻塞：`0.1.6` ID 修复已在本地验证，但 push、tag、GitHub Release 和官方社区重新提交都属于公开发布动作，需要主人再次明确确认。
+- 官方社区表单曾拒绝 `0.1.5`：旧 `manifest.id` 为 `xuezha985-wechat-publisher`，包含数字；本地已改为 `kenengba-wechat-publisher`。
 - 干净 Obsidian vault 手动 smoke test 尚未执行；如官方 review 或主人要求，需要另开当前任务。
 
 ## 操作前需要批准
