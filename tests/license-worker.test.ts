@@ -224,7 +224,7 @@ async function verify(env: TestEnv, licenseKey: string, deviceId: string): Promi
 			licenseKey,
 			deviceId,
 			pluginId: 'kenengba-wechat-publisher',
-			pluginVersion: '0.1.6',
+			pluginVersion: '0.1.7',
 			feature: 'wechat_upload',
 		}),
 		env,

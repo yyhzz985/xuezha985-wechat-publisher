@@ -16,6 +16,7 @@
 | D010 | 2026-06-18 | `isDesktopOnly` 改为 `true` | 插件复制路径存在 Electron clipboard fallback，当前没有完成移动端兼容验证 | 生效 |
 | D011 | 2026-06-18 | `npm run package:plugin` 后自动运行 release asset 验证 | GitHub Release 需要单独上传 `manifest.json`、`main.js`、`styles.css`，zip 不能替代它们 | 生效 |
 | D012 | 2026-06-18 | `manifest.id` 使用 `kenengba-wechat-publisher` | 官方社区提交页拒绝带数字的 `xuezha985-wechat-publisher`；新 ID 只含小写英文字母和连字符，并避开已有 `wechat-publisher` 撞名 | 生效 |
+| D013 | 2026-06-18 | `0.1.7` 把 `minAppVersion` 提升到 `1.7.2`，并用 `sanitizeHTMLToDom` 替代 view 里的 `innerHTML` 写入 | 官方自动审查对 `0.1.6` 标记 failed；`loadIfDeferred()` / `revealLeaf()` 在本地 Obsidian typings 标注为 `@since 1.7.2`，直接写 `innerHTML` 被 source review 拒绝 | 生效 |
 
 ## 已拒绝选项
 
@@ -26,6 +27,7 @@
 | 静默跳过上传失败 | 用户需要直接看到 WeChat 错误，才能修 AppID、AppSecret、IP 白名单或图片格式 |
 | 普通修复中自动跑 production deploy | 违反生产安全边界 |
 | 直接用旧的 `0.1.4` 状态提审官方社区 | 旧状态缺少英文展示名、桌面端策略说明、README 隐私说明和 release asset 验证 |
+| 为了消除 artifact attestation recommendation 而改 CI / 发布配置 | 当前阻断是 source errors；CI / release attestation 属于额外发布流程设计，不在 `OBS-PUBLISH-009` 中处理 |
 
 ## 决策说明
 

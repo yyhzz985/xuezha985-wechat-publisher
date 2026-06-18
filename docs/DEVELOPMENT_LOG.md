@@ -389,3 +389,15 @@
 - 因本机 `git push` 到 GitHub HTTPS 失败，本次通过 GitHub API 更新远端 `main` 和 tag `0.1.6`；远端 commit 为 `85354ff44bae5272b170ba8f5ab074bdf4b96ccb`，内容与本地 `0.1.6` tree 一致。
 - Release 单独上传 `manifest.json`、`main.js`、`styles.css` 和 `kenengba-wechat-publisher-0.1.6.zip`；zip SHA-256 为 `2909B853545D9BE36E0C978B70CC6911B956EEEACD0CC27A54F64AFDF2622076`。
 - 尚未重新提交官方社区表单。
+
+## 2026-06-18 v0.1.7 官方自动审查 source errors 本地整改
+
+- 官方社区页面显示 `0.1.6` failed。
+- 阻断项包括：`manifest.minAppVersion` 低于实际 API 使用、view 代码直接写 `innerHTML`、`SettingsTab` 直接创建 HTML heading、README 缺少英文说明。
+- 新增 `tests/official-review.test.ts`，先确认本地测试能复现这些失败项。
+- 版本号升为 `0.1.7`；`manifest.minAppVersion` 升为 `1.7.2`，匹配 `loadIfDeferred()` 和 `revealLeaf()` 的 `@since 1.7.2`。
+- 新增 `src/utils/domUtils.ts`，使用 Obsidian 官方 `sanitizeHTMLToDom` 渲染 HTML fragment，并移除 `PreviewModal.ts`、`PreviewView.ts` 中的直接 `innerHTML` 写入。
+- `SettingsTab.ts` 章节标题改为 `new Setting(...).setName(...).setHeading()`。
+- README 新增 `English summary`，并同步 `0.1.7` 安装包示例。
+- 验证：`npm test` 91 项通过；`npm run build` 通过；`npm run package:plugin` 通过，生成 `dist/kenengba-wechat-publisher-0.1.7.zip`，SHA-256 为 `2505BA66290817D35B0F654990A27617737A84B72974234F0DA3B2E6AEE4DA78`。
+- 尚未公开发布 `0.1.7`；需要主人单独确认后才能更新远端、tag 和 GitHub Release。

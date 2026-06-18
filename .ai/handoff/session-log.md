@@ -46,3 +46,9 @@
 - 已创建 GitHub Release：`https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/tag/0.1.6`。
 - Release assets 已验证：`manifest.json`、`main.js`、`styles.css`、`kenengba-wechat-publisher-0.1.6.zip` 均为独立资产，zip digest 为 `sha256:2909b853545d9be36e0c978b70cc6911b956eeeacd0cc27a54f64afdf2622076`。
 - 尚未重新提交官方社区表单；下一步需要主人在网页表单中提交仓库 URL。
+- 主人发来官方社区 `0.1.6` Review failed 截图；新增 `OBS-PUBLISH-009`，本地修复 `minAppVersion`、直接 `innerHTML`、`SettingsTab` heading 和 README 英文摘要问题。
+- 新增 `tests/official-review.test.ts`；先跑出 4 个预期失败，再实现修复并转绿。
+- 版本升为 `0.1.7`，`manifest.minAppVersion` 升为 `1.7.2`；新增 `src/utils/domUtils.ts`，使用 `sanitizeHTMLToDom` 渲染 HTML fragment。
+- 验证通过：`npm test` 91 项通过；`npm run build` 通过；`npm run package:plugin` 通过；`npm run verify:release-assets` 通过；`git diff --check -- . ':!main.js'` 通过。
+- 生成本地包：`dist/kenengba-wechat-publisher-0.1.7.zip`，SHA-256 为 `2505BA66290817D35B0F654990A27617737A84B72974234F0DA3B2E6AEE4DA78`。
+- 尚未公开发布 `0.1.7`；下一步必须先问主人是否允许 push/tag/GitHub Release/官方社区重新触发审核。

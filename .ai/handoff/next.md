@@ -2,14 +2,15 @@
 
 ## 建议的下一步
 
-`0.1.6` 已公开发布。下一步不是手动创建 `obsidian-releases` PR，而是主人回到官方社区新提交表单，重新提交仓库 URL。
+`0.1.6` 已公开发布，但官方社区自动审查 failed。`0.1.7` 已完成本地整改和打包。下一步必须先等主人确认是否公开发布 `0.1.7`。
 
 ## 建议的第一个任务
 
-1. 主人打开官方社区提交入口。
-2. 提交仓库 URL：`https://github.com/yyhzz985/xuezha985-wechat-publisher`。
-3. 如果官方表单仍报错，按报错精确修复，不要顺手改 Worker、D1、secrets 或生产配置。
-4. 如果提交成功，等待官方 review。
+1. 主人确认是否允许公开发布 `0.1.7`。
+2. 如果允许，先创建本地 checkpoint。
+3. 更新远端 `main`、tag `0.1.7` 和 GitHub Release assets。
+4. 在官方社区页面点击 `Check for new releases`，或按页面要求重新触发审核。
+5. 如果官方 review 仍 failed，按新的错误精确修复，不要顺手改 Worker、D1、secrets 或生产配置。
 
 ## 未确认不要开始
 
@@ -51,9 +52,11 @@
 4. `scripts/verify-release-assets.ps1` 已接入 package 流程。
 5. `npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets` 已通过。
 6. `main`、tag `0.1.5` 和 GitHub Release 已公开，但官方社区表单拒绝该版本的旧 `manifest.id`。
-7. `0.1.6` 已公开发布：`https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/tag/0.1.6`。
-8. `manifest.id` 为 `kenengba-wechat-publisher`，`manifest.version` 为 `0.1.6`。
-9. `npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets`、`git diff --check` 已通过。
+7. `0.1.6` 已公开发布：`https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/tag/0.1.6`，但官方自动审查 failed。
+8. 本地 `manifest.id` 为 `kenengba-wechat-publisher`，`manifest.version` 为 `0.1.7`，`manifest.minAppVersion` 为 `1.7.2`。
+9. 本地已修复 `innerHTML`、`SettingsTab` heading 和 README 英文摘要问题。
+10. `npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets` 已通过。
+11. 完整 `git diff --check` 只因生成的 `main.js` 第 25 行 trailing whitespace 失败；`git diff --check -- . ':!main.js'` 已通过。
 
 红线：
 - 不要 push。

@@ -1,6 +1,7 @@
 import { App, Modal, setIcon } from 'obsidian';
 import type { ClipboardService } from '../service/ClipboardService';
 import type { FormattedWeChatArticle } from '../service/WeChatFormatService';
+import { replaceWithSanitizedHtml } from '../utils/domUtils';
 import type { NoticeView } from './NoticeView';
 
 export class PreviewModal extends Modal {
@@ -34,7 +35,7 @@ export class PreviewModal extends Modal {
 
 		const shell = contentEl.createDiv({ cls: 'wechat-publisher-phone-shell' });
 		const articleEl = shell.createDiv({ cls: 'wechat-publisher-phone-article' });
-		articleEl.innerHTML = this.article.html;
+		replaceWithSanitizedHtml(articleEl, this.article.html);
 	}
 
 	onClose(): void {

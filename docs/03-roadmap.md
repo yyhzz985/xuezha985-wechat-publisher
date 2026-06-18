@@ -12,17 +12,18 @@
 
 完成 Obsidian 官方插件社区上架前合规整改准备。
 
-当前状态：`OBS-PUBLISH-001` 已完成本地合规整改和自动验证。`0.1.5` 已公开，但官方社区新提交表单拒绝旧 `manifest.id`；`OBS-PUBLISH-008` 已完成，`0.1.6` 已公开发布并使用 `kenengba-wechat-publisher` ID。下一步是主人在官方社区表单中重新提交仓库 URL。
+当前状态：`OBS-PUBLISH-001` 已完成本地合规整改和自动验证。`0.1.5` 已公开，但官方社区新提交表单拒绝旧 `manifest.id`；`OBS-PUBLISH-008` 已完成，`0.1.6` 已公开发布并使用 `kenengba-wechat-publisher` ID。官方自动审查随后对 `0.1.6` 标记 failed；`OBS-PUBLISH-009` 已在本地修复 source errors，并准备 `0.1.7`，但尚未公开发布。
 
 ## 官方社区上架准备
 
 1. 已确认官方社区展示名：`Kenengba WeChat Publisher`。
-2. 已检查 `manifest.json`：`id`、`name`、`version`、`minAppVersion`、`description`、`author`、`isDesktopOnly`。当前 `id` 为 `kenengba-wechat-publisher`，只含小写英文字母和连字符。
+2. 已检查 `manifest.json`：`id`、`name`、`version`、`minAppVersion`、`description`、`author`、`isDesktopOnly`。当前 `id` 为 `kenengba-wechat-publisher`，只含小写英文字母和连字符；当前本地 `version` 为 `0.1.7`，`minAppVersion` 为 `1.7.2`。
 3. 已决定桌面端策略：`isDesktopOnly: true`。
 4. 已补齐 `LICENSE` 和 README 隐私 / 网络请求说明。
 5. 已增加 release/package 验证，确保 GitHub Release 需要单独包含 `manifest.json`、`main.js`、`styles.css`。
 6. 已跑 `npm test`、`npm run build`、`npm run package:plugin`。
 7. 用户单独确认后，才允许创建 GitHub Release、push 或提交官方社区。
+8. 官方 source review 阻断项已纳入本地测试：不能低报 `minAppVersion`，不能在 view 代码直接写 `innerHTML` / `outerHTML`，`SettingsTab` 章节标题使用 `Setting.setHeading()`，README 保留英文摘要。
 
 ## 后续
 

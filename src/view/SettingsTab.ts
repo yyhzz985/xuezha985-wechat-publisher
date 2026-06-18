@@ -55,7 +55,7 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 			text: '用于复制到微信公众号后台的排版设置。',
 		});
 
-		containerEl.createEl('h3', { text: '排版' });
+		new Setting(containerEl).setName('排版').setHeading();
 		new Setting(containerEl)
 			.setName('主题')
 			.addDropdown((dropdown) => {
@@ -90,7 +90,7 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 					.onChange((value) => this.savePatch({ codeTheme: value as CodeTheme }));
 			});
 
-		containerEl.createEl('h3', { text: '时间模块' });
+		new Setting(containerEl).setName('时间模块').setHeading();
 		new Setting(containerEl)
 			.setName('顶部插入时间模块')
 			.setDesc('头像 + 名字 + 阅读时间估算')
@@ -131,7 +131,7 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 				button.buttonEl.addClass('wechat-publisher-upload-avatar-button');
 			});
 
-		containerEl.createEl('h3', { text: 'Pro 授权' });
+		new Setting(containerEl).setName('Pro 授权').setHeading();
 		new Setting(containerEl)
 			.setName('授权状态')
 			.setDesc(this.formatLicenseStatus(this.getEntitlementStatus()));
@@ -156,7 +156,7 @@ export class WeChatPublisherSettingTab extends PluginSettingTab {
 			);
 
 		const wechatSection = this.createProGatedSection(containerEl, canUseWechatUpload);
-		wechatSection.createEl('h3', { text: '公众号接口' });
+		new Setting(wechatSection).setName('公众号接口').setHeading();
 		wechatSection.createEl('p', {
 			cls: 'wechat-publisher-setting-note',
 			text: '用于上传到草稿箱。AppSecret 会明文保存在当前库的插件数据里，微信后台还需要配置服务器 IP 白名单。',

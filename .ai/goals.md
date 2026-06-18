@@ -8,7 +8,7 @@
 | --- | --- | --- | --- | --- |
 | G001 | 已完成 | 把旧项目恢复成文件化 handoff 契约 | `AGENTS.md`、`docs/00-07`、`tasks/`、`.ai/` docs 已在工作区新增或修复 | 见 `.ai/checks/latest.md` |
 | G002 | 已完成 | 准备 Obsidian 官方插件社区上架合规整改 | `manifest.name`、`isDesktopOnly`、`LICENSE`、README 隐私/网络请求、release asset 验证已完成 | `npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets` 通过 |
-| G003 | 进行中 | 公开发布并提交官方社区 | `0.1.6` 已公开发布，Release assets 已验证；官方社区表单尚待主人重新提交仓库 URL | `npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets`、`git diff --check` 均通过；Release URL 已创建 |
+| G003 | 进行中 | 公开发布并提交官方社区 | `0.1.6` 已公开发布但官方自动审查 failed；`0.1.7` 已完成本地 source errors 整改并打包，等待主人确认是否公开发布 | `npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets` 通过；`git diff --check -- . ':!main.js'` 通过；完整 `git diff --check` 因生成的 `main.js` trailing whitespace 未通过 |
 
 ## 规则
 

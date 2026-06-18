@@ -85,6 +85,6 @@ npm run verify:release-assets
 - 仓库当前跟踪生成的根目录 `main.js`。
 - `dist/` 已忽略。
 - 当前分支是 `main`，跟踪 `origin/main`。
-- 当前 `manifest.id` 是 `kenengba-wechat-publisher`，`manifest.name` 是 `Kenengba WeChat Publisher`，`isDesktopOnly` 是 `true`。
+- 当前本地 `manifest.id` 是 `kenengba-wechat-publisher`，`manifest.name` 是 `Kenengba WeChat Publisher`，`version` 是 `0.1.7`，`minAppVersion` 是 `1.7.2`，`isDesktopOnly` 是 `true`。
 - `AGENTS.md`、`docs/00-07`、`tasks/` 和 `.ai/` 中的文档契约文件已进入仓库；当前可能存在未提交整改改动。
 - `cover-image/wechat-publisher/prompts/*.md` 也未跟踪；没有用户决策前，不要删除、移动、忽略或跟踪它。

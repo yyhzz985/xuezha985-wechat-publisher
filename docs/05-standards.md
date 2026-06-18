@@ -75,9 +75,13 @@
 - `manifest.id` 只允许小写英文字母和连字符；不要使用数字、`obsidian`，也不要以 `plugin` 结尾。
 - 当前 `manifest.name` 为 `Kenengba WeChat Publisher`，使用 Basic Latin 英文展示名。
 - 当前 `manifest.id` 为 `kenengba-wechat-publisher`。
+- 当前本地准备版本为 `0.1.7`，`manifest.minAppVersion` 为 `1.7.2`；使用新 Obsidian API 时必须按 typings / 官方文档同步提升 `minAppVersion` 和 `versions.json`。
 - 当前 `isDesktopOnly: true`；插件使用 Electron clipboard fallback，README 和帮助文档必须说明桌面端限制。
 - 如果以后改回 `isDesktopOnly: false`，必须完成移动端兼容审计；如果保留 Electron / Node-only 依赖，继续保持 `true` 并同步文档。
 - README 必须写清网络请求、数据保存位置、免费/Pro 边界和隐私说明。
+- README 必须保留英文摘要，供 Obsidian 官方目录 review 识别插件用途。
+- View 代码不要直接写 `innerHTML` 或 `outerHTML`；需要把生成 HTML 放入 DOM 时，优先使用 `sanitizeHTMLToDom` 封装。
+- `PluginSettingTab` 内的章节标题使用 `new Setting(containerEl).setName(...).setHeading()`。
 
 ## 红线
 

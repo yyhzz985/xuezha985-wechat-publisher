@@ -16,6 +16,7 @@
 | F008 | 中 | 已解决 | 官方上架文档 | README 需要更明确的隐私/网络请求/免费与 Pro 边界说明 | 已整理 README、`docs/install-guide.md` 和 `docs/plugin-help.md` | `npm test` |
 | F009 | 中 | 已解决 | License 文件 | `package.json` 声明 `MIT`，但官方上架前需要确认根目录 `LICENSE` 存在 | 已补 `LICENSE` 并保留 README MIT 说明 | `npm test`、`npm run verify:release-assets` |
 | F010 | 高 | 已解决 | 官方社区提交 | 官方社区提交页提示 `The plugin ID in your manifest.json is not allowed`；旧 `manifest.id` 为 `xuezha985-wechat-publisher`，包含数字 | 本地改为 `kenengba-wechat-publisher`，版本升为 `0.1.6`，release 校验脚本收紧为只允许小写英文字母和连字符 | `npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets`、`git diff --check` |
+| F011 | 高 | 开放 | 官方自动审查 | 官方社区 `0.1.6` Review 标记 failed；source errors 包括低报 `minAppVersion`、直接写 `innerHTML`、`SettingsTab` heading 规则，README 还提示缺少英文说明 | 本地 `0.1.7` 已修复：`minAppVersion: 1.7.2`、`sanitizeHTMLToDom`、`Setting.setHeading()`、README `English summary`；等待主人确认公开发布并重新触发官方审查 | `npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets` 通过；`git diff --check -- . ':!main.js'` 通过 |
 
 ## 规则
 

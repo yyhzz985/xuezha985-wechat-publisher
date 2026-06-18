@@ -2,47 +2,50 @@
 
 ## ID
 
-OBS-PUBLISH-008
+OBS-PUBLISH-009
 
 ## 状态
 
-已完成：官方社区表单拒绝 `manifest.id` 后，`0.1.6` 已公开发布，release assets 已验证。
+本地已完成：官方自动审查失败项已修复并打包为 `0.1.7`；等待主人确认是否公开发布 `0.1.7`。
 
 ## 目标
 
-修复 Obsidian 官方社区提交页提示的 `The plugin ID in your manifest.json is not allowed`，准备 `0.1.6` 版本重新提交。
+修复 Obsidian 官方社区 `0.1.6` 自动审查失败项，让下一版具备再次提交审核的准备条件。
 
-## 当前结果
+## 触发
 
-- 官方社区提交入口已打开：`https://community.obsidian.md/account/plugins/new`。
-- 表单错误：`The plugin ID in your manifest.json is not allowed.`
-- 根因：当前公开版 `0.1.5` 使用 `xuezha985-wechat-publisher`，其中 `985` 不符合官方表单当前对新插件 ID 的限制。
-- 本地 `manifest.id` 已改为 `kenengba-wechat-publisher`。
-- 本地版本已升为 `0.1.6`，避免复用已公开且 manifest 无效的 `0.1.5` Release。
-- `src/view/PreviewView.ts` 的 view type 已同步为 `kenengba-wechat-publisher-preview`。
-- README、安装文档、Worker README 示例、版本 metadata 和测试已同步。
-- 主人已确认允许公开发布 `0.1.6`。
-- 因本机 `git push` 到 GitHub HTTPS 持续失败，本次使用 GitHub API 更新远端 `main` 和 tag。
-- 远端 `main` 和 tag `0.1.6` 指向 API commit：`85354ff44bae5272b170ba8f5ab074bdf4b96ccb`。
-- 已创建 GitHub Release：`https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/tag/0.1.6`。
-- Release 单独包含 `manifest.json`、`main.js`、`styles.css` 和 `kenengba-wechat-publisher-0.1.6.zip`。
-- 尚未重新提交官方社区表单。
+官方社区页面显示 `0.1.6` failed，主要阻断项：
 
-## 已完成验收
+- `manifest.minAppVersion` 低于实际使用的 Obsidian API。
+- `src/view/PreviewModal.ts` 和 `src/view/PreviewView.ts` 直接写 `innerHTML`。
+- `src/view/SettingsTab.ts` 直接创建 HTML heading。
+- README 被提示缺少英文说明。
+
+## 本地整改
+
+- 版本已升为 `0.1.7`。
+- `manifest.minAppVersion` 已升为 `1.7.2`，匹配 `WorkspaceLeaf.loadIfDeferred()` 和 `Workspace.revealLeaf()` 的 `@since 1.7.2`。
+- 新增 `src/utils/domUtils.ts`，用 Obsidian 官方 `sanitizeHTMLToDom` 渲染 HTML fragment。
+- `PreviewModal.ts`、`PreviewView.ts` 已移除直接 `innerHTML` 写入。
+- `SettingsTab.ts` 已改用 `new Setting(...).setName(...).setHeading()`。
+- README 已新增 `English summary`。
+- README、安装文档、Worker README 示例、版本 metadata 和测试已同步到 `0.1.7`。
+- 新增 `tests/official-review.test.ts`，覆盖官方审查阻断项。
+
+## 本地验收
 
 - `manifest.name`：`Kenengba WeChat Publisher`。
 - `manifest.id`：`kenengba-wechat-publisher`。
-- `manifest.version`：`0.1.6`。
+- `manifest.version`：`0.1.7`。
+- `manifest.minAppVersion`：`1.7.2`。
 - `isDesktopOnly`：`true`。
-- `versions.json` 包含 `0.1.6` 到 `1.0.0` 的映射。
-- release/package 验证脚本已收紧 ID 规则：只允许小写英文字母和连字符，不允许数字。
-- `npm test` 已通过：87 tests，87 pass。
+- `versions.json` 包含 `0.1.7` 到 `1.7.2` 的映射。
+- `npm test` 已通过：91 tests，91 pass。
 - `npm run build` 已通过。
-- `npm run package:plugin` 已通过，生成 `dist/kenengba-wechat-publisher-0.1.6.zip`。
+- `npm run package:plugin` 已通过，生成 `dist/kenengba-wechat-publisher-0.1.7.zip`。
 - `npm run verify:release-assets` 已通过。
-- `git diff --check` 已通过。
-- `dist/kenengba-wechat-publisher-0.1.6.zip` SHA-256：`2909B853545D9BE36E0C978B70CC6911B956EEEACD0CC27A54F64AFDF2622076`。
-- GitHub Release asset digest 已确认 zip 为 `sha256:2909b853545d9be36e0c978b70cc6911b956eeeacd0cc27a54f64afdf2622076`。
+- `git diff --check -- . ':!main.js'` 已通过；完整 `git diff --check` 仍会报告生成的 `main.js` 第 25 行 trailing whitespace。
+- `dist/kenengba-wechat-publisher-0.1.7.zip` SHA-256：`2505BA66290817D35B0F654990A27617737A84B72974234F0DA3B2E6AEE4DA78`。
 
 ## 验证
 
@@ -51,11 +54,13 @@ npm test
 npm run build
 npm run package:plugin
 npm run verify:release-assets
-git diff --check
+git diff --check -- . ':!main.js'
+Get-FileHash -Algorithm SHA256 -LiteralPath dist\kenengba-wechat-publisher-0.1.7.zip
 ```
 
 ## 下一步
 
-1. 主人回到官方社区表单提交仓库 URL：`https://github.com/yyhzz985/xuezha985-wechat-publisher`。
-2. 如果官方表单仍报错，把截图或错误文本发回。
-3. 不要重复创建 Release，不要 deploy，不要改 Worker/D1/secrets。
+1. 停下来等主人确认是否公开发布 `0.1.7`。
+2. 如果确认，发布前先创建本地 checkpoint，再更新远端 `main` / tag / GitHub Release assets。
+3. 发布后回到官方社区页面点击 `Check for new releases` 或重新提交审核。
+4. 不要 deploy，不要改 Worker/D1/secrets，不要提交官方入口，直到主人明确确认。

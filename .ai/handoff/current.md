@@ -2,6 +2,152 @@
 
 ## 最新状态
 
+官方社区 `0.1.6` 自动审查已 failed。截图显示 source errors 主要是：
+
+- `manifest.minAppVersion` 低于实际使用的 Obsidian API。
+- `src/view/PreviewModal.ts`、`src/view/PreviewView.ts` 直接写 `innerHTML`。
+- `src/view/SettingsTab.ts` 直接创建 HTML heading。
+- README 缺少英文说明。
+
+本地已完成 `OBS-PUBLISH-009` 整改并准备 `0.1.7`：
+
+- `manifest.version`：`0.1.7`
+- `manifest.minAppVersion`：`1.7.2`
+- `versions.json`：`0.1.7` -> `1.7.2`
+- 新增 `src/utils/domUtils.ts`，用 `sanitizeHTMLToDom` 渲染 HTML fragment。
+- `PreviewModal.ts`、`PreviewView.ts` 已移除直接 `innerHTML` 写入。
+- `SettingsTab.ts` 已改用 `new Setting(...).setName(...).setHeading()`。
+- README 已新增 `English summary`。
+- 已生成 `dist/kenengba-wechat-publisher-0.1.7.zip`，SHA-256：`2505BA66290817D35B0F654990A27617737A84B72974234F0DA3B2E6AEE4DA78`。
+
+已验证：
+
+```powershell
+npm test
+npm run build
+npm run package:plugin
+npm run verify:release-assets
+git diff --check -- . ':!main.js'
+```
+
+结果：
+
+- `npm test`：91 tests，91 pass。
+- `npm run build`：通过。
+- `npm run package:plugin`：通过。
+- `npm run verify:release-assets`：通过。
+- `git diff --check -- . ':!main.js'`：通过。
+- 完整 `git diff --check`：未通过，仅因生成的 `main.js:25` trailing whitespace。
+
+尚未公开发布 `0.1.7`。公开发布、push、tag、GitHub Release、官方社区重新触发审核都必须先等主人确认。
+
+## 当前目标
+
+`G003` 仍在进行中：公开发布并提交官方社区。当前不是完成态，因为官方可见最新审核仍是 `0.1.6` failed。
+
+## 项目状态
+
+- 本项目是用于公众号 Markdown 预览、复制和 Pro 上传的 Obsidian 插件。
+- 当前本地版本是 `0.1.7`。
+- 当前官方展示名是 `Kenengba WeChat Publisher`。
+- 当前 `manifest.id` 是 `kenengba-wechat-publisher`。
+- 当前 `manifest.minAppVersion` 是 `1.7.2`。
+- 当前 `isDesktopOnly: true`。
+- 当前分支是 `main`，本地仍显示 `main...origin/main [ahead 3]`，因为此前 `git push` 到 GitHub HTTPS 失败，`0.1.6` 是通过 GitHub API 更新远端。
+
+## 本轮完成
+
+- 用本地 Obsidian typings 确认 `loadIfDeferred()` 和 `revealLeaf()` 的 API floor 是 `1.7.2`。
+- 先新增 `tests/official-review.test.ts`，确认本地能复现官方 source review 失败点。
+- 将 `manifest.json`、`package.json`、`package-lock.json`、`versions.json` 升到 `0.1.7`。
+- 将 HTML preview 渲染改为 `sanitizeHTMLToDom` helper。
+- 将 `SettingsTab` 章节标题改为 `Setting.setHeading()`。
+- 给 README 增加英文摘要。
+- 同步 README、安装文档、Worker README 示例和测试版本号。
+- 更新 `tasks/current.md`、`tasks/backlog.md`、`docs/02/03/04/05/07`、`docs/DEVELOPMENT_LOG.md`、`.ai/goals.md`、`.ai/findings.md`、`.ai/checks/latest.md`。
+
+## 变更文件
+
+- `README.md`
+- `docs/02-tech-stack.md`
+- `docs/03-roadmap.md`
+- `docs/04-decisions.md`
+- `docs/05-standards.md`
+- `docs/07-project-map.md`
+- `docs/DEVELOPMENT_LOG.md`
+- `docs/install-guide.md`
+- `main.js`
+- `manifest.json`
+- `package.json`
+- `package-lock.json`
+- `versions.json`
+- `worker/README.md`
+- `src/utils/domUtils.ts`
+- `src/view/PreviewModal.ts`
+- `src/view/PreviewView.ts`
+- `src/view/SettingsTab.ts`
+- `tests/documentation.test.ts`
+- `tests/license-worker.test.ts`
+- `tests/official-review.test.ts`
+- `tasks/current.md`
+- `tasks/backlog.md`
+- `.ai/goals.md`
+- `.ai/findings.md`
+- `.ai/checks/latest.md`
+- `.ai/handoff/current.md`
+
+## 关键决策
+
+- 不处理 artifact attestation recommendation；当前阻断是 source errors，CI / attestation 需要另行设计。
+- 不移除 release zip requirement；项目仍要求 GitHub Release 单独包含 `manifest.json`、`main.js`、`styles.css`，zip 只是手动安装包。
+- 不改 Worker production config、D1、secrets、License CSV 或本地 vault data。
+- 不公开发布 `0.1.7`，直到主人明确确认。
+
+## 活跃目标
+
+- `G003`：进行中。`0.1.7` 本地整改完成，等待公开发布确认。
+
+## 开放问题
+
+- 官方页面仍显示 `0.1.6` failed；要验证官方审查是否通过，必须先发布 `0.1.7` 并重新触发审核。
+- `main.js` 生成 bundle 里有 trailing whitespace，完整 `git diff --check` 会失败；源码和文档排除生成 bundle 后已通过。
+- 干净 Obsidian vault 手动 smoke test 尚未执行。
+
+## 阻塞 / 风险
+
+- 阻塞：公开发布 `0.1.7` 需要主人明确批准。
+- 风险：本机 GitHub HTTPS push 之前持续失败，可能仍需使用 GitHub API 发布远端 commit/tag/release。
+- 风险：官方 review 仍会给 artifact attestation、zip extra file、clipboard access 等 recommendation；当前未处理，因为它们不是截图里的 source error 阻断项。
+
+## 验证
+
+```powershell
+npm test
+npm run build
+npm run package:plugin
+npm run verify:release-assets
+git diff --check -- . ':!main.js'
+Get-FileHash -Algorithm SHA256 -LiteralPath dist\kenengba-wechat-publisher-0.1.7.zip
+```
+
+## 下一步
+
+1. 主人确认是否允许公开发布 `0.1.7`。
+2. 如果确认，先创建本地 checkpoint。
+3. 更新远端 `main`、tag `0.1.7` 和 GitHub Release，单独上传 `manifest.json`、`main.js`、`styles.css` 和 `kenengba-wechat-publisher-0.1.7.zip`。
+4. 发布后在官方社区页面点击 `Check for new releases`，或按页面要求重新触发审核。
+5. 如果官方 review 仍 failed，按新的错误逐项处理，不碰 Worker / D1 / secrets / deploy。
+
+## 接力提示词
+
+```text
+主人要求：继续 E:\AI_project\ob-kenengba。当前任务是 `OBS-PUBLISH-009`：修复 Obsidian 官方社区 `0.1.6` 自动审查 failed 后的 source errors。必须先读 AGENTS.md、tasks/current.md、tasks/backlog.md、.ai/goals.md、.ai/findings.md、.ai/checks/latest.md、.ai/handoff/current.md、docs/03-roadmap.md、docs/04-decisions.md、docs/05-standards.md、docs/07-project-map.md。
+
+当前本地已准备 `0.1.7`：`manifest.minAppVersion` 为 `1.7.2`，view 代码不再直接写 `innerHTML`，`SettingsTab` 使用 `Setting.setHeading()`，README 有 `English summary`。验证通过：`npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets`。完整 `git diff --check` 只因生成的 `main.js` 第 25 行 trailing whitespace 失败，排除 `main.js` 已通过。尚未公开发布 `0.1.7`，任何 push、tag、GitHub Release、官方社区提交或 deploy 都必须先问主人。
+```
+
+## 历史记录（0.1.6 发布后，保留供追溯）
+
 官方社区新提交表单拒绝 `0.1.5` 的旧 `manifest.id`：`xuezha985-wechat-publisher`。截图错误为 `The plugin ID in your manifest.json is not allowed`。
 
 `0.1.6` 已公开发布：

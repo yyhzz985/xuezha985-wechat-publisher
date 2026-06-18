@@ -17,6 +17,7 @@ import {
 } from '../settings';
 import type { EntitlementStatus } from '../service/EntitlementService';
 import type { FormattedWeChatArticle } from '../service/WeChatFormatService';
+import { replaceWithSanitizedHtml } from '../utils/domUtils';
 import { formatLicenseStatus } from '../utils/licenseDisplayUtils';
 import type { MarkdownFormatAction } from '../utils/markdownEditUtils';
 import type { NoticeView } from './NoticeView';
@@ -261,7 +262,7 @@ export class WeChatPublisherPreviewView extends ItemView {
 		this.syncButton.disabled = false;
 		this.emptyEl.hide();
 		this.articleEl.show();
-		this.articleEl.innerHTML = this.article.html;
+		replaceWithSanitizedHtml(this.articleEl, this.article.html);
 	}
 
 	private setActivePanel(panel: 'settings' | 'help' | null): void {
@@ -687,6 +688,6 @@ export class WeChatPublisherPreviewView extends ItemView {
 		header.createEl('h3', { text: '帮助' });
 
 		const content = this.helpPanel.createDiv({ cls: 'wechat-publisher-inline-settings-content wechat-publisher-help-content' });
-		content.innerHTML = HELP_MARKDOWN_RENDERER.render(helpMarkdown);
+		replaceWithSanitizedHtml(content, HELP_MARKDOWN_RENDERER.render(helpMarkdown));
 	}
 }

@@ -4,6 +4,10 @@
 
 本插件的排版风格参考 [可能吧公众号排版器](https://mp.knb.im/)。我非常喜欢它简约、克制、高级的排版审美，所以把这套写作后的排版工作流搬进了 Obsidian。
 
+## English summary
+
+Kenengba WeChat Publisher is a desktop-only Obsidian plugin for turning Markdown notes into WeChat Official Account-compatible HTML. It provides a live preview, clipboard copy, and optional Pro features for WeChat draft upload and image upload.
+
 GitHub 仓库地址：[https://github.com/yyhzz985/xuezha985-wechat-publisher](https://github.com/yyhzz985/xuezha985-wechat-publisher)
 
 安装使用说明：[docs/install-guide.md](docs/install-guide.md)
@@ -39,7 +43,7 @@ GitHub 仓库地址：[https://github.com/yyhzz985/xuezha985-wechat-publisher](h
 下载最新版本里的 zip 文件，例如：
 
 ```text
-kenengba-wechat-publisher-0.1.6.zip
+kenengba-wechat-publisher-0.1.7.zip
 ```
 
 ### 第二步：解压文件
@@ -148,7 +152,7 @@ kenengba-wechat-publisher
 最常见错误是多了一层目录，例如：
 
 ```text
-.obsidian/plugins/kenengba-wechat-publisher/kenengba-wechat-publisher-0.1.6/manifest.json
+.obsidian/plugins/kenengba-wechat-publisher/kenengba-wechat-publisher-0.1.7/manifest.json
 ```
 
 这种是不对的。
@@ -423,7 +427,7 @@ npm run verify:release-assets
 manifest.json
 main.js
 styles.css
-kenengba-wechat-publisher-0.1.6.zip
+kenengba-wechat-publisher-0.1.7.zip
 ```
 
 zip 只用于手动安装，不能替代单独的 `manifest.json`、`main.js` 和 `styles.css`。创建 GitHub Release、push 和提交 Obsidian 官方社区 PR 都属于公开发布动作，需要单独确认。
