@@ -11,6 +11,8 @@
 | D005 | 2026-06-18 | 当前保持 Worker payment endpoints 关闭 | 当前购买路径是手动发放 license | 生效 |
 | D006 | 2026-06-18 | deploy、release、migration、publishing 必须明确批准 | 这些动作会影响公开或生产状态 | 生效 |
 | D007 | 2026-06-18 | 把 docs、tasks 和 `.ai/` 文件作为项目 handoff 契约 | 后续 AI 会话必须从仓库文件恢复，不依赖聊天记忆 | 生效 |
+| D008 | 2026-06-18 | 官方社区上架拆成“合规整改准备”和“公开发布提交”两步 | 第一阶段可改文档和代码准备；GitHub Release、push、官方 PR 属于公开动作，需要主人单独确认 | 生效 |
+| D009 | 2026-06-18 | 上架前优先解决 `manifest.name` 和 `isDesktopOnly` 策略 | 当前中文名和 Electron clipboard fallback 都可能成为官方审核风险 | 待执行 |
 
 ## 已拒绝选项
 
@@ -20,6 +22,7 @@
 | 给本地图片使用固定附件目录 | Obsidian 已经能解析当前笔记图片上下文 |
 | 静默跳过上传失败 | 用户需要直接看到 WeChat 错误，才能修 AppID、AppSecret、IP 白名单或图片格式 |
 | 普通修复中自动跑 production deploy | 违反生产安全边界 |
+| 直接用当前 `0.1.4` 状态提审官方社区 | `manifest.name`、`isDesktopOnly`、README 隐私说明和 release asset 验证尚未完成 |
 
 ## 决策说明
 

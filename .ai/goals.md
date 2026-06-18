@@ -7,7 +7,8 @@
 | ID | 状态 | 目标 | 证据 | 验证 |
 | --- | --- | --- | --- | --- |
 | G001 | 已完成 | 把旧项目恢复成文件化 handoff 契约 | `AGENTS.md`、`docs/00-07`、`tasks/`、`.ai/` docs 已在工作区新增或修复 | 见 `.ai/checks/latest.md` |
-| G002 | 阻塞 | 选择并执行第一个代码级稳定化任务 | 需要用户确认目标 | 代码任务使用 `npm test` 和 `npm run build` |
+| G002 | 进行中 | 准备 Obsidian 官方插件社区上架合规整改 | `tasks/current.md` 已设为 `OBS-PUBLISH-001` | 文档整理阶段用 `git diff --check`；执行阶段用 `npm test`、`npm run build`、`npm run package:plugin` |
+| G003 | 阻塞 | 公开发布并提交官方社区 | 需要主人单独确认 GitHub Release、push 和官方 PR | Release asset 和官方提交结果 |
 
 ## 规则
 

@@ -63,6 +63,16 @@
 - 如果发布资产变化，任何 public release 前都要验证包内容。
 - 在 `git status` 不再显示契约文件为 untracked 前，不要声称文档恢复已在 git 中持久化。
 
+## 官方上架规则
+
+- `OBS-PUBLISH-001` 只做上架前准备，不做公开发布。
+- GitHub Release、push、提交 `obsidian-releases` PR、正式上架都必须单独得到主人确认。
+- release asset 不能只依赖 zip；GitHub Release 必须单独提供 `manifest.json`、`main.js`、`styles.css`。
+- `manifest.json` 的 `version`、Git tag、release asset 内的 `manifest.json` 必须一致。
+- `versions.json` 必须包含当前版本到最低 Obsidian 版本的映射。
+- 如果 `isDesktopOnly: false`，必须完成移动端兼容审计；如果保留 Electron / Node-only 依赖，改为 `true` 并同步文档。
+- README 必须写清网络请求、数据保存位置、免费/Pro 边界和隐私说明。
+
 ## 红线
 
 - 未确认前，不删除、不批量移动。
