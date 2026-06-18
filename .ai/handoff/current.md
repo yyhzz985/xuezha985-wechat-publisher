@@ -4,7 +4,7 @@
 
 官方社区新提交表单拒绝 `0.1.5` 的旧 `manifest.id`：`xuezha985-wechat-publisher`。截图错误为 `The plugin ID in your manifest.json is not allowed`。
 
-本地已准备 `0.1.6` 修复：
+`0.1.6` 已公开发布：
 
 - `manifest.id`：`kenengba-wechat-publisher`
 - `manifest.name`：`Kenengba WeChat Publisher`
@@ -13,6 +13,8 @@
 - view type：`kenengba-wechat-publisher-preview`
 - package zip：`dist/kenengba-wechat-publisher-0.1.6.zip`
 - zip SHA-256：`2909B853545D9BE36E0C978B70CC6911B956EEEACD0CC27A54F64AFDF2622076`
+- Release：`https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/tag/0.1.6`
+- 远端 `main` / tag `0.1.6`：`85354ff44bae5272b170ba8f5ab074bdf4b96ccb`
 
 已验证：
 
@@ -24,23 +26,23 @@ npm run verify:release-assets
 git diff --check
 ```
 
-全部通过。`0.1.6` 仍是本地状态，尚未 push、尚未创建 tag、尚未创建 GitHub Release、尚未重新提交官方社区。公开发布前必须再次问主人。
+全部通过。主人已确认允许公开发布 `0.1.6`。本机 `git push` 到 GitHub HTTPS 持续失败，本轮使用 GitHub API 更新远端 `main` 和 tag，并创建 GitHub Release。尚未重新提交官方社区表单。
 
 ## 当前目标
 
-`OBS-PUBLISH-001` 已完成。`0.1.5` 已公开发布，但官方社区新提交表单拒绝旧 `manifest.id`。当前 `OBS-PUBLISH-008` 已在本地完成 `0.1.6` ID 修复，等待主人确认是否公开发布。
+`OBS-PUBLISH-001` 已完成。`0.1.5` 已公开发布，但官方社区新提交表单拒绝旧 `manifest.id`。`OBS-PUBLISH-008` 已完成，`0.1.6` 已公开发布，下一步需要主人重新提交官方社区表单。
 
 ## 项目状态
 
 - 本项目是用于公众号 Markdown 预览、复制和 Pro 上传的 Obsidian 插件。
 - Cloudflare Worker 处理 License 校验和 admin license 操作。
-- 当前本地版本是 `0.1.6`；已公开版本仍是 `0.1.5`。
+- 当前版本是 `0.1.6`。
 - 当前官方展示名是 `Kenengba WeChat Publisher`。
 - 当前 `manifest.json` 设置为 `isDesktopOnly: true`。
 - 当前分支是 `main`，跟踪 `origin/main`。
 - 已创建本地 checkpoint：`de4e51a`，commit message 为 `checkpoint: current project state`。
 - 已创建计划 checkpoint：`0d5991c`，commit message 为 `checkpoint: official plugin submission plan`。
-- 当前工作区有 `0.1.6` ID 修复和状态文档更新未提交；主仓库 `main` 和 tag `0.1.5` 已 push。
+- 当前工作区有 `0.1.6` 发布后状态文档更新未提交；远端 `main` 和 tag `0.1.6` 已通过 GitHub API 更新。
 
 ## 本轮已完成
 
@@ -125,7 +127,7 @@ git diff --check
 
 - G001：已完成。把旧项目恢复成文件化 handoff 契约。
 - G002：已完成。准备 Obsidian 官方插件社区上架合规整改。
-- G003：等待确认。`0.1.6` 本地修复已验证，下一步需要主人确认是否公开发布。
+- G003：进行中。`0.1.6` 已公开发布，下一步需要主人重新提交官方社区表单。
 
 ## 开放发现
 
@@ -141,7 +143,8 @@ git diff --check
 
 ## 阻塞 / 风险
 
-- `0.1.6` 尚未公开发布；push、tag、GitHub Release 和官方社区重新提交都需要主人确认。
+- `0.1.6` 已公开发布；官方社区表单尚未重新提交。
+- 本机 `git push` 到 GitHub HTTPS 失败，本轮远端发布通过 GitHub API 完成；本地 `origin/main` 可能仍显示旧跟踪状态。
 - Worker deploy、migration、schema/data work 和 production config 变化都需要主人单独确认。
 - 干净 Obsidian vault 手动 smoke test 尚未执行；如提审前需要人工验收，应单独安排。
 
@@ -168,7 +171,7 @@ git diff --check
 - `npm run package:plugin`：通过，生成并验证 `dist/kenengba-wechat-publisher-0.1.6.zip`。
 - `npm run verify:release-assets`：通过。
 - `git diff --check`：通过，只有 Windows line ending 提示。
-- `git push origin main`：本轮未执行；`0.1.6` 公开发布前需要主人确认。
+- `git push origin main`：多次失败，错误为 GitHub HTTPS 连接重置 / 443 连接失败；已改用 GitHub API 更新远端。
 - `git push origin 0.1.5`：历史已通过。
 - `gh release create 0.1.5 ...`：历史已通过。
 - `git -C E:\AI_project\obsidian-releases push -u origin add-xuezha985-wechat-publisher`：历史已通过。
@@ -177,13 +180,12 @@ git diff --check
 
 ## 下一步
 
-1. 先问主人是否允许公开发布 `0.1.6`。
-2. 若主人确认，提交本地改动并 push `main`。
-3. 创建 tag `0.1.6` 和 GitHub Release，单独上传 `manifest.json`、`main.js`、`styles.css`、`kenengba-wechat-publisher-0.1.6.zip`。
-4. 回到官方社区表单提交仓库 URL：`https://github.com/yyhzz985/xuezha985-wechat-publisher`。
+1. 主人回到官方社区表单提交仓库 URL：`https://github.com/yyhzz985/xuezha985-wechat-publisher`。
+2. 如果表单仍报错，把截图或错误文本发回。
+3. 不要重复创建 Release，不要 deploy，不要改 Worker/D1/secrets。
 
 ## 交接提示
 
 ```text
-继续本项目时，先读 AGENTS.md、tasks/current.md、tasks/backlog.md、.ai/goals.md、.ai/findings.md、.ai/checks/latest.md、.ai/handoff/current.md、docs/03-roadmap.md、docs/04-decisions.md 和 docs/05-standards.md。`0.1.5` 已公开发布但官方社区表单拒绝旧 ID；`0.1.6` 已在本地改为 `kenengba-wechat-publisher` 并验证通过。不要假设聊天历史。没有主人明确确认，不要 push、创建 tag、创建 Release、提交官方社区、deploy、migrate、delete，也不要触碰 secrets。
+继续本项目时，先读 AGENTS.md、tasks/current.md、tasks/backlog.md、.ai/goals.md、.ai/findings.md、.ai/checks/latest.md、.ai/handoff/current.md、docs/03-roadmap.md、docs/04-decisions.md 和 docs/05-standards.md。`0.1.6` 已公开发布，Release URL 为 https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/tag/0.1.6；官方社区表单尚未重新提交。不要假设聊天历史。没有主人明确确认，不要重复创建 Release、提交官方社区、deploy、migrate、delete，也不要触碰 secrets。
 ```

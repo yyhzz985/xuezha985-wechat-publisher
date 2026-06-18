@@ -12,7 +12,7 @@
 
 完成 Obsidian 官方插件社区上架前合规整改准备。
 
-当前状态：`OBS-PUBLISH-001` 已完成本地合规整改和自动验证。`0.1.5` 已公开，但官方社区新提交表单拒绝旧 `manifest.id`；当前转入 `OBS-PUBLISH-008`，本地准备 `0.1.6` 和 `kenengba-wechat-publisher` ID 修复。下一步如需正式上架，需要主人单独确认 push、GitHub Release 和官方社区提交。
+当前状态：`OBS-PUBLISH-001` 已完成本地合规整改和自动验证。`0.1.5` 已公开，但官方社区新提交表单拒绝旧 `manifest.id`；`OBS-PUBLISH-008` 已完成，`0.1.6` 已公开发布并使用 `kenengba-wechat-publisher` ID。下一步是主人在官方社区表单中重新提交仓库 URL。
 
 ## 官方社区上架准备
 

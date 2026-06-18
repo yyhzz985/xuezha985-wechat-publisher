@@ -9,7 +9,7 @@
 | OBS-PUBLISH-005 | 已完成 | 增加 release/package 验证 checklist 或脚本 | `OBS-PUBLISH-001` | `scripts/verify-release-assets.ps1` 检查 `manifest.json`、`main.js`、`styles.css`、zip、版本 metadata | 没有做 public release |
 | OBS-PUBLISH-006 | 待处理 | 干净 vault smoke test | `OBS-PUBLISH-001` | 在干净 Obsidian vault 中手动安装并确认启用、预览、复制路径 | 自动验证已完成；不 deploy |
 | OBS-PUBLISH-007 | 已取代 | 创建 GitHub Release 并提交官方社区 | `OBS-PUBLISH-001`、用户已确认“公开” | Release tag 与 `manifest.json` version 一致，assets 单独包含 `manifest.json`、`main.js`、`styles.css`；官方 PR 分支已推送 | `0.1.5` 已公开，但官方社区新表单拒绝带数字的 `manifest.id`，改由 `OBS-PUBLISH-008` 处理 |
-| OBS-PUBLISH-008 | 等待确认 | 修复官方社区表单拒绝 `manifest.id` | `OBS-PUBLISH-007` | `manifest.id` 只含小写英文字母和连字符；`0.1.6` 本地构建、测试、打包验证通过；公开发布前得到主人确认 | 当前本地 ID 为 `kenengba-wechat-publisher`，已验证，未 push，未创建新 release |
+| OBS-PUBLISH-008 | 已完成 | 修复官方社区表单拒绝 `manifest.id` | `OBS-PUBLISH-007` | `manifest.id` 只含小写英文字母和连字符；`0.1.6` 本地构建、测试、打包验证通过；公开发布前得到主人确认 | `0.1.6` 已发布，Release assets 已单独上传；官方社区表单尚待主人重新提交 |
 | STAB-004 | 待处理 | 创建 Worker operations runbook | 无 | 记录 Worker dry-run、deploy、secrets、D1 migration 和 issue-license 流程 | 不改生产配置 |
 | STAB-006 | 待处理 | 降低用户文档漂移 | 无 | README、install guide、plugin help 和 Worker README 有清晰归属规则 | 可并入 `OBS-PUBLISH-004` |
 | STAB-007 | 待处理 | 必要时增加 Obsidian UI smoke 验证 | 重复 UI 回归 | 有轻量手动或自动 smoke 路径 | 可并入 `OBS-PUBLISH-006` |

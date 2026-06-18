@@ -2,14 +2,15 @@
 
 ## 当前阻塞
 
-- 公开发布阻塞：`0.1.6` ID 修复已在本地验证，但 push、tag、GitHub Release 和官方社区重新提交都属于公开发布动作，需要主人再次明确确认。
+- 官方社区表单尚未重新提交：`0.1.6` 已公开发布，主人需要在网页表单中再次提交仓库 URL。
 - 官方社区表单曾拒绝 `0.1.5`：旧 `manifest.id` 为 `xuezha985-wechat-publisher`，包含数字；本地已改为 `kenengba-wechat-publisher`。
+- 本机 `git push` 到 GitHub HTTPS 失败，本轮远端发布通过 GitHub API 完成；本地 `origin/main` 可能仍显示旧跟踪状态。
 - 干净 Obsidian vault 手动 smoke test 尚未执行；如官方 review 或主人要求，需要另开当前任务。
 
 ## 操作前需要批准
 
 - 删除或移动文件 / 目录。
-- 再次 push、改 tag 或覆盖 Release asset。
+- 再次 push、改 tag、覆盖 Release asset 或重新创建 Release。
 - 修改已发布 GitHub Release。
 - 提交新的 `obsidian-releases` PR 或通过官方入口提审。
 - Deploy Cloudflare Worker。

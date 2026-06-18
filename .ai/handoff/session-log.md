@@ -41,3 +41,8 @@
 - 验证通过：`npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets`、`git diff --check`。
 - 生成本地包：`dist/kenengba-wechat-publisher-0.1.6.zip`，SHA-256 为 `2909B853545D9BE36E0C978B70CC6911B956EEEACD0CC27A54F64AFDF2622076`。
 - 未 push、未创建 tag、未创建 GitHub Release、未重新提交官方社区；下一步必须先问主人是否允许公开发布 `0.1.6`。
+- 主人确认“允许公开发布 0.1.6”后，尝试 `git push origin main` 和 `git -c http.version=HTTP/1.1 push origin main`，均因 GitHub HTTPS 连接失败。
+- 为避免阻塞发布，改用 GitHub API 更新远端 `main` 和 tag `0.1.6`；远端 commit 为 `85354ff44bae5272b170ba8f5ab074bdf4b96ccb`，tree 内容与本地 `0.1.6` commit 一致。
+- 已创建 GitHub Release：`https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/tag/0.1.6`。
+- Release assets 已验证：`manifest.json`、`main.js`、`styles.css`、`kenengba-wechat-publisher-0.1.6.zip` 均为独立资产，zip digest 为 `sha256:2909b853545d9be36e0c978b70cc6911b956eeeacd0cc27a54f64afdf2622076`。
+- 尚未重新提交官方社区表单；下一步需要主人在网页表单中提交仓库 URL。

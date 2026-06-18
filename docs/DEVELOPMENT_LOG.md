@@ -385,3 +385,7 @@
 - 同步更新 README、安装文档、Worker README 示例、`versions.json`、`package.json`、`package-lock.json` 和相关测试。
 - 收紧 `scripts/verify-release-assets.ps1`：`manifest.id` 只允许小写英文字母和连字符，不允许数字。
 - 验证：`npm test` 87 项通过；尚未 push、尚未创建 tag、尚未创建 GitHub Release，公开发布前必须再次得到主人确认。
+- 主人确认后公开发布 `0.1.6`：`https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/tag/0.1.6`。
+- 因本机 `git push` 到 GitHub HTTPS 失败，本次通过 GitHub API 更新远端 `main` 和 tag `0.1.6`；远端 commit 为 `85354ff44bae5272b170ba8f5ab074bdf4b96ccb`，内容与本地 `0.1.6` tree 一致。
+- Release 单独上传 `manifest.json`、`main.js`、`styles.css` 和 `kenengba-wechat-publisher-0.1.6.zip`；zip SHA-256 为 `2909B853545D9BE36E0C978B70CC6911B956EEEACD0CC27A54F64AFDF2622076`。
+- 尚未重新提交官方社区表单。
