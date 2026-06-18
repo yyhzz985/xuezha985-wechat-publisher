@@ -2,17 +2,14 @@
 
 ## 建议的下一步
 
-`OBS-PUBLISH-001` 已完成本地合规整改。下一步取决于主人是否要进入公开发布阶段。
+`0.1.5` 已公开发布。下一步是主人手动创建 `obsidian-releases` PR，因为 GitHub API 拒绝自动创建。
 
 ## 建议的第一个任务
 
-如主人明确确认公开发布，先做发布前复核：
-
-1. 重新核对 Obsidian 官方提交规则。
-2. 确认是否需要干净 Obsidian vault 手动 smoke test。
-3. 确认 GitHub Release tag 必须等于 `manifest.json` 的 `version`，且不要加 `v` 前缀。
-4. 确认 Release 单独包含 `manifest.json`、`main.js`、`styles.css` 和 zip。
-5. 得到主人单独确认后，才允许 push、创建 GitHub Release 或提交官方社区 PR。
+1. 打开 compare 页面：`https://github.com/obsidianmd/obsidian-releases/compare/master...yyhzz985:obsidian-releases:add-xuezha985-wechat-publisher?expand=1`。
+2. 标题使用 `Add plugin: Kenengba WeChat Publisher`。
+3. PR 创建后等待官方 review。
+4. 如果 review 要求修改，按 review 精确处理并重新验证。
 
 ## 未确认不要开始
 
@@ -53,7 +50,8 @@
 3. `LICENSE`、README 隐私/网络请求说明、免费/Pro 边界说明已补。
 4. `scripts/verify-release-assets.ps1` 已接入 package 流程。
 5. `npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets` 已通过。
-6. 下一步只能在主人确认后做 GitHub Release、push 或官方社区 PR。
+6. `main`、tag `0.1.5` 和 GitHub Release 已公开。
+7. 官方 PR 分支已推送到 fork，但 PR 需要主人手动创建。
 
 红线：
 - 不要 push。

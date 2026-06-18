@@ -8,7 +8,7 @@
 | OBS-PUBLISH-004 | 已完成 | 补齐 `LICENSE` 和 README 隐私说明 | `OBS-PUBLISH-001` | 根目录有 `LICENSE`，README 写清网络请求、数据流和免费/Pro 边界 | 未读取 secret |
 | OBS-PUBLISH-005 | 已完成 | 增加 release/package 验证 checklist 或脚本 | `OBS-PUBLISH-001` | `scripts/verify-release-assets.ps1` 检查 `manifest.json`、`main.js`、`styles.css`、zip、版本 metadata | 没有做 public release |
 | OBS-PUBLISH-006 | 待处理 | 干净 vault smoke test | `OBS-PUBLISH-001` | 在干净 Obsidian vault 中手动安装并确认启用、预览、复制路径 | 自动验证已完成；不 deploy |
-| OBS-PUBLISH-007 | 阻塞 | 创建 GitHub Release 并提交官方社区 | `OBS-PUBLISH-006`、用户明确确认 | Release tag 与 `manifest.json` version 一致，assets 单独包含 `manifest.json`、`main.js`、`styles.css` | 公开发布动作，必须单独确认 |
+| OBS-PUBLISH-007 | 进行中 | 创建 GitHub Release 并提交官方社区 | `OBS-PUBLISH-001`、用户已确认“公开” | Release tag 与 `manifest.json` version 一致，assets 单独包含 `manifest.json`、`main.js`、`styles.css`；官方 PR 分支已推送 | GitHub API 拒绝自动创建 PR，需要主人手动打开 compare 页面 |
 | STAB-004 | 待处理 | 创建 Worker operations runbook | 无 | 记录 Worker dry-run、deploy、secrets、D1 migration 和 issue-license 流程 | 不改生产配置 |
 | STAB-006 | 待处理 | 降低用户文档漂移 | 无 | README、install guide、plugin help 和 Worker README 有清晰归属规则 | 可并入 `OBS-PUBLISH-004` |
 | STAB-007 | 待处理 | 必要时增加 Obsidian UI smoke 验证 | 重复 UI 回归 | 有轻量手动或自动 smoke 路径 | 可并入 `OBS-PUBLISH-006` |

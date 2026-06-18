@@ -2,7 +2,7 @@
 
 ## 当前目标
 
-`OBS-PUBLISH-001` 已完成本地合规整改和自动验证。当前只剩公开发布阶段需要主人单独确认。
+`OBS-PUBLISH-001` 已完成。`0.1.5` 已公开发布。官方社区 PR 分支已推送，但自动创建 PR 被 GitHub API 权限拦住，需要主人手动打开 compare 页面。
 
 ## 项目状态
 
@@ -14,7 +14,7 @@
 - 当前分支是 `main`，跟踪 `origin/main`。
 - 已创建本地 checkpoint：`de4e51a`，commit message 为 `checkpoint: current project state`。
 - 已创建计划 checkpoint：`0d5991c`，commit message 为 `checkpoint: official plugin submission plan`。
-- 当前工作区有未提交整改改动，分支 `main` 相对 `origin/main` ahead 3。
+- 当前工作区有发布状态文档更新未提交；主仓库 `main` 和 tag `0.1.5` 已 push。
 
 ## 本轮已完成
 
@@ -30,6 +30,11 @@
 - 运行并通过 `npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets`、`git diff --check`。
 - 未 push、未创建 GitHub Release、未提交官方社区 PR、未 deploy。
 - 主人随后明确说“公开”，进入公开发布阶段；由于远端已有 `0.1.4` release 和 tag，本轮将当前合规整改版本升为 `0.1.5`，避免复用旧 tag。
+- 已 push 主仓库 `main` 和 tag `0.1.5`。
+- 已创建 GitHub Release：`https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/tag/0.1.5`。
+- Release 已单独上传 `manifest.json`、`main.js`、`styles.css` 和 `xuezha985-wechat-publisher-0.1.5.zip`。
+- 已创建 `obsidian-releases` fork 并推送 `add-xuezha985-wechat-publisher` 分支。
+- 自动创建官方 PR 失败：GraphQL 返回 `yyhzz985 does not have the correct permissions to execute CreatePullRequest`；REST API 返回 404。
 
 ## 历史已完成
 
@@ -94,7 +99,7 @@
 
 - G001：已完成。把旧项目恢复成文件化 handoff 契约。
 - G002：已完成。准备 Obsidian 官方插件社区上架合规整改。
-- G003：阻塞。公开发布和官方社区提交，等待主人单独确认。
+- G003：进行中。Release 已完成，官方 PR 需要主人手动打开 compare 页面。
 
 ## 开放发现
 
@@ -109,7 +114,7 @@
 
 ## 阻塞 / 风险
 
-- GitHub Release、push、官方社区 PR、正式发布都需要主人单独确认。
+- 官方社区 PR 尚未创建，需要主人手动打开 compare 页面。
 - Worker deploy、migration、schema/data work 和 production config 变化都需要主人单独确认。
 - 干净 Obsidian vault 手动 smoke test 尚未执行；如提审前需要人工验收，应单独安排。
 
@@ -136,18 +141,22 @@ git diff --check
 - `npm run package:plugin`：通过，生成并验证 `dist/xuezha985-wechat-publisher-0.1.5.zip`。
 - `npm run verify:release-assets`：通过。
 - `git diff --check`：通过，只有 Windows line ending 提示。
+- `git push origin main`：通过。
+- `git push origin 0.1.5`：通过。
+- `gh release create 0.1.5 ...`：通过。
+- `git -C E:\AI_project\obsidian-releases push -u origin add-xuezha985-wechat-publisher`：通过。
 - 没有跑 Obsidian runtime smoke test。
 - 没有跑 Worker dry-run。
 
 ## 下一步
 
-1. 如主人要继续提审，先确认是否需要干净 Obsidian vault 手动 smoke test。
-2. 如主人明确批准公开发布，再创建 GitHub Release；Release tag 必须等于 `manifest.json` 的 `0.1.5`，不要加 `v` 前缀。
-3. Release 资产必须单独包含 `manifest.json`、`main.js`、`styles.css` 和 zip。
-4. push、GitHub Release、官方社区 PR 都需要主人单独确认。
+1. 主人打开 compare 页面创建 PR：`https://github.com/obsidianmd/obsidian-releases/compare/master...yyhzz985:obsidian-releases:add-xuezha985-wechat-publisher?expand=1`。
+2. PR 标题用 `Add plugin: Kenengba WeChat Publisher`。
+3. PR 创建后等待官方 review。
+4. 如果官方 review 要求修改，按 review 精确处理并重新验证。
 
 ## 交接提示
 
 ```text
-继续本项目时，先读 AGENTS.md、tasks/current.md、tasks/backlog.md、.ai/goals.md、.ai/findings.md、.ai/checks/latest.md、.ai/handoff/current.md、docs/03-roadmap.md、docs/04-decisions.md 和 docs/05-standards.md。`OBS-PUBLISH-001` 已完成本地整改。不要假设聊天历史。没有主人明确确认，不要 push、创建 GitHub Release、提交官方社区 PR、deploy、migrate、delete，也不要触碰 secrets。
+继续本项目时，先读 AGENTS.md、tasks/current.md、tasks/backlog.md、.ai/goals.md、.ai/findings.md、.ai/checks/latest.md、.ai/handoff/current.md、docs/03-roadmap.md、docs/04-decisions.md 和 docs/05-standards.md。`0.1.5` 已公开发布，官方 PR 分支已推送但 PR 未创建。不要假设聊天历史。没有主人明确确认，不要再次 push、改 tag、改 Release、deploy、migrate、delete，也不要触碰 secrets。
 ```

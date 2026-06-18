@@ -29,3 +29,9 @@
 - 新增 release asset 回归测试，并同步 manifest/documentation 测试。
 - 验证通过：`npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets`、`git diff --check`。
 - 未执行 push、GitHub Release、官方社区 PR、deploy、Worker dry-run、D1 migration 或任何公开发布动作。
+- 主人明确说“公开”后，发现远端已有 `0.1.4` tag/release，遂将合规整改版本升为 `0.1.5`。
+- `0.1.5` 验证通过：`npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets`。
+- 已 push 主仓库 `main` 和 tag `0.1.5`。
+- 已创建 GitHub Release：`https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/tag/0.1.5`，包含独立的 `manifest.json`、`main.js`、`styles.css` 和 zip。
+- 已 fork `obsidianmd/obsidian-releases` 到 `yyhzz985/obsidian-releases`，并推送分支 `add-xuezha985-wechat-publisher`。
+- 自动创建官方 PR 失败：`gh pr create` GraphQL 权限错误，REST API 返回 404；需要主人手动打开 compare 页面创建 PR。

@@ -2,15 +2,15 @@
 
 ## 当前阻塞
 
-- 公开发布阶段阻塞：GitHub Release、push、官方社区 PR 都需要主人单独确认。
-- 干净 Obsidian vault 手动 smoke test 尚未执行；如主人要求提审前手动验收，需要另开当前任务。
+- 官方社区 PR 创建阻塞：`gh pr create` 被 GitHub GraphQL 拒绝，REST API 创建 PR 返回 404；需要主人手动打开 compare 页面提交。
+- 干净 Obsidian vault 手动 smoke test 尚未执行；如官方 review 或主人要求，需要另开当前任务。
 
 ## 操作前需要批准
 
 - 删除或移动文件 / 目录。
-- push。
-- 创建 GitHub Release。
-- 提交 `obsidian-releases` PR 或通过官方入口提审。
+- 再次 push、改 tag 或覆盖 Release asset。
+- 修改已发布 GitHub Release。
+- 提交新的 `obsidian-releases` PR 或通过官方入口提审。
 - Deploy Cloudflare Worker。
 - 运行 D1 migrations 或编辑 production D1 data。
 - 修改 Worker production config、secrets、auth 或 CI/CD。

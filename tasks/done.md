@@ -7,3 +7,4 @@
 | CHECKPOINT-001 | 2026-06-18 | 保存当前项目状态本地 git 备份 | 本地 commit `de4e51a`：`checkpoint: current project state` | `git status` 后续确认 |
 | PLAN-001 | 2026-06-18 | 整理官方插件社区上架开发计划 | 本地 commit `0d5991c`：`checkpoint: official plugin submission plan` | `git diff --check` |
 | OBS-PUBLISH-001 | 2026-06-18 | 官方插件社区上架前合规整改准备 | `manifest.name` 改为 `Kenengba WeChat Publisher`；`isDesktopOnly` 改为 `true`；补 `LICENSE`、隐私/网络请求文档和 release asset 验证脚本 | `npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets` 通过 |
+| OBS-PUBLISH-007A | 2026-06-18 | 公开发布 `0.1.5` GitHub Release | 已 push `main` 和 tag `0.1.5`；Release 单独包含 `manifest.json`、`main.js`、`styles.css` 和 zip | Release manifest 下载验证通过；GitHub asset digest 与本地 zip hash 一致 |
