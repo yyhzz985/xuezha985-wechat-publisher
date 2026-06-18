@@ -12,13 +12,14 @@ const entitlementService = readFileSync('src/service/EntitlementService.ts', 'ut
 const issueLicenseScript = readFileSync('worker/scripts/issue-license.ps1', 'utf8');
 const worker = readFileSync('worker/src/index.ts', 'utf8');
 const helpMarkdown = readFileSync('docs/plugin-help.md', 'utf8');
-const manifest = JSON.parse(readFileSync('manifest.json', 'utf8')) as { id: string; name: string; author: string };
+const manifest = JSON.parse(readFileSync('manifest.json', 'utf8')) as { id: string; name: string; author: string; isDesktopOnly: boolean };
 const packageJson = JSON.parse(readFileSync('package.json', 'utf8')) as { name: string };
 
 test('uses a unique plugin id that does not collide with public wechat publisher plugins', () => {
 	assert.equal(manifest.id, 'xuezha985-wechat-publisher');
-	assert.equal(manifest.name, '公众号一键排版上传');
+	assert.equal(manifest.name, 'Kenengba WeChat Publisher');
 	assert.equal(manifest.author, 'xuezha985');
+	assert.equal(manifest.isDesktopOnly, true);
 	assert.equal(packageJson.name, 'obsidian-xuezha985-wechat-publisher');
 	assert.notEqual(manifest.id, 'wechat-publisher');
 	assert.match(previewView, /xuezha985-wechat-publisher-preview/);

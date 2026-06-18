@@ -19,7 +19,8 @@
 | 构建 | esbuild + TypeScript check | 现有快速 bundle 路径 | 仅 `tsc`，不能 bundle 插件 |
 | 测试 | Node test runner with `tsx` | 已有回归测试 | 只做手动 Obsidian 检查，太弱 |
 | License backend | Cloudflare Worker + D1 | 小型托管 API 和设备绑定 | 静态 license 列表，控制更弱 |
-| 打包 | PowerShell `scripts/package-plugin.ps1` | 创建 Obsidian 安装 zip | 手动 zip，容易出错 |
+| 打包 | PowerShell `scripts/package-plugin.ps1` | 创建 Obsidian 安装 zip，并调用 release asset 验证 | 不能替代 GitHub Release 单独附件 |
+| Release 检查 | PowerShell `scripts/verify-release-assets.ps1` | 校验 manifest、versions、zip 内容和单独资产规则 | 只做本地检查，不创建 Release |
 
 ## 包和运行时
 
@@ -60,6 +61,12 @@ npm run build
 
 ```powershell
 npm run package:plugin
+```
+
+Release 资产检查：
+
+```powershell
+npm run verify:release-assets
 ```
 
 Worker dry-run，仅在任务明确批准后：

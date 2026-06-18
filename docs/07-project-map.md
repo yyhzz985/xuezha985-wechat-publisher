@@ -9,6 +9,7 @@
 | `esbuild.config.mjs` | 把 `src/main.ts` bundle 到根目录 `main.js` |
 | `main.js` | Obsidian 使用的生成插件 bundle |
 | `styles.css` | Obsidian 加载的插件 CSS |
+| `scripts/verify-release-assets.ps1` | 本地 release/package 资产验证 |
 | `worker/src/index.ts` | Cloudflare Worker 请求路由 |
 
 ## 主要目录
@@ -64,6 +65,12 @@ npm run build
 npm run package:plugin
 ```
 
+Release 资产检查：
+
+```powershell
+npm run verify:release-assets
+```
+
 ## 未确认不要触碰
 
 - `worker/wrangler.jsonc` production D1 binding
@@ -78,5 +85,6 @@ npm run package:plugin
 - 仓库当前跟踪生成的根目录 `main.js`。
 - `dist/` 已忽略。
 - 当前分支是 `main`，跟踪 `origin/main`。
-- `AGENTS.md`、`docs/00-07`、`tasks/` 和 `.ai/` 中的文档契约文件当前是工作区文件，在用户创建 git checkpoint 前可能仍然是 untracked。
+- 当前 `manifest.name` 是 `Kenengba WeChat Publisher`，`isDesktopOnly` 是 `true`。
+- `AGENTS.md`、`docs/00-07`、`tasks/` 和 `.ai/` 中的文档契约文件已进入仓库；当前可能存在未提交整改改动。
 - `cover-image/wechat-publisher/prompts/*.md` 也未跟踪；没有用户决策前，不要删除、移动、忽略或跟踪它。

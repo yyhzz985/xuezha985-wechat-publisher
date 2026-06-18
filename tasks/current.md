@@ -6,7 +6,7 @@ OBS-PUBLISH-001
 
 ## 状态
 
-进行中：准备交给新对话执行。
+已完成：本地合规整改和验证通过；未执行公开发布。
 
 ## 目标
 
@@ -41,9 +41,9 @@ OBS-PUBLISH-001
 ## 依赖
 
 - 新对话先读 `AGENTS.md`、`tasks/current.md`、`tasks/backlog.md`、`.ai/goals.md`、`.ai/findings.md`、`.ai/handoff/current.md`。
-- 决定官方上架展示名。当前 `manifest.name` 为中文，官方 Manifest 文档倾向 Basic Latin/英文名称。
-- 决定 `isDesktopOnly` 策略。当前为 `false`，但 `ClipboardService` 有 Electron clipboard fallback。
-- 确认是否把自动化 release 检查做成脚本，还是先做 checklist。
+- 官方上架展示名已改为 `Kenengba WeChat Publisher`。
+- `isDesktopOnly` 已改为 `true`，因为当前复制路径保留 Electron clipboard fallback，未声明移动端兼容。
+- release/package 检查已做成 `scripts/verify-release-assets.ps1`，并接入 `npm run package:plugin`。
 
 ## 验收标准
 
@@ -78,4 +78,14 @@ npm run package:plugin
 ## 交接说明
 
 - 本任务只做到“可提审准备”。创建 GitHub Release、push、提交官方社区 PR、正式发布都需要主人单独确认。
-- 第一动作建议：检查官方 Manifest 命名规则，给出英文插件名候选，并让主人选定。
+- 本轮未创建 GitHub Release、未 push、未提交官方社区 PR、未 deploy。
+- 下一步如果要公开发布，必须先由主人单独确认。
+
+## 完成结果
+
+- `manifest.name`：`Kenengba WeChat Publisher`。
+- `isDesktopOnly`：`true`。
+- 已补 `LICENSE`，与 `package.json` 的 `MIT` 一致。
+- README、安装文档和插件内帮助已补隐私、网络请求、免费/Pro 边界、桌面端限制和反馈入口。
+- 已新增 `scripts/verify-release-assets.ps1`，检查 manifest、`versions.json`、zip 内容和 GitHub Release 单独资产规则。
+- 已运行 `npm test`、`npm run build`、`npm run package:plugin` 和 `npm run verify:release-assets`。

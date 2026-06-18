@@ -1,4 +1,4 @@
-# 公众号一键排版上传插件安装使用说明
+# Kenengba WeChat Publisher 安装使用说明
 
 插件仓库：
 
@@ -7,6 +7,8 @@
 插件下载页：
 
 [https://github.com/yyhzz985/xuezha985-wechat-publisher/releases](https://github.com/yyhzz985/xuezha985-wechat-publisher/releases)
+
+当前版本只声明支持 Obsidian 桌面版，暂不声明支持 iOS 或 Android。
 
 ## 1. 下载安装包
 
@@ -87,7 +89,7 @@ xuezha985-wechat-publisher
 2. 打开 `设置`
 3. 进入 `第三方插件`
 4. 如果还没关闭安全模式，先关闭安全模式
-5. 找到 `公众号一键排版上传`
+5. 找到 `Kenengba WeChat Publisher`
 6. 打开右侧开关启用插件
 
 ## 7. 使用插件
@@ -129,7 +131,17 @@ Pro 功能包括：
 
 未激活 Pro 时，公众号接口配置区会被锁定，不能填写 AppID / AppSecret。手动填写头像 URL 仍是免费功能；点击“上传头像图”选择本地图片是 Pro 功能。
 
-## 9. 常见问题
+## 9. 隐私与网络请求
+
+- 免费预览和免费复制不会调用授权服务器，也不要求公众号 AppID / AppSecret
+- 插件设置保存在当前 Obsidian 库的插件数据里，包括 `License Key`、设备 ID、授权缓存、公众号 AppID 和 AppSecret
+- AppSecret 明文保存在当前 Obsidian 库的插件数据里，请只在可信设备和可信 vault 中填写
+- 授权校验会请求 `https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify`
+- 授权服务器只接收 `License Key`、设备 ID、插件 ID、插件版本和功能名，不接收文章正文或公众号 AppSecret
+- Pro 上传草稿箱、上传封面图、上传头像图或本地图片上传会请求 `https://api.weixin.qq.com`
+- 上传草稿箱时，文章 HTML、标题摘要、封面 media_id、评论设置和原文链接会发送给微信官方接口
+
+## 10. 常见问题
 
 ### Obsidian 里看不到插件
 

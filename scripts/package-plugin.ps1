@@ -29,3 +29,6 @@ Compress-Archive `
 	-CompressionLevel Optimal
 
 Write-Host "Package created: $packagePath"
+
+$verifyScript = Join-Path $PSScriptRoot 'verify-release-assets.ps1'
+& $verifyScript -PackagePath $packagePath

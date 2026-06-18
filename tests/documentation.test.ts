@@ -56,3 +56,17 @@ test('documents restored markdown rendering details', () => {
 	assert.match(help, /图片下方小字说明/);
 	assert.match(help, /:rocket:/);
 });
+
+test('documents desktop-only support and privacy disclosures', () => {
+	for (const doc of [help, readme, installGuide]) {
+		assert.match(doc, /Obsidian 桌面版/);
+		assert.match(doc, /授权服务器/);
+		assert.match(doc, /api\.weixin\.qq\.com/);
+		assert.match(doc, /文章正文/);
+		assert.match(doc, /AppSecret 明文保存在当前 Obsidian 库/);
+	}
+
+	assert.match(readme, /isDesktopOnly:\s*true/);
+	assert.match(readme, /zip 只用于手动安装，不能替代单独的 `manifest\.json`、`main\.js` 和 `styles\.css`/);
+	assert.match(installGuide, /暂不声明支持 iOS 或 Android/);
+});

@@ -6,11 +6,15 @@
 
 ## 范围
 
-文档-only 计划整理：保存当前项目状态 checkpoint，并整理 `OBS-PUBLISH-001` 官方插件社区上架前合规整改计划。
+`OBS-PUBLISH-001`：Obsidian 官方插件社区上架前合规整改准备。
 
 ## 命令
 
 ```powershell
+npm test
+npm run build
+npm run package:plugin
+npm run verify:release-assets
 git diff --check
 ```
 
@@ -20,14 +24,15 @@ git diff --check
 
 ## 证据
 
-- 已创建本地 checkpoint：`de4e51a`，message 为 `checkpoint: current project state`。
-- `git diff --check`：退出码 0，无 whitespace error；输出了 Windows line ending 提示。
-- 已创建计划 checkpoint：`0d5991c`，message 为 `checkpoint: official plugin submission plan`。
-- `git status --short --branch --untracked-files=all`：`main...origin/main [ahead 2]`，工作区 clean。
+- `npm test`：87 tests，87 pass，0 fail。
+- `npm run build`：`tsc -noEmit -skipLibCheck && node esbuild.config.mjs production` 通过。
+- `npm run package:plugin`：通过；生成并验证 `dist/xuezha985-wechat-publisher-0.1.4-20260618-135324.zip`。
+- `npm run verify:release-assets`：通过；输出 GitHub Release 必须单独附加 `manifest.json`、`main.js`、`styles.css` 和 package zip。
+- `git diff --check`：通过；只有 Windows line ending 提示，无 whitespace error。
+- 当前分支 `main...origin/main [ahead 3]`，未 push。
 
 ## 已知缺口
 
-- `npm test` 未跑：本轮只整理计划文档。
-- `npm run build` 未跑：本轮只整理计划文档，且 build 会重写已跟踪的生成文件 `main.js`。
-- `npm run package:plugin` 未跑：本轮没有 release package 请求。
-- 未跑 Worker dry-run：Worker deployment/config work 属于红线区。
+- 未做 GitHub Release、未 push、未提交 `obsidian-releases` PR。
+- 未做干净 Obsidian vault 手动 smoke test。
+- 未跑 Worker dry-run：Worker deployment/config work 属于红线区，且本任务不涉及 Worker 发布。

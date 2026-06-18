@@ -23,3 +23,9 @@
 - 按用户要求创建本地 git checkpoint：`de4e51a`，message 为 `checkpoint: current project state`。
 - 整理官方插件社区上架计划，把当前任务设为 `OBS-PUBLISH-001`，并拆分命名、`isDesktopOnly`、README/隐私、release asset、本地验证和公开发布提交子任务。
 - 创建计划 checkpoint：`0d5991c`，message 为 `checkpoint: official plugin submission plan`。
+- 执行 `OBS-PUBLISH-001` 合规整改：`manifest.name` 改为 `Kenengba WeChat Publisher`，`isDesktopOnly` 改为 `true`。
+- 补齐根目录 `LICENSE`，并在 README、安装文档和插件内帮助中补充桌面端限制、隐私、网络请求、免费/Pro 边界和反馈入口。
+- 新增 `scripts/verify-release-assets.ps1`，并让 `npm run package:plugin` 生成 zip 后自动验证 manifest、`versions.json`、zip 内容和 GitHub Release 单独资产规则。
+- 新增 release asset 回归测试，并同步 manifest/documentation 测试。
+- 验证通过：`npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets`、`git diff --check`。
+- 未执行 push、GitHub Release、官方社区 PR、deploy、Worker dry-run、D1 migration 或任何公开发布动作。

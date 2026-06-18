@@ -43,7 +43,7 @@
 
 - Obsidian desktop 是主要目标。
 - 不假设面板很宽；toolbar 和设置必须能在窄右侧栏工作。
-- `manifest.json` 当前是 `isDesktopOnly: false`，除非有意修改，否则避免 desktop-only 假设。
+- `manifest.json` 当前是 `isDesktopOnly: true`，插件不声明移动端兼容。
 
 ## 资产
 

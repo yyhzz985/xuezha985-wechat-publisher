@@ -3,8 +3,7 @@
 ## 当前阻塞
 
 - 公开发布阶段阻塞：GitHub Release、push、官方社区 PR 都需要主人单独确认。
-- `manifest.name` 英文展示名未决定。
-- `isDesktopOnly` 策略未决定。
+- 干净 Obsidian vault 手动 smoke test 尚未执行；如主人要求提审前手动验收，需要另开当前任务。
 
 ## 操作前需要批准
 

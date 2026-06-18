@@ -1,4 +1,4 @@
-# 公众号一键排版上传
+# Kenengba WeChat Publisher
 
 一个 Obsidian 插件，用来把当前笔记排版成接近「可能吧公众号排版器」风格的微信公众号 HTML，并支持复制到公众号后台；Pro 用户还可以一键上传到公众号草稿箱。
 
@@ -7,6 +7,8 @@
 GitHub 仓库地址：[https://github.com/yyhzz985/xuezha985-wechat-publisher](https://github.com/yyhzz985/xuezha985-wechat-publisher)
 
 安装使用说明：[docs/install-guide.md](docs/install-guide.md)
+
+当前版本为桌面端插件，支持 Windows、macOS 和 Linux 的 Obsidian 桌面版。插件使用 Electron 剪贴板能力复制富文本 HTML，暂不声明支持 iOS 或 Android。
 
 ## 功能
 
@@ -22,6 +24,7 @@ GitHub 仓库地址：[https://github.com/yyhzz985/xuezha985-wechat-publisher](h
 - 支持主题、字重、小标题风格、代码主题、阅读时间模块配置
 - 免费功能：预览、排版设置、复制 HTML、复制网络图片链接
 - Pro 功能：上传草稿箱、上传封面图、上传头像图、复制时自动上传本地图片
+- 桌面端限定：当前 `manifest.json` 设置为 `isDesktopOnly: true`
 
 ## 安装使用
 
@@ -109,7 +112,7 @@ xuezha985-wechat-publisher
 2. 打开 `设置`
 3. 进入 `第三方插件`
 4. 如果还没关闭安全模式，先关闭安全模式
-5. 在已安装插件列表里找到 `公众号一键排版上传`
+5. 在已安装插件列表里找到 `Kenengba WeChat Publisher`
 6. 打开右侧开关启用插件
 
 ### 第七步：开始使用
@@ -127,6 +130,8 @@ xuezha985-wechat-publisher
 3. 填入激活码
 4. 点击 `校验授权`
 5. 授权成功后，公众号接口配置区会解锁；配置 AppID / AppSecret 后即可使用上传草稿箱、上传封面图、上传头像图
+
+如果你使用的是 Obsidian 移动端，当前版本不会在社区插件目录中作为移动端兼容插件声明。
 
 ### 常见安装问题
 
@@ -371,14 +376,24 @@ Pro 功能：
 
 联系渣姐微信 `237219265` 获取激活码。授权期间享受免费插件版本升级，后续计划添加多公众号账号切换管理。
 
-## 安全说明
+## 隐私与网络请求
 
-- AppSecret 明文保存在当前 Obsidian 库的插件数据里
-- 文章内容不会发送到授权服务器
-- 公众号 AppSecret 不会发送到授权服务器
-- 授权服务器只校验 License Key、设备 ID、插件 ID、插件版本和功能名
-- 一个 License Key 默认绑定 1 台设备
+- 插件设置保存在当前 Obsidian 库的插件数据里，包括主题设置、作者信息、`License Key`、设备 ID、授权缓存、公众号 AppID 和 AppSecret
+- AppSecret 明文保存在当前 Obsidian 库的插件数据里，请只在可信设备和可信 vault 中填写
+- 免费预览和免费复制不会调用授权服务器，也不要求公众号 AppID / AppSecret
+- 点击 `校验授权` 或使用 Pro 功能前需要校验授权时，插件会请求授权服务器，只发送 `License Key`、设备 ID、插件 ID、插件版本和功能名
+- 授权服务器地址为 `https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify`
+- 授权服务器不会接收文章正文、Markdown 原文、公众号 AppSecret 或公众号接口返回内容
 - 只有使用上传草稿箱、上传封面图、上传头像图或 Pro 本地图片上传时，插件才会调用微信公众号接口
+- 公众号接口请求会直接发往 `https://api.weixin.qq.com`，用于获取 `access_token`、上传正文图片、上传封面素材或创建草稿
+- 使用微信公众号草稿上传时，文章 HTML、标题摘要、封面 media_id、评论设置和原文链接会发送给微信官方接口
+- 一个 License Key 默认绑定 1 台设备
+- 网络图片链接在免费复制中会原样保留；Pro 上传本地图片时会把本地图片发送给微信官方接口以换取微信图片 URL
+
+## 反馈
+
+- 使用问题和 bug：优先在 [GitHub Issues](https://github.com/yyhzz985/xuezha985-wechat-publisher/issues) 反馈
+- Pro 激活和账号问题：联系微信 `237219265`
 
 ## 开发
 
@@ -395,6 +410,23 @@ npm run package:plugin
 ```
 
 生成的 zip 在 `dist/` 目录。
+
+Release 前本地检查：
+
+```powershell
+npm run verify:release-assets
+```
+
+提交 GitHub Release 时必须把下面文件作为单独附件上传：
+
+```text
+manifest.json
+main.js
+styles.css
+xuezha985-wechat-publisher-0.1.4.zip
+```
+
+zip 只用于手动安装，不能替代单独的 `manifest.json`、`main.js` 和 `styles.css`。创建 GitHub Release、push 和提交 Obsidian 官方社区 PR 都属于公开发布动作，需要单独确认。
 
 ## 开源许可证
 

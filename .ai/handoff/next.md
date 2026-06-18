@@ -2,14 +2,17 @@
 
 ## 建议的下一步
 
-在新对话执行 `OBS-PUBLISH-001`：官方插件社区上架前合规整改。
+`OBS-PUBLISH-001` 已完成本地合规整改。下一步取决于主人是否要进入公开发布阶段。
 
 ## 建议的第一个任务
 
-先处理两个会影响官方审核的关键决策：
+如主人明确确认公开发布，先做发布前复核：
 
-1. 给 `manifest.name` 选择合规英文展示名。
-2. 决定 `isDesktopOnly` 策略：改为 `true`，或整改 Electron clipboard fallback 并验证移动端兼容。
+1. 重新核对 Obsidian 官方提交规则。
+2. 确认是否需要干净 Obsidian vault 手动 smoke test。
+3. 确认 GitHub Release tag 必须等于 `manifest.json` 的 `version`，且不要加 `v` 前缀。
+4. 确认 Release 单独包含 `manifest.json`、`main.js`、`styles.css` 和 zip。
+5. 得到主人单独确认后，才允许 push、创建 GitHub Release 或提交官方社区 PR。
 
 ## 未确认不要开始
 
@@ -29,7 +32,7 @@
 ## 新对话提示词
 
 ```text
-主人要求：继续 E:\AI_project\ob-kenengba，执行 `OBS-PUBLISH-001`：Obsidian 官方插件社区上架前合规整改。
+主人要求：继续 E:\AI_project\ob-kenengba。`OBS-PUBLISH-001` 已完成本地合规整改和自动验证；公开发布阶段仍阻塞，必须单独确认。
 
 必须先读：
 - AGENTS.md
@@ -44,13 +47,13 @@
 - docs/05-standards.md
 - docs/07-project-map.md
 
-工作目标：
-1. 让插件具备提交 Obsidian 官方插件社区审核的准备条件。
-2. 先处理 `manifest.name` 英文展示名和 `isDesktopOnly` 策略。
-3. 补齐 `LICENSE`、README 隐私/网络请求说明、免费/Pro 边界说明。
-4. 增加 release/package 验证，确保 GitHub Release 单独包含 `manifest.json`、`main.js`、`styles.css`，zip 不能替代它们。
-5. 跑 `npm test`、`npm run build`、`npm run package:plugin`。
-6. 更新 `.ai/checks/latest.md`、`.ai/findings.md`、`.ai/handoff/current.md` 和任务状态。
+当前状态：
+1. `manifest.name` 已是 `Kenengba WeChat Publisher`。
+2. `isDesktopOnly` 已是 `true`。
+3. `LICENSE`、README 隐私/网络请求说明、免费/Pro 边界说明已补。
+4. `scripts/verify-release-assets.ps1` 已接入 package 流程。
+5. `npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets` 已通过。
+6. 下一步只能在主人确认后做 GitHub Release、push 或官方社区 PR。
 
 红线：
 - 不要 push。

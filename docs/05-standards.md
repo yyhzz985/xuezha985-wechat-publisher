@@ -22,6 +22,7 @@
 | Build | `npm run build` |
 | Test | `npm test` |
 | Package | `npm run package:plugin` |
+| Release asset check | `npm run verify:release-assets` |
 | Lint | 未知，当前没有 lint script |
 
 ## 编码约定
@@ -68,9 +69,12 @@
 - `OBS-PUBLISH-001` 只做上架前准备，不做公开发布。
 - GitHub Release、push、提交 `obsidian-releases` PR、正式上架都必须单独得到主人确认。
 - release asset 不能只依赖 zip；GitHub Release 必须单独提供 `manifest.json`、`main.js`、`styles.css`。
+- `npm run package:plugin` 会在生成 zip 后运行 `scripts/verify-release-assets.ps1`，检查 zip 根目录内容、manifest 元数据和 `versions.json` 映射。
 - `manifest.json` 的 `version`、Git tag、release asset 内的 `manifest.json` 必须一致。
 - `versions.json` 必须包含当前版本到最低 Obsidian 版本的映射。
-- 如果 `isDesktopOnly: false`，必须完成移动端兼容审计；如果保留 Electron / Node-only 依赖，改为 `true` 并同步文档。
+- 当前 `manifest.name` 为 `Kenengba WeChat Publisher`，使用 Basic Latin 英文展示名。
+- 当前 `isDesktopOnly: true`；插件使用 Electron clipboard fallback，README 和帮助文档必须说明桌面端限制。
+- 如果以后改回 `isDesktopOnly: false`，必须完成移动端兼容审计；如果保留 Electron / Node-only 依赖，继续保持 `true` 并同步文档。
 - README 必须写清网络请求、数据保存位置、免费/Pro 边界和隐私说明。
 
 ## 红线

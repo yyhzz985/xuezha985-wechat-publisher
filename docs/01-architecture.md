@@ -7,7 +7,7 @@
 - Obsidian 右侧预览。
 - 复制到剪贴板的 WeChat 兼容 HTML。
 - Pro 专属 WeChat 草稿，本地图片已上传并替换为 WeChat 图片 URL。
-- 包含 `manifest.json`、`main.js` 和 `styles.css` 的发布包。
+- 包含 `manifest.json`、`main.js` 和 `styles.css` 的发布包与独立 release 资产。
 
 ## 取：检索 / 输出
 
@@ -17,7 +17,7 @@
 | 复制 HTML | 写作者 | 点击复制或执行命令 | 给 WeChat 编辑器使用的剪贴板 HTML |
 | 上传草稿 | Pro 写作者 | 点击上传草稿 | WeChat 草稿 `media_id` |
 | License 校验 | 插件 | 用户校验或使用 Pro 上传 | 授权状态 |
-| 插件打包 | 维护者 | 发布准备 | `dist/` 里的 zip 包 |
+| 插件打包 | 维护者 | 发布准备 | `dist/` 里的 zip 包和 release asset 验证结果 |
 
 ## 存：存储 / 状态
 
@@ -71,6 +71,7 @@ License Key + device ID
 ## 技术栈影响
 
 - Obsidian 需要打包后的 `main.js` 和 `manifest.json`。
+- 当前插件声明 `isDesktopOnly: true`，复制富文本 HTML 使用 Electron clipboard fallback。
 - WeChat 粘贴兼容性更适合使用内联 HTML/CSS，而不是外部样式。
 - Shiki 会被打进 bundle，因此渲染改动可能影响 bundle 大小。
 - Worker 代码在同一个仓库，但依赖生产 D1 和 secret。
@@ -83,12 +84,14 @@ v1 做：
 - support core Markdown, custom containers, TOC, footnotes, images, links, emoji, and code blocks
 - gate WeChat upload functions behind Pro entitlement
 - manually package plugin release assets
+- verify separate GitHub Release assets before public release
 
 v1 不做：
 
 - directly publish or mass-send WeChat articles
 - 把自动支付作为当前购买路径开放
 - manage multiple公众号 accounts
+- claim mobile support before compatibility audit
 - silently bypass WeChat API or IP whitelist errors
 
 ## 决策
