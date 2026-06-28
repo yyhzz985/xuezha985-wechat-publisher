@@ -17,7 +17,7 @@
 | F009 | 中 | 已解决 | License 文件 | `package.json` 声明 `MIT`，但官方上架前需要确认根目录 `LICENSE` 存在 | 已补 `LICENSE` 并保留 README MIT 说明 | `npm test`、`npm run verify:release-assets` |
 | F010 | 高 | 已解决 | 官方社区提交 | 官方社区提交页提示 `The plugin ID in your manifest.json is not allowed`；旧 `manifest.id` 为 `xuezha985-wechat-publisher`，包含数字 | 本地改为 `kenengba-wechat-publisher`，版本升为 `0.1.6`，release 校验脚本收紧为只允许小写英文字母和连字符 | `npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets`、`git diff --check` |
 | F011 | 高 | 已解决 | 官方自动审查 | 官方社区 `0.1.6` Review 标记 failed；source errors 包括低报 `minAppVersion`、直接写 `innerHTML`、`SettingsTab` heading 规则，README 还提示缺少英文说明 | `0.1.7` 已修复并公开发布：`minAppVersion: 1.7.2`、`sanitizeHTMLToDom`、`Setting.setHeading()`、README `English summary`；官方 review 已 completed | `npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets` 通过；Release `0.1.7` 单独资产已核对；官方页面显示 live |
-| F012 | 高 | 开放 | Pro 授权服务 | 官方社区版用户点击 `校验授权` 报 `net::ERR_CONNECTION_TIMED_OUT`；本机和阿里云大陆服务器访问 `workers.dev` 授权接口均超时；卡密和 D1 数据正常 | 已部署阿里云主授权入口，插件本地 `0.1.8` 默认切到 `https://pindoutool.cn/wechat-publisher-license/v1/licenses/verify`，旧 Worker 地址保留为 fallback，并改进网络错误提示；用户侧生效仍需公开发布 `0.1.8` | `npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets` 通过；阿里云 health、无效卡、已绑定有效卡校验通过 |
+| F012 | 高 | 开放 | Pro 授权服务 | 官方社区版用户点击 `校验授权` 报 `net::ERR_CONNECTION_TIMED_OUT`；本机和阿里云大陆服务器访问 `workers.dev` 授权接口均超时；卡密和 D1 数据正常 | 已部署阿里云主授权入口，插件 `0.1.8` 默认切到 `https://pindoutool.cn/wechat-publisher-license/v1/licenses/verify`，旧 Worker 地址保留为 fallback，并改进网络错误提示；GitHub Release 已发布，仍需官方社区后台扫描 | `npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets` 通过；阿里云 health、无效卡、已绑定有效卡校验通过；Release `0.1.8` 资产齐全 |
 
 ## 规则
 

@@ -6,8 +6,9 @@
   - 当前判断不是授权码批次缺失、D1 未写入、卡密已绑定或 `manifest.id` 变化导致。
   - 阻塞点原本在用户网络 / DNS 到 `workers.dev` 授权域名的访问链路。
   - 服务器侧修复已完成：阿里云主授权入口为 `https://pindoutool.cn/wechat-publisher-license/v1/licenses/verify`。
-  - 本地 `0.1.8` 已准备，但公开发布、GitHub Release 和官方社区更新仍需主人明确批准。
+  - GitHub Release `0.1.8` 已在主人确认后发布，官方社区后台扫描仍需手动触发。
 - `LIC-002` 待处理：后续新发卡不能只写 Cloudflare D1，必须同步阿里云 SQLite 主授权库。
+- Obsidian 社区后台自动点击失败：Chrome 连接后台页面时超时，需要主人手动进入插件后台点击 `Check for new releases`。
 - 无当前上架阻塞：`0.1.7` 官方 review 已 completed，公开页已 live。
 - Obsidian 客户端内置插件搜索暂未命中，按官方索引 / 客户端缓存延迟观察。
 - 官方社区表单曾拒绝 `0.1.5`：旧 `manifest.id` 为 `xuezha985-wechat-publisher`，包含数字；本地已改为 `kenengba-wechat-publisher`，`0.1.7` 已上架。

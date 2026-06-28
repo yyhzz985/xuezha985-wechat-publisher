@@ -12,7 +12,10 @@
 - 插件本地版本已升到 `0.1.8`，默认授权地址改为阿里云入口，旧 `workers.dev` 地址保留为 fallback。
 - 授权缓存宽限从 24 小时改为 30 天；网络错误提示改为“授权服务器连接超时或不可达，请稍后重试或联系支持”。
 - 已生成 `dist/kenengba-wechat-publisher-0.1.8.zip`，SHA-256：`BC7A651579FB0D98457021A58C02725886F9F51263D36E85E8A3C9F53E9FFA11`。
-- 未 push、未创建 GitHub Release、未更新官方社区版本；公开发布 `0.1.8` 仍需主人单独确认。
+- 已推送远端 `main` 和 tag `0.1.8`，均指向 `777c30ea4586343111b363890b16d9c71affec7e`。
+- 已创建 GitHub Release：`https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/tag/0.1.8`。
+- Release 已单独上传 `manifest.json`、`main.js`、`styles.css` 和 `kenengba-wechat-publisher-0.1.8.zip`。
+- Obsidian 官方社区后台 `Check for new releases` 尚未触发；Chrome 连接尝试超时，需主人手动点击。
 
 官方社区上架已完成。`0.1.7` 已完成整改、公开发布和官方 review；公开页已 live，显示 `Add to Obsidian`。此前截图显示 `0.1.6` source errors 主要是：
 
@@ -61,12 +64,12 @@ git diff --check -- . ':!main.js'
 
 ## 当前目标
 
-`G004` 进行中：服务器侧修复和本地 `0.1.8` 已准备，等待主人确认是否公开发布。`G003` 已完成：公开发布并提交官方社区。
+`G004` 进行中：服务器侧修复和 GitHub Release `0.1.8` 已完成，等待官方社区后台扫描。`G003` 已完成：公开发布并提交官方社区。
 
 ## 项目状态
 
 - 本项目是用于公众号 Markdown 预览、复制和 Pro 上传的 Obsidian 插件。
-- 当前本地版本是 `0.1.8`；官方社区当前公开版本仍是 `0.1.7`。
+- 当前本地版本是 `0.1.8`；GitHub Release 已发布，官方社区当前公开版本可能仍是 `0.1.7`，待后台扫描。
 - 当前官方展示名是 `Kenengba WeChat Publisher`。
 - 当前 `manifest.id` 是 `kenengba-wechat-publisher`。
 - 当前 `manifest.minAppVersion` 是 `1.7.2`。
@@ -125,21 +128,21 @@ git diff --check -- . ':!main.js'
 - 不改 Worker production config、D1 schema/data、secrets、License CSV 或本地 vault data；只做 D1 只读导出和阿里云新库导入。
 - 不使用 `license.pindoutool.cn`，因为当前未解析；先用已备案并已解析的 `pindoutool.cn/wechat-publisher-license/`。
 - 新发卡必须同步阿里云授权库；否则 `0.1.8` 主入口无法识别只写入 D1 的新卡。
-- `0.1.8` 公开发布、GitHub Release 和官方社区更新仍需主人再次确认。
+- `0.1.8` GitHub Release 已在主人确认后发布；官方社区后台扫描还需要手动触发。
 
 ## 活跃目标
 
-- `G004`：进行中。服务器侧修复和本地 `0.1.8` 已完成，等待公开发布确认。
+- `G004`：进行中。服务器侧修复和 GitHub Release `0.1.8` 已完成，等待官方社区扫描。
 
 ## 开放问题
 
-- 官方社区线上用户仍在 `0.1.7`，还会继续访问旧 `workers.dev` 授权入口；必须发布 `0.1.8` 后才会解决用户侧首次激活超时。
+- 官方社区线上用户仍可能停在 `0.1.7`，还会继续访问旧 `workers.dev` 授权入口；需要后台扫描并更新到 `0.1.8` 后才会解决用户侧首次激活超时。
 - 本地永久卡 CSV 缺少线上 D1 的永久卡 `item=1` 明文；已用 legacy device entitlement 支持其已绑定设备继续使用，但不能支持该卡在新设备重新激活。
 - 后续新发卡同步阿里云授权库的流程尚未补齐，见 `LIC-002`。
 
 ## 阻塞 / 风险
 
-- 阻塞：公开发布 `0.1.8` 属于公开发布动作，必须主人明确确认。
+- 阻塞：Chrome 自动进入 Obsidian 社区后台时连接超时；需要主人手动进入后台点击 `Check for new releases`。
 - 风险：本机 GitHub HTTPS push 之前持续失败，后续如果要改远端，可能仍需使用 GitHub API。
 - 风险：阿里云服务现在是主授权入口，后续服务器续费、Nginx、PM2、SQLite 备份都需要纳入运维检查。
 - 风险：官方 review 仍给 artifact attestation、zip extra file、clipboard access、README 英文占比、TypeScript lint 等 warning / recommendation；当前无 `Error`，不阻断上架。
@@ -159,11 +162,9 @@ Get-FileHash -Algorithm SHA256 -LiteralPath dist\kenengba-wechat-publisher-0.1.8
 
 ## 下一步
 
-1. 等主人确认是否公开发布 `0.1.8`。
-2. 确认后再 push / 创建 GitHub Release / 上传 `manifest.json`、`main.js`、`styles.css` 和 `kenengba-wechat-publisher-0.1.8.zip`。
-3. 在 Obsidian 社区后台点击 `Check for new releases`，让官方扫描 `0.1.8`。
-4. 发布后让报错用户更新插件，再用原 Pro 授权码校验。
-5. 单独处理 `LIC-002`：新发卡同步阿里云授权库。
+1. 主人手动进入 Obsidian 社区后台，点击 `Check for new releases`，让官方扫描 `0.1.8`。
+2. 扫描完成后让报错用户更新插件，再用原 Pro 授权码校验。
+3. 单独处理 `LIC-002`：新发卡同步阿里云授权库。
 
 ## 接力提示词
 

@@ -428,5 +428,8 @@
 - 版本号升为 `0.1.8`，同步更新 `manifest.json`、`versions.json`、`package.json`、`package-lock.json`、README、安装说明、插件帮助、架构、技术栈、路线图、决策和测试。
 - 验证：阿里云 health、无效卡、已绑定有效卡校验通过；`npm test` 92 项通过；`npm run build` 通过；`npm run package:plugin` 通过；`npm run verify:release-assets` 通过。
 - 生成本地包：`dist/kenengba-wechat-publisher-0.1.8.zip`，SHA-256 为 `BC7A651579FB0D98457021A58C02725886F9F51263D36E85E8A3C9F53E9FFA11`；复跑打包时因同版本包已存在，脚本另生成 `dist/kenengba-wechat-publisher-0.1.8-20260628-142006.zip`，SHA-256 为 `679362EB0BF0D65CC7F0B16F501D35A1F1F950FC828EC2FCCED40AEE38217DB8`。
-- 尚未 push、尚未创建 GitHub Release、尚未更新 Obsidian 官方社区版本；公开发布 `0.1.8` 前必须再次得到主人确认。
+- 主人确认后公开发布 `0.1.8`：`https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/tag/0.1.8`。
+- 远端 `main` 和 tag `0.1.8` 均指向 commit `777c30ea4586343111b363890b16d9c71affec7e`。
+- Release 单独上传 `manifest.json`、`main.js`、`styles.css` 和 `kenengba-wechat-publisher-0.1.8.zip`；zip SHA-256 为 `BC7A651579FB0D98457021A58C02725886F9F51263D36E85E8A3C9F53E9FFA11`。
+- Obsidian 社区后台 `Check for new releases` 尚未触发；Chrome 连接后台页面超时，需要主人手动点击。
 - 后续新发卡前必须补 `LIC-002`：确保 Cloudflare D1 和阿里云 SQLite 授权库同步，否则新卡只写 D1 会导致主授权入口无法识别。

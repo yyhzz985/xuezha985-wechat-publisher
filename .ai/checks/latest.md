@@ -21,7 +21,7 @@ Get-FileHash -Algorithm SHA256 -LiteralPath dist\kenengba-wechat-publisher-0.1.8
 
 ## 结果
 
-已完成服务器侧修复和本地 `0.1.8` 发版准备；未 push、未创建 GitHub Release、未更新 Obsidian 官方社区版本。
+已完成服务器侧修复和 `0.1.8` GitHub 公开发布；Obsidian 官方社区后台 `Check for new releases` 尚未触发。
 
 - `npm test`：92 tests，92 pass。
 - `npm run build`：通过。
@@ -30,6 +30,10 @@ Get-FileHash -Algorithm SHA256 -LiteralPath dist\kenengba-wechat-publisher-0.1.8
 - `git diff --check -- . ':!main.js'`：通过。
 - `dist\kenengba-wechat-publisher-0.1.8.zip` SHA-256：`BC7A651579FB0D98457021A58C02725886F9F51263D36E85E8A3C9F53E9FFA11`。
 - `dist\kenengba-wechat-publisher-0.1.8-20260628-142006.zip` SHA-256：`679362EB0BF0D65CC7F0B16F501D35A1F1F950FC828EC2FCCED40AEE38217DB8`。
+- 远端 `main`：`777c30ea4586343111b363890b16d9c71affec7e`。
+- 远端 tag `0.1.8`：`777c30ea4586343111b363890b16d9c71affec7e`。
+- GitHub Release：`https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/tag/0.1.8`。
+- Release 状态：`isDraft=false`，`isPrerelease=false`。
 
 ## 证据
 
@@ -40,9 +44,14 @@ Get-FileHash -Algorithm SHA256 -LiteralPath dist\kenengba-wechat-publisher-0.1.8
 - 插件本地 `0.1.8` 默认授权地址已改为阿里云入口，旧 `https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify` 保留为 fallback。
 - 授权缓存宽限从 24 小时改为 30 天。
 - 网络错误提示改为“授权服务器连接超时或不可达，请稍后重试或联系支持”。
+- Release 已单独上传 `manifest.json`、`main.js`、`styles.css` 和 `kenengba-wechat-publisher-0.1.8.zip`：
+  - `manifest.json`：`sha256:0bc8eadd5f4690d54feafebe0e2aa6be2a9c75166e76dbbdac4ae63257e3f873`
+  - `main.js`：`sha256:bfadded5252abb8ce5162f69e2a6e45fc293165cac98373262768a79dabea078`
+  - `styles.css`：`sha256:3d8baf36d068a83e5109c051875001c22efcbab8525c0b9d3c5153850526e57e`
+  - `kenengba-wechat-publisher-0.1.8.zip`：`sha256:bc7a651579fb0d98457021a58c02725886f9f51263d36e85e8a3c9f53e9ffa11`
 
 ## 已知缺口
 
-- 当前 Obsidian 官方社区线上用户仍在 `0.1.7`，必须公开发布 `0.1.8` 后才会拿到新授权入口。
+- 当前 Obsidian 官方社区线上用户仍可能停在 `0.1.7`，需要在社区后台点击 `Check for new releases` 让官方扫描 `0.1.8`。
 - 本地永久卡 CSV 缺少线上 D1 的永久卡 `item=1` 明文；阿里云库已为该卡的已绑定设备建立 legacy entitlement，可支持该设备继续用，但无法支持该卡在新设备重新激活，除非找回明文或换发。
 - 后续新发卡不能只写 Cloudflare D1；必须同步写入阿里云 SQLite 主授权库，见 `LIC-002`。

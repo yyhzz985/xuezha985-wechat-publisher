@@ -6,13 +6,13 @@ LIC-001
 
 ## 状态
 
-已完成服务器侧修复和本地 `0.1.8` 准备，未公开发布：官方社区版插件 Pro 授权超时的根因是部分用户网络无法稳定访问 `workers.dev`。当前已在阿里云大陆轻量服务器部署主授权入口：
+已完成服务器侧修复并公开发布 GitHub Release `0.1.8`；官方社区后台扫描尚未触发。官方社区版插件 Pro 授权超时的根因是部分用户网络无法稳定访问 `workers.dev`。当前已在阿里云大陆轻量服务器部署主授权入口：
 
 ```text
 https://pindoutool.cn/wechat-publisher-license/v1/licenses/verify
 ```
 
-插件本地版本已升为 `0.1.8`，默认使用阿里云授权入口，旧 `workers.dev` 地址保留为 fallback。GitHub Release、push、官方社区更新仍未执行。
+插件版本已升为 `0.1.8`，默认使用阿里云授权入口，旧 `workers.dev` 地址保留为 fallback。远端 `main`、tag 和 GitHub Release 已发布；Obsidian 社区后台 `Check for new releases` 尚未触发。
 
 ## 目标
 
@@ -56,6 +56,9 @@ net::ERR_CONNECTION_TIMED_OUT
   - 网络错误提示改为“授权服务器连接超时或不可达，请稍后重试或联系支持”。
   - 授权缓存宽限从 24 小时改为 30 天。
   - README、安装文档、帮助文档、架构、技术栈、决策和测试已同步。
+- 已推送远端 `main` 和 tag `0.1.8`，均指向 `777c30ea4586343111b363890b16d9c71affec7e`。
+- 已创建 GitHub Release：`https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/tag/0.1.8`。
+- Release 已单独上传 `manifest.json`、`main.js`、`styles.css` 和 `kenengba-wechat-publisher-0.1.8.zip`。
 
 ## 当前判断
 
@@ -88,7 +91,6 @@ Get-FileHash -Algorithm SHA256 -LiteralPath dist\kenengba-wechat-publisher-0.1.8
 
 ## 下一步
 
-1. 等主人单独确认后，才允许 push、创建 GitHub Release、官方社区 `Check for new releases` 或其他公开发布动作。
-2. 发布 `0.1.8` 时，GitHub Release 仍必须单独上传 `manifest.json`、`main.js`、`styles.css` 和 zip；zip 不能替代前三个文件。
-3. 发布后让报错用户更新插件，再用原 Pro 授权码校验。
-4. 后续发新卡前，必须补“发卡同步阿里云授权库”流程；否则新卡只写 D1，主授权入口无法识别。
+1. 在 Obsidian 社区后台点击 `Check for new releases`，让官方扫描 `0.1.8`。
+2. 扫描完成后让报错用户更新插件，再用原 Pro 授权码校验。
+3. 后续发新卡前，必须补“发卡同步阿里云授权库”流程；否则新卡只写 D1，主授权入口无法识别。

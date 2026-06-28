@@ -4,15 +4,13 @@
 
 `0.1.7` 已完成整改、打包、公开发布和官方社区上架。当前任务是 `LIC-001`：修复 Pro 授权激活报 `net::ERR_CONNECTION_TIMED_OUT`。
 
-当前已完成服务器侧修复和本地 `0.1.8` 准备：阿里云主授权入口为 `https://pindoutool.cn/wechat-publisher-license/v1/licenses/verify`，插件默认切到该入口，旧 `workers.dev` 保留为 fallback。尚未公开发布 `0.1.8`。
+当前已完成服务器侧修复和 GitHub Release `0.1.8` 发布：阿里云主授权入口为 `https://pindoutool.cn/wechat-publisher-license/v1/licenses/verify`，插件默认切到该入口，旧 `workers.dev` 保留为 fallback。尚未触发 Obsidian 社区后台扫描。
 
 ## 建议的第一个任务
 
-1. 等主人确认是否公开发布 `0.1.8`。
-2. 确认后再 push、创建 GitHub Release，并上传独立 `manifest.json`、`main.js`、`styles.css` 和 `kenengba-wechat-publisher-0.1.8.zip`。
-3. 在 Obsidian 社区后台点击 `Check for new releases`，等待官方扫描 `0.1.8`。
-4. 发布后让报错用户更新插件，再用原 Pro 授权码校验。
-5. 另开 `LIC-002` 补新发卡同步阿里云授权库。
+1. 主人手动进入 Obsidian 社区后台，点击 `Check for new releases`，等待官方扫描 `0.1.8`。
+2. 扫描完成后让报错用户更新插件，再用原 Pro 授权码校验。
+3. 另开 `LIC-002` 补新发卡同步阿里云授权库。
 
 ## 未确认不要开始
 
@@ -56,12 +54,13 @@
 2. 其他用户输入已发放的 Pro 授权码后，点击 `校验授权` 报 `net::ERR_CONNECTION_TIMED_OUT`。
 3. 根因已确认：部分大陆网络无法稳定访问 `workers.dev` 授权入口，不是卡密数据问题。
 4. 阿里云主授权入口已部署：`https://pindoutool.cn/wechat-publisher-license/v1/licenses/verify`。
-5. 插件本地版本已升为 `0.1.8`，默认授权入口改为阿里云，旧 Worker 地址保留为 fallback。
+5. 插件版本已升为 `0.1.8`，默认授权入口改为阿里云，旧 Worker 地址保留为 fallback。
 6. 授权缓存宽限从 24 小时改为 30 天，网络错误提示已改为更友好的中文提示。
 7. 已验证：`npm test`、`npm run build`、`npm run package:plugin`、`npm run verify:release-assets` 通过。
 8. 已生成 `dist/kenengba-wechat-publisher-0.1.8.zip`，SHA-256 为 `BC7A651579FB0D98457021A58C02725886F9F51263D36E85E8A3C9F53E9FFA11`。
-9. 尚未 push、尚未创建 GitHub Release、尚未更新官方社区版本。
-10. 后续新发卡必须同步阿里云 SQLite 授权库，见 `LIC-002`。
+9. 已发布 GitHub Release：`https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/tag/0.1.8`；远端 `main` 和 tag `0.1.8` 指向 `777c30e`。
+10. 尚未触发 Obsidian 社区后台 `Check for new releases`。
+11. 后续新发卡必须同步阿里云 SQLite 授权库，见 `LIC-002`。
 
 红线：
 - 不要 push。

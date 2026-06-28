@@ -83,3 +83,8 @@
 - 验证通过：`npm test` 92 项通过，`npm run build` 通过，`npm run package:plugin` 通过，`npm run verify:release-assets` 通过，`git diff --check -- . ':!main.js'` 通过。
 - 生成本地包 `dist/kenengba-wechat-publisher-0.1.8.zip`，SHA-256 为 `BC7A651579FB0D98457021A58C02725886F9F51263D36E85E8A3C9F53E9FFA11`。
 - 尚未 push、尚未创建 GitHub Release、尚未更新官方社区版本；公开发布 `0.1.8` 仍需主人单独确认。
+- 主人确认“允许公开发布 0.1.8”后，创建发布 commit `777c30ea4586343111b363890b16d9c71affec7e`，父提交为远端 `0.1.7` commit `afb44fa60d13a6782e0a947510af3293329f0b2a`，避免本地历史分叉造成非快进覆盖。
+- 已推送远端 `main` 和 tag `0.1.8`，均指向 `777c30ea4586343111b363890b16d9c71affec7e`。
+- 已创建 GitHub Release：`https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/tag/0.1.8`。
+- Release 独立资产已验证：`manifest.json`、`main.js`、`styles.css`、`kenengba-wechat-publisher-0.1.8.zip`。
+- 尝试连接 Chrome 进入 Obsidian 社区后台触发 `Check for new releases`，但 Chrome 连接页面超时；官方社区扫描尚未触发，需要主人手动点击。
