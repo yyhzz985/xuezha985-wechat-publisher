@@ -16,7 +16,11 @@ export type FontWeight = 'light' | 'medium' | 'bold';
 export type SubheadingStyle = 'number' | 'eye' | 'none';
 export type ProFeature = 'wechat_upload';
 
-export const DEFAULT_LICENSE_SERVER_URL = 'https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify';
+export const DEFAULT_LICENSE_SERVER_URL = 'https://pindoutool.cn/wechat-publisher-license/v1/licenses/verify';
+export const FALLBACK_LICENSE_SERVER_URLS = [
+	'https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify',
+];
+export const LICENSE_NETWORK_ERROR_MESSAGE = '授权服务器连接超时或不可达，请稍后重试或联系支持';
 
 export interface EntitlementCache {
 	plan: 'free' | 'pro';

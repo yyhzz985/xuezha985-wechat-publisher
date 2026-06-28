@@ -48,7 +48,7 @@
 | `src/service/` | Markdown、上传、授权、剪贴板 | 主要行为测试在这里 |
 | `src/repository/` | 设置和 vault 文件访问 | 不写业务决策 |
 | `src/utils/` | 纯工具函数 | 保持确定性 |
-| `worker/` | License backend | 生产风险区 |
+| `worker/` / `scripts/license-server/` | License backend | 生产风险区 |
 | `tests/` | 回归测试 | Node test runner |
 | `docs/` | 项目和用户文档 | 保持用户侧文档口径一致 |
 | `.ai/` | handoff 状态 | 不是产品运行时状态 |
@@ -75,7 +75,7 @@
 - `manifest.id` 只允许小写英文字母和连字符；不要使用数字、`obsidian`，也不要以 `plugin` 结尾。
 - 当前 `manifest.name` 为 `Kenengba WeChat Publisher`，使用 Basic Latin 英文展示名。
 - 当前 `manifest.id` 为 `kenengba-wechat-publisher`。
-- 当前本地准备版本为 `0.1.7`，`manifest.minAppVersion` 为 `1.7.2`；使用新 Obsidian API 时必须按 typings / 官方文档同步提升 `minAppVersion` 和 `versions.json`。
+- 当前本地准备版本为 `0.1.8`，`manifest.minAppVersion` 为 `1.7.2`；使用新 Obsidian API 时必须按 typings / 官方文档同步提升 `minAppVersion` 和 `versions.json`。
 - 当前 `isDesktopOnly: true`；插件使用 Electron clipboard fallback，README 和帮助文档必须说明桌面端限制。
 - 如果以后改回 `isDesktopOnly: false`，必须完成移动端兼容审计；如果保留 Electron / Node-only 依赖，继续保持 `true` 并同步文档。
 - README 必须写清网络请求、数据保存位置、免费/Pro 边界和隐私说明。

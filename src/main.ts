@@ -6,6 +6,7 @@ import { ClipboardService } from './service/ClipboardService';
 import { EntitlementService, type LicenseHttpClient, type LicenseVerifyResponse } from './service/EntitlementService';
 import { WeChatDraftService, type WeChatHttpClient } from './service/WeChatDraftService';
 import type { FormattedWeChatArticle } from './service/WeChatFormatService';
+import { FALLBACK_LICENSE_SERVER_URLS, LICENSE_NETWORK_ERROR_MESSAGE } from './settings';
 import type { PluginSettings } from './settings';
 import { ObsidianNoticeView } from './view/NoticeView';
 import { VIEW_TYPE_WECHAT_PUBLISHER_PREVIEW, WeChatPublisherPreviewView } from './view/PreviewView';
@@ -88,15 +89,24 @@ export default class WeChatPublisherPlugin extends Plugin {
 				if (!serverUrl) {
 					throw new Error('授权服务未配置，请重新安装插件');
 				}
-				const response = await requestUrl({
-					url: serverUrl,
-					method: 'POST',
-					body: JSON.stringify(request),
-					headers: {
-						'Content-Type': 'application/json',
-					},
-				});
-				return response.json as LicenseVerifyResponse;
+				const urls = Array.from(new Set([serverUrl, ...FALLBACK_LICENSE_SERVER_URLS].filter(Boolean)));
+				let lastError: unknown;
+				for (const url of urls) {
+					try {
+						const response = await requestUrl({
+							url,
+							method: 'POST',
+							body: JSON.stringify(request),
+							headers: {
+								'Content-Type': 'application/json',
+							},
+						});
+						return response.json as LicenseVerifyResponse;
+					} catch (error) {
+						lastError = error;
+					}
+				}
+				throw new Error(formatLicenseRequestError(lastError));
 			},
 		};
 	}
@@ -174,4 +184,12 @@ export default class WeChatPublisherPlugin extends Plugin {
 		});
 		return leaf;
 	}
+}
+
+function formatLicenseRequestError(error: unknown): string {
+	const message = error instanceof Error ? error.message : String(error);
+	if (/ERR_CONNECTION_TIMED_OUT|timeout|timed out|ENOTFOUND|ECONNRESET|network/i.test(message)) {
+		return LICENSE_NETWORK_ERROR_MESSAGE;
+	}
+	return message || LICENSE_NETWORK_ERROR_MESSAGE;
 }

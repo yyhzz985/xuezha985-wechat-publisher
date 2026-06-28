@@ -2,11 +2,11 @@
 
 ## 日期
 
-2026-06-18 Asia/Shanghai
+2026-06-28 Asia/Shanghai
 
 ## 范围
 
-官方社区 `0.1.6` 自动审查 failed 后的 `0.1.7` 本地整改与打包验证。
+`LIC-001`：官方社区版插件 Pro 授权激活 `net::ERR_CONNECTION_TIMED_OUT` 的正式修复准备。
 
 ## 命令
 
@@ -16,32 +16,33 @@ npm run build
 npm run package:plugin
 npm run verify:release-assets
 git diff --check -- . ':!main.js'
-git diff --check
-Get-FileHash -Algorithm SHA256 -LiteralPath dist\kenengba-wechat-publisher-0.1.7.zip
+Get-FileHash -Algorithm SHA256 -LiteralPath dist\kenengba-wechat-publisher-0.1.8.zip
 ```
 
 ## 结果
 
-核心验证通过。完整 `git diff --check` 未通过，原因是生成的 `main.js` 第 25 行存在依赖 bundle 内容产生的 trailing whitespace；排除生成 bundle 后源码 / 文档 diff check 通过。
+已完成服务器侧修复和本地 `0.1.8` 发版准备；未 push、未创建 GitHub Release、未更新 Obsidian 官方社区版本。
+
+- `npm test`：92 tests，92 pass。
+- `npm run build`：通过。
+- `npm run package:plugin`：通过；因 `dist\kenengba-wechat-publisher-0.1.8.zip` 已存在，脚本按规则生成 `dist\kenengba-wechat-publisher-0.1.8-20260628-142006.zip`，没有覆盖旧包。
+- `npm run verify:release-assets`：通过。
+- `git diff --check -- . ':!main.js'`：通过。
+- `dist\kenengba-wechat-publisher-0.1.8.zip` SHA-256：`BC7A651579FB0D98457021A58C02725886F9F51263D36E85E8A3C9F53E9FFA11`。
+- `dist\kenengba-wechat-publisher-0.1.8-20260628-142006.zip` SHA-256：`679362EB0BF0D65CC7F0B16F501D35A1F1F950FC828EC2FCCED40AEE38217DB8`。
 
 ## 证据
 
-- `npm test`：91 tests，91 pass，0 fail。
-- `npm run build`：`tsc -noEmit -skipLibCheck && node esbuild.config.mjs production` 通过。
-- `npm run package:plugin`：通过；生成并验证 `dist/kenengba-wechat-publisher-0.1.7.zip`。
-- `npm run verify:release-assets`：通过；输出 GitHub Release 必须单独附加 `manifest.json`、`main.js`、`styles.css` 和 package zip。
-- `git diff --check -- . ':!main.js'`：通过；只有 Windows line ending 提示，无 whitespace error。
-- `git diff --check`：失败；`main.js:25: trailing whitespace.`。该文件是 esbuild 生成的 bundle，source files 已通过排除生成 bundle 的检查。
-- `dist/kenengba-wechat-publisher-0.1.7.zip` SHA-256：`2505BA66290817D35B0F654990A27617737A84B72974234F0DA3B2E6AEE4DA78`。
-- 本地已确认 `src/view/PreviewModal.ts` 和 `src/view/PreviewView.ts` 不再直接写 `innerHTML` / `outerHTML`。
-- 本地已确认 `src/view/SettingsTab.ts` 使用 `Setting.setHeading()`。
-- 本地已确认 `manifest.minAppVersion` 为 `1.7.2`，`versions.json` 映射 `0.1.7` 到 `1.7.2`。
-- README 已新增 `English summary`。
+- 阿里云大陆服务器新增授权服务，公网入口为 `https://pindoutool.cn/wechat-publisher-license/v1/licenses/verify`。
+- `GET https://pindoutool.cn/wechat-publisher-license/health` 返回 `{"ok":true}`。
+- 无效卡 POST 返回 `License 不存在`。
+- 已绑定有效卡按同设备校验返回 `active=true`、`plan=pro`、`usedDevices=1`、`maxDevices=1`。
+- 插件本地 `0.1.8` 默认授权地址已改为阿里云入口，旧 `https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify` 保留为 fallback。
+- 授权缓存宽限从 24 小时改为 30 天。
+- 网络错误提示改为“授权服务器连接超时或不可达，请稍后重试或联系支持”。
 
 ## 已知缺口
 
-- 尚未公开发布 `0.1.7`；公开发布需要主人再次确认。
-- 官方社区当前可见的最新审查仍是 `0.1.6` failed，需发布 `0.1.7` 后点击 `Check for new releases` 或重新触发审核。
-- 本地 `origin/main` 由于 `git push` 网络失败仍可能显示旧跟踪状态；远端已通过 GitHub API 更新。
-- 未做干净 Obsidian vault 手动 smoke test。
-- 未跑 Worker dry-run：Worker deployment/config work 属于红线区，且本任务不涉及 Worker 发布。
+- 当前 Obsidian 官方社区线上用户仍在 `0.1.7`，必须公开发布 `0.1.8` 后才会拿到新授权入口。
+- 本地永久卡 CSV 缺少线上 D1 的永久卡 `item=1` 明文；阿里云库已为该卡的已绑定设备建立 legacy entitlement，可支持该设备继续用，但无法支持该卡在新设备重新激活，除非找回明文或换发。
+- 后续新发卡不能只写 Cloudflare D1；必须同步写入阿里云 SQLite 主授权库，见 `LIC-002`。

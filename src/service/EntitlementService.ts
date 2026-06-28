@@ -43,7 +43,7 @@ interface EntitlementServiceOptions {
 	cacheTtlMs?: number;
 }
 
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 export const PRO_REQUIRED_MESSAGE = '需 Pro 授权后可用';
 
 export class EntitlementService {
@@ -57,7 +57,7 @@ export class EntitlementService {
 		private readonly options: EntitlementServiceOptions,
 	) {
 		this.now = options.now ?? (() => new Date());
-		this.cacheTtlMs = options.cacheTtlMs ?? ONE_DAY_MS;
+		this.cacheTtlMs = options.cacheTtlMs ?? THIRTY_DAYS_MS;
 	}
 
 	async ensureFeature(feature: ProFeature): Promise<void> {
@@ -78,7 +78,7 @@ export class EntitlementService {
 		try {
 			status = await this.refreshLicense(feature);
 		} catch {
-			throw new Error('授权校验失败，请联网后重试');
+			throw new Error('授权服务器连接超时或不可达，请稍后重试或联系支持');
 		}
 
 		if (!this.allowsFeature(status, feature)) {

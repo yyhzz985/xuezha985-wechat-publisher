@@ -186,7 +186,7 @@ Bob: 你好，很高兴认识你。
 - 插件设置保存在当前 Obsidian 库的插件数据里，包括 `License Key`、设备 ID、授权缓存、公众号 AppID 和 AppSecret
 - AppSecret 明文保存在当前 Obsidian 库的插件数据里，**不会上传到任何授权服务器**
 - 免费预览和免费复制不会调用授权服务器，也不要求公众号 AppID / AppSecret
-- 授权服务器地址为 `https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify`
+- 授权服务器主入口为 `https://pindoutool.cn/wechat-publisher-license/v1/licenses/verify`，旧 `workers.dev` 地址仅作为备用 fallback
 - 授权服务器只校验 License Key、设备 ID、插件 ID、插件版本和功能名，不接收文章正文、Markdown 原文或公众号密钥
 - Pro 上传草稿箱、上传封面图、上传头像图或本地图片上传会请求 `https://api.weixin.qq.com`
 - 上传草稿箱时，文章 HTML、标题摘要、封面 media_id、评论设置和原文链接会发送给微信官方接口

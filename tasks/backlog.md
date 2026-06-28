@@ -10,7 +10,9 @@
 | OBS-PUBLISH-006 | 待处理 | 干净 vault smoke test | `OBS-PUBLISH-001` | 在干净 Obsidian vault 中手动安装并确认启用、预览、复制路径 | 自动验证已完成；不 deploy |
 | OBS-PUBLISH-007 | 已取代 | 创建 GitHub Release 并提交官方社区 | `OBS-PUBLISH-001`、用户已确认“公开” | Release tag 与 `manifest.json` version 一致，assets 单独包含 `manifest.json`、`main.js`、`styles.css`；官方 PR 分支已推送 | `0.1.5` 已公开，但官方社区新表单拒绝带数字的 `manifest.id`，改由 `OBS-PUBLISH-008` 处理 |
 | OBS-PUBLISH-008 | 已完成 | 修复官方社区表单拒绝 `manifest.id` | `OBS-PUBLISH-007` | `manifest.id` 只含小写英文字母和连字符；`0.1.6` 本地构建、测试、打包验证通过；公开发布前得到主人确认 | `0.1.6` 已发布，Release assets 已单独上传；官方社区表单尚待主人重新提交 |
-| OBS-PUBLISH-009 | 进行中 | 修复官方自动审查失败项 | `OBS-PUBLISH-008` | `0.1.7` 本地移除 source errors：`minAppVersion`、`innerHTML`、设置页 heading、README 英文摘要；验证通过；公开发布前得到主人确认 | 本地已完成并打包，尚未公开发布 `0.1.7` |
+| OBS-PUBLISH-009 | 已完成 | 修复官方自动审查失败项 | `OBS-PUBLISH-008` | `0.1.7` 移除 source errors：`minAppVersion`、`innerHTML`、设置页 heading、README 英文摘要；验证通过；GitHub Release assets 齐全；官方 review completed | 官方插件页已 live；Obsidian 客户端搜索暂未命中，按索引延迟观察 |
+| LIC-001 | 进行中 | 修复 Pro 授权服务连接超时 | 无 | 官方社区版用户可在普通网络下稳定校验授权；卡密存在、未绑定时能成功激活；超时错误有清晰提示 | 阿里云主授权入口已部署，本地 `0.1.8` 已准备；公开发布仍需主人确认 |
+| LIC-002 | 待处理 | 新发卡同步阿里云授权库 | `LIC-001` | 后续批量生成新 License Key 时，Cloudflare D1 和阿里云 SQLite 主授权库保持一致 | 当前 `worker/scripts/issue-license.ps1` 只写 D1；继续发新卡前必须补同步流程 |
 | STAB-004 | 待处理 | 创建 Worker operations runbook | 无 | 记录 Worker dry-run、deploy、secrets、D1 migration 和 issue-license 流程 | 不改生产配置 |
 | STAB-006 | 待处理 | 降低用户文档漂移 | 无 | README、install guide、plugin help 和 Worker README 有清晰归属规则 | 可并入 `OBS-PUBLISH-004` |
 | STAB-007 | 待处理 | 必要时增加 Obsidian UI smoke 验证 | 重复 UI 回归 | 有轻量手动或自动 smoke 路径 | 可并入 `OBS-PUBLISH-006` |
@@ -19,7 +21,7 @@
 
 - 不做代码重构。
 - 不升级依赖。
-- 不 deploy，不 public release。
+- 不再 deploy，不创建或修改 public release。
 - 不做 D1 migration。
 - 不删除文件。
 - 不修改 secrets、License CSV 或生产数据。

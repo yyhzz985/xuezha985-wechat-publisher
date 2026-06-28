@@ -388,7 +388,7 @@
 - 主人确认后公开发布 `0.1.6`：`https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/tag/0.1.6`。
 - 因本机 `git push` 到 GitHub HTTPS 失败，本次通过 GitHub API 更新远端 `main` 和 tag `0.1.6`；远端 commit 为 `85354ff44bae5272b170ba8f5ab074bdf4b96ccb`，内容与本地 `0.1.6` tree 一致。
 - Release 单独上传 `manifest.json`、`main.js`、`styles.css` 和 `kenengba-wechat-publisher-0.1.6.zip`；zip SHA-256 为 `2909B853545D9BE36E0C978B70CC6911B956EEEACD0CC27A54F64AFDF2622076`。
-- 尚未重新提交官方社区表单。
+- 当时官方社区表单提交流程未完成；该状态已由后续 `0.1.7` 官方上架取代。
 
 ## 2026-06-18 v0.1.7 官方自动审查 source errors 本地整改
 
@@ -400,4 +400,33 @@
 - `SettingsTab.ts` 章节标题改为 `new Setting(...).setName(...).setHeading()`。
 - README 新增 `English summary`，并同步 `0.1.7` 安装包示例。
 - 验证：`npm test` 91 项通过；`npm run build` 通过；`npm run package:plugin` 通过，生成 `dist/kenengba-wechat-publisher-0.1.7.zip`，SHA-256 为 `2505BA66290817D35B0F654990A27617737A84B72974234F0DA3B2E6AEE4DA78`。
-- 尚未公开发布 `0.1.7`；需要主人单独确认后才能更新远端、tag 和 GitHub Release。
+- 主人确认后公开发布 `0.1.7`：`https://github.com/yyhzz985/xuezha985-wechat-publisher/releases/tag/0.1.7`。
+- 因本机 `git push` 到 GitHub HTTPS 被拒绝为非 fast-forward，本次继续通过 GitHub API 更新远端 `main`、tag `0.1.7` 和 GitHub Release；最终远端 commit 为 `afb44fa60d13a6782e0a947510af3293329f0b2a`。
+- Release 单独上传 `manifest.json`、`main.js`、`styles.css` 和 `kenengba-wechat-publisher-0.1.7.zip`；zip SHA-256 为 `2505BA66290817D35B0F654990A27617737A84B72974234F0DA3B2E6AEE4DA78`。
+- Obsidian 官方社区 `0.1.7` review 已 completed，无 `Error`；公开页已 live，显示 `Add to Obsidian`。
+- Obsidian 客户端内置插件搜索暂未命中，按索引 / 缓存延迟观察。
+
+## 2026-06-28 LIC-001 官方社区版 Pro 授权超时排查
+
+- 用户反馈：官方社区版插件可安装，但其他用户输入 Pro 授权码后，点击 `校验授权` 报 `授权校验失败：net::ERR_CONNECTION_TIMED_OUT`。
+- 代码链路确认：插件内置授权服务地址为 `https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify`，通过 Obsidian `requestUrl` 发起 POST 校验。
+- Worker 逻辑确认：授权校验按 `licenseKey` hash 查询 D1，不按 `pluginId` 拒绝旧卡；`manifest.id` 改为 `kenengba-wechat-publisher` 不是本次失败根因。
+- 数据确认：截图对应授权码在线上 D1 存在、active、未绑定设备、未过期；2026-06-11 年卡批次和永久卡批次在线上 D1 都是 100 条。
+- 网络确认：本机 Node / Electron 类请求可复现连接超时，系统 DNS 对 `workers.dev` 授权域名返回异常 IP；DoH 能返回 Cloudflare IP，但当前网络仍不能稳定访问。
+- 当前结论：根因是授权服务部署在 `workers.dev` 单一入口，部分用户网络 / DNS 无法稳定访问。短期可让用户换网络 / 开代理后重新校验；正式修复需要主人单独批准后处理自定义域名、fallback endpoint、错误提示和 `0.1.8` 发布。
+- 本轮未修改代码，未修改 Worker production config，未 deploy，未改 D1 schema/data，未发布新版本。
+
+## 2026-06-28 v0.1.8 阿里云主授权入口
+
+- 为解决普通大陆网络无法访问 `workers.dev` 导致的 Pro 激活失败，在阿里云大陆轻量服务器部署主授权入口：`https://pindoutool.cn/wechat-publisher-license/v1/licenses/verify`。
+- 没有把备案域名接到 Cloudflare；当前问题的本质就是用户网络到 Cloudflare / `workers.dev` 不稳定，所以最直接路径是走已备案并已解析到阿里云的主域名路径。
+- 新增 `scripts/license-server/import_licenses.py`：从本地最后两批 License CSV 生成只含 hash 的 SQLite 授权库，并导入 D1 只读导出的已绑定设备记录。
+- 新增 `scripts/license-server/license_server.py`：提供 `GET /health` 和 `POST /v1/licenses/verify`，校验逻辑保持按 License hash 和 device hash 判断，不保存明文 License Key 或设备 ID。
+- 本地最后两批 CSV 共导入 199 张有明文的卡；线上 D1 中缺失明文的永久卡 `item=1` 已用 legacy device entitlement 支持其已绑定设备继续使用。
+- 插件默认授权地址改为阿里云入口，旧 `https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify` 保留为 fallback。
+- 授权成功缓存宽限从 24 小时改为 30 天；网络不可达提示改为“授权服务器连接超时或不可达，请稍后重试或联系支持”。
+- 版本号升为 `0.1.8`，同步更新 `manifest.json`、`versions.json`、`package.json`、`package-lock.json`、README、安装说明、插件帮助、架构、技术栈、路线图、决策和测试。
+- 验证：阿里云 health、无效卡、已绑定有效卡校验通过；`npm test` 92 项通过；`npm run build` 通过；`npm run package:plugin` 通过；`npm run verify:release-assets` 通过。
+- 生成本地包：`dist/kenengba-wechat-publisher-0.1.8.zip`，SHA-256 为 `BC7A651579FB0D98457021A58C02725886F9F51263D36E85E8A3C9F53E9FFA11`；复跑打包时因同版本包已存在，脚本另生成 `dist/kenengba-wechat-publisher-0.1.8-20260628-142006.zip`，SHA-256 为 `679362EB0BF0D65CC7F0B16F501D35A1F1F950FC828EC2FCCED40AEE38217DB8`。
+- 尚未 push、尚未创建 GitHub Release、尚未更新 Obsidian 官方社区版本；公开发布 `0.1.8` 前必须再次得到主人确认。
+- 后续新发卡前必须补 `LIC-002`：确保 Cloudflare D1 和阿里云 SQLite 授权库同步，否则新卡只写 D1 会导致主授权入口无法识别。

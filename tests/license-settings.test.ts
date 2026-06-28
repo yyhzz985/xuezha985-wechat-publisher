@@ -34,6 +34,7 @@ test('adds license fields to plugin settings', () => {
 	assert.match(settings, /entitlementCache:\s*EntitlementCache \| null/);
 	assert.match(settings, /DEFAULT_LICENSE_SERVER_URL/);
 	assert.doesNotMatch(settings, /DEFAULT_PRO_PURCHASE_URL/);
+	assert.match(settings, /pindoutool\.cn\/wechat-publisher-license\/v1\/licenses\/verify/);
 	assert.match(settings, /wechat-publisher-license\.237219265\.workers\.dev\/v1\/licenses\/verify/);
 	assert.match(settings, /maxDevices\?:\s*number/);
 	assert.match(settings, /usedDevices\?:\s*number/);
@@ -77,6 +78,7 @@ test('locks wechat api settings and avatar upload behind pro entitlement', () =>
 
 test('wires license refresh and entitlement status through main without purchase page', () => {
 	assert.match(main, /createLicenseHttpClient/);
+	assert.match(main, /FALLBACK_LICENSE_SERVER_URLS/);
 	assert.match(main, /publisherController\.refreshLicense/);
 	assert.match(main, /publisherController\.getEntitlementStatus/);
 	assert.doesNotMatch(main, /DEFAULT_PRO_PURCHASE_URL/);

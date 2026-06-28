@@ -43,7 +43,7 @@ GitHub 仓库地址：[https://github.com/yyhzz985/xuezha985-wechat-publisher](h
 下载最新版本里的 zip 文件，例如：
 
 ```text
-kenengba-wechat-publisher-0.1.7.zip
+kenengba-wechat-publisher-0.1.8.zip
 ```
 
 ### 第二步：解压文件
@@ -152,7 +152,7 @@ kenengba-wechat-publisher
 最常见错误是多了一层目录，例如：
 
 ```text
-.obsidian/plugins/kenengba-wechat-publisher/kenengba-wechat-publisher-0.1.7/manifest.json
+.obsidian/plugins/kenengba-wechat-publisher/kenengba-wechat-publisher-0.1.8/manifest.json
 ```
 
 这种是不对的。
@@ -386,7 +386,7 @@ Pro 功能：
 - AppSecret 明文保存在当前 Obsidian 库的插件数据里，请只在可信设备和可信 vault 中填写
 - 免费预览和免费复制不会调用授权服务器，也不要求公众号 AppID / AppSecret
 - 点击 `校验授权` 或使用 Pro 功能前需要校验授权时，插件会请求授权服务器，只发送 `License Key`、设备 ID、插件 ID、插件版本和功能名
-- 授权服务器地址为 `https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify`
+- 授权服务器主入口为 `https://pindoutool.cn/wechat-publisher-license/v1/licenses/verify`，旧 `workers.dev` 地址仅作为备用 fallback
 - 授权服务器不会接收文章正文、Markdown 原文、公众号 AppSecret 或公众号接口返回内容
 - 只有使用上传草稿箱、上传封面图、上传头像图或 Pro 本地图片上传时，插件才会调用微信公众号接口
 - 公众号接口请求会直接发往 `https://api.weixin.qq.com`，用于获取 `access_token`、上传正文图片、上传封面素材或创建草稿
@@ -427,7 +427,7 @@ npm run verify:release-assets
 manifest.json
 main.js
 styles.css
-kenengba-wechat-publisher-0.1.7.zip
+kenengba-wechat-publisher-0.1.8.zip
 ```
 
 zip 只用于手动安装，不能替代单独的 `manifest.json`、`main.js` 和 `styles.css`。创建 GitHub Release、push 和提交 Obsidian 官方社区 PR 都属于公开发布动作，需要单独确认。

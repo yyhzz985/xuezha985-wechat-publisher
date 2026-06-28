@@ -1,4 +1,5 @@
 node_modules/
+__pycache__/
 .obsidian/
 .playwright-mcp/
 .DS_Store

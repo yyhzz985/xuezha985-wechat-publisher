@@ -18,7 +18,7 @@
 | 代码高亮 | Shiki core | 在生成 HTML 中提供稳定语法高亮 | 普通转义代码块 |
 | 构建 | esbuild + TypeScript check | 现有快速 bundle 路径 | 仅 `tsc`，不能 bundle 插件 |
 | 测试 | Node test runner with `tsx` | 已有回归测试 | 只做手动 Obsidian 检查，太弱 |
-| License backend | Cloudflare Worker + D1 | 小型托管 API 和设备绑定 | 静态 license 列表，控制更弱 |
+| License backend | 阿里云轻量服务器 Python service + SQLite，Cloudflare Worker + D1 作为 legacy fallback | 大陆普通网络优先可达，同时保留旧 Worker 数据链路 | 只依赖 `workers.dev`，大陆网络不稳定 |
 | 打包 | PowerShell `scripts/package-plugin.ps1` | 创建 Obsidian 安装 zip，并调用 release asset 验证 | 不能替代 GitHub Release 单独附件 |
 | Release 检查 | PowerShell `scripts/verify-release-assets.ps1` | 校验 manifest、versions、zip 内容和单独资产规则 | 只做本地检查，不创建 Release |
 
@@ -31,7 +31,7 @@
 | 已观察 Node | `v22.22.1` |
 | 已观察 npm | `10.9.4` |
 | 根 package | `obsidian-kenengba-wechat-publisher` |
-| 当前版本 | `0.1.7` |
+| 当前版本 | `0.1.8` |
 
 ## 依赖
 

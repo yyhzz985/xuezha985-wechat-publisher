@@ -10,6 +10,8 @@
 | `main.js` | Obsidian 使用的生成插件 bundle |
 | `styles.css` | Obsidian 加载的插件 CSS |
 | `scripts/verify-release-assets.ps1` | 本地 release/package 资产验证 |
+| `scripts/license-server/license_server.py` | 阿里云 License verify service |
+| `scripts/license-server/import_licenses.py` | 从本地 License CSV 构建阿里云 SQLite 授权库 |
 | `worker/src/index.ts` | Cloudflare Worker 请求路由 |
 
 ## 主要目录
@@ -20,7 +22,7 @@
 | `tests/` | 回归测试 |
 | `worker/` | License service、D1 migration、admin script |
 | `docs/` | 用户文档、产品文档、开发历史 |
-| `scripts/` | 打包脚本 |
+| `scripts/` | 打包脚本和阿里云授权服务辅助脚本 |
 | `tasks/` | 当前工作和 backlog |
 | `.ai/` | goals、findings、checks、handoff |
 | `dist/` | 生成的 zip 包，已忽略 |
@@ -37,6 +39,8 @@
 | `src/service/WeChatDraftService.ts` | WeChat token、图片上传、草稿上传逻辑 |
 | `src/service/EntitlementService.ts` | Pro feature gate 和 license cache |
 | `src/repository/SettingsRepository.ts` | Obsidian 插件设置持久化 |
+| `scripts/license-server/license_server.py` | 阿里云大陆授权校验服务 |
+| `scripts/license-server/import_licenses.py` | 授权 CSV 导入和设备绑定迁移脚本 |
 | `worker/wrangler.jsonc` | Worker name 和 D1 binding |
 | `worker/migrations/0001_license_orders.sql` | 当前 D1 schema |
 | `docs/DEVELOPMENT_LOG.md` | 历史实现日志 |
@@ -47,7 +51,8 @@
 | 路径 | 数据 |
 | --- | --- |
 | 用户 vault 中的 Obsidian plugin data | 设置、AppSecret、License Key、entitlement cache |
-| Cloudflare D1 | License hashes、activations、order/payment placeholders |
+| 阿里云轻量服务器 SQLite | 当前官方社区版主授权库 |
+| Cloudflare D1 | legacy / fallback License hashes、activations、order/payment placeholders |
 | `worker/.admin-token.local` | 本地 admin token，已被 git 忽略 |
 | `worker/.dev.vars*` / `worker/.env*` | 本地 Worker secrets，已被 git 忽略 |
 | `worker/licenses-*.csv` | 生成的 License CSV，已被 git 忽略 |
@@ -85,6 +90,6 @@ npm run verify:release-assets
 - 仓库当前跟踪生成的根目录 `main.js`。
 - `dist/` 已忽略。
 - 当前分支是 `main`，跟踪 `origin/main`。
-- 当前本地 `manifest.id` 是 `kenengba-wechat-publisher`，`manifest.name` 是 `Kenengba WeChat Publisher`，`version` 是 `0.1.7`，`minAppVersion` 是 `1.7.2`，`isDesktopOnly` 是 `true`。
+- 当前本地 `manifest.id` 是 `kenengba-wechat-publisher`，`manifest.name` 是 `Kenengba WeChat Publisher`，`version` 是 `0.1.8`，`minAppVersion` 是 `1.7.2`，`isDesktopOnly` 是 `true`。
 - `AGENTS.md`、`docs/00-07`、`tasks/` 和 `.ai/` 中的文档契约文件已进入仓库；当前可能存在未提交整改改动。
 - `cover-image/wechat-publisher/prompts/*.md` 也未跟踪；没有用户决策前，不要删除、移动、忽略或跟踪它。

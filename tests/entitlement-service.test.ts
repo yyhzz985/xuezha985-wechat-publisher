@@ -151,7 +151,7 @@ test('rejects expired cache when license server cannot be reached', async () => 
 			licenseServerUrl: 'https://license.example.com/v1/licenses/verify',
 			entitlementCache: {
 				...PRO_CACHE,
-				checkedAt: '2026-06-04T00:00:00.000Z',
+				checkedAt: '2026-04-01T00:00:00.000Z',
 			},
 		},
 		{
@@ -163,8 +163,33 @@ test('rejects expired cache when license server cannot be reached', async () => 
 
 	await assert.rejects(
 		() => service.ensureFeature('wechat_upload'),
-		/授权校验失败，请联网后重试/,
+		/授权服务器连接超时或不可达，请稍后重试或联系支持/,
 	);
+});
+
+test('allows pro feature from cached entitlement within grace period', async () => {
+	let verifyCount = 0;
+	const { service } = createService(
+		{
+			...DEFAULT_SETTINGS,
+			deviceId: 'device-1',
+			licenseKey: 'LICENSE',
+			entitlementCache: {
+				...PRO_CACHE,
+				checkedAt: '2026-05-20T00:00:00.000Z',
+			},
+		},
+		{
+			async verify() {
+				verifyCount += 1;
+				throw new Error('should not request within grace period');
+			},
+		},
+	);
+
+	await service.ensureFeature('wechat_upload');
+
+	assert.equal(verifyCount, 0);
 });
 
 test('rejects inactive or expired license responses', async () => {

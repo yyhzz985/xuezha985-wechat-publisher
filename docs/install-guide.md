@@ -15,7 +15,7 @@
 打开下载页，下载最新版本里的 zip 文件，例如：
 
 ```text
-kenengba-wechat-publisher-0.1.7.zip
+kenengba-wechat-publisher-0.1.8.zip
 ```
 
 不要下载 GitHub 页面上的 `Source code`，那个是源码包，不是 Obsidian 插件安装包。
@@ -136,7 +136,7 @@ Pro 功能包括：
 - 免费预览和免费复制不会调用授权服务器，也不要求公众号 AppID / AppSecret
 - 插件设置保存在当前 Obsidian 库的插件数据里，包括 `License Key`、设备 ID、授权缓存、公众号 AppID 和 AppSecret
 - AppSecret 明文保存在当前 Obsidian 库的插件数据里，请只在可信设备和可信 vault 中填写
-- 授权校验会请求 `https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify`
+- 授权校验主入口为 `https://pindoutool.cn/wechat-publisher-license/v1/licenses/verify`，旧 `workers.dev` 地址仅作为备用 fallback
 - 授权服务器只接收 `License Key`、设备 ID、插件 ID、插件版本和功能名，不接收文章正文或公众号 AppSecret
 - Pro 上传草稿箱、上传封面图、上传头像图或本地图片上传会请求 `https://api.weixin.qq.com`
 - 上传草稿箱时，文章 HTML、标题摘要、封面 media_id、评论设置和原文链接会发送给微信官方接口
@@ -156,7 +156,7 @@ Pro 功能包括：
 最常见错误是多了一层目录，例如：
 
 ```text
-.obsidian/plugins/kenengba-wechat-publisher/kenengba-wechat-publisher-0.1.7/manifest.json
+.obsidian/plugins/kenengba-wechat-publisher/kenengba-wechat-publisher-0.1.8/manifest.json
 ```
 
 这种目录结构是不对的。

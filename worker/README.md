@@ -4,6 +4,10 @@
 
 当前公开购买入口已关闭：`/buy`、`/v1/orders/create`、`/v1/pay/mbd/webhook` 都只返回“购买入口暂未开放”。现在的发卡方式是后台脚本批量生成 License Key，再手动发给用户。
 
+> 2026-06-28 起，官方社区版插件的主授权入口已迁到阿里云大陆服务器：
+> `https://pindoutool.cn/wechat-publisher-license/v1/licenses/verify`。
+> 本 Worker 地址保留为 legacy / fallback。继续用本脚本发新卡后，必须同步导入阿里云授权库，否则大陆用户可能无法用新卡激活。
+
 ## 1. 数据库
 
 ```powershell
@@ -40,13 +44,13 @@ npx wrangler deploy --dry-run
 npx wrangler deploy
 ```
 
-当前线上地址：
+当前 Worker 线上地址：
 
 ```text
 https://wechat-publisher-license.237219265.workers.dev
 ```
 
-插件内置校验接口：
+legacy / fallback 校验接口：
 
 ```text
 https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify
@@ -111,13 +115,13 @@ $body = @{
   licenseKey = "PRO-xxxx"
   deviceId = "codex-check"
   pluginId = "kenengba-wechat-publisher"
-  pluginVersion = "0.1.7"
+  pluginVersion = "0.1.8"
   feature = "wechat_upload"
 } | ConvertTo-Json
 
 Invoke-RestMethod `
   -Method Post `
-  -Uri "https://wechat-publisher-license.237219265.workers.dev/v1/licenses/verify" `
+  -Uri "https://pindoutool.cn/wechat-publisher-license/v1/licenses/verify" `
   -ContentType "application/json" `
   -Body $body
 

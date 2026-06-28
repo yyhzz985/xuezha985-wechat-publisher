@@ -17,6 +17,8 @@
 | D011 | 2026-06-18 | `npm run package:plugin` 后自动运行 release asset 验证 | GitHub Release 需要单独上传 `manifest.json`、`main.js`、`styles.css`，zip 不能替代它们 | 生效 |
 | D012 | 2026-06-18 | `manifest.id` 使用 `kenengba-wechat-publisher` | 官方社区提交页拒绝带数字的 `xuezha985-wechat-publisher`；新 ID 只含小写英文字母和连字符，并避开已有 `wechat-publisher` 撞名 | 生效 |
 | D013 | 2026-06-18 | `0.1.7` 把 `minAppVersion` 提升到 `1.7.2`，并用 `sanitizeHTMLToDom` 替代 view 里的 `innerHTML` 写入 | 官方自动审查对 `0.1.6` 标记 failed；`loadIfDeferred()` / `revealLeaf()` 在本地 Obsidian typings 标注为 `@since 1.7.2`，直接写 `innerHTML` 被 source review 拒绝 | 生效 |
+| D014 | 2026-06-28 | 官方社区版授权不能长期只依赖单一 `workers.dev` 入口 | 部分用户网络 / DNS 环境访问 `wechat-publisher-license.237219265.workers.dev` 会超时，导致有效 Pro 授权码无法激活；`0.1.8` 改用阿里云大陆授权入口，并保留 Worker fallback | 已实施 |
+| D015 | 2026-06-28 | 发新卡前必须同步阿里云授权库 | 官方社区版主授权入口已迁到阿里云 SQLite；继续只写 Cloudflare D1 会导致大陆用户新卡无法在主入口激活 | 生效 |
 
 ## 已拒绝选项
 

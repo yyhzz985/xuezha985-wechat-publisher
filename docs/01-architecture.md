@@ -26,7 +26,7 @@
 | raw | Obsidian vault 中的用户 Markdown 笔记 | 除明确格式化动作外，不改源笔记 |
 | settings | 通过 `SettingsRepository` 保存的 Obsidian 插件数据 | 可能包含 AppSecret 和 License Key；不要记录 secret |
 | processed | 运行时格式化 HTML 和已跟踪的 `main.js` bundle | 从源码生成；不要手改生成 bundle |
-| license | `worker/` schema 下的 Cloudflare D1 表 | schema 和生产数据改动需要明确批准 |
+| license | 阿里云轻量服务器 SQLite 授权库；Cloudflare D1 作为 legacy / fallback | schema 和生产数据改动需要明确批准 |
 | docs | README、docs、tasks、`.ai/` handoff | 文档是项目连续性的来源 |
 
 ## 进：输入
@@ -37,7 +37,7 @@
 | 插件设置 | 设置页或预览面板 | `PluginSettings` | Service 和渲染流程 |
 | 本地图片 | 预览、复制、上传中的图片引用 | Vault file bytes | `ObsidianImageRepository` |
 | WeChat API 响应 | 上传和 token 请求 | JSON / bytes | `WeChatDraftService` |
-| License 校验请求 | 用户校验或 Pro gated action | JSON | Worker `LicenseService` |
+| License 校验请求 | 用户校验或 Pro gated action | JSON | 阿里云 License service；Worker `LicenseService` 作为 fallback |
 
 ## 数据流
 
@@ -53,8 +53,9 @@ Markdown note
 ```text
 License Key + device ID
 -> EntitlementService
--> Worker /v1/licenses/verify
--> D1Repository + LicenseService
+-> https://pindoutool.cn/wechat-publisher-license/v1/licenses/verify
+-> 阿里云 License service + SQLite
+-> fallback: Worker /v1/licenses/verify + D1Repository + LicenseService
 -> cached entitlement in plugin settings
 ```
 
@@ -74,7 +75,7 @@ License Key + device ID
 - 当前插件声明 `isDesktopOnly: true`，复制富文本 HTML 使用 Electron clipboard fallback。
 - WeChat 粘贴兼容性更适合使用内联 HTML/CSS，而不是外部样式。
 - Shiki 会被打进 bundle，因此渲染改动可能影响 bundle 大小。
-- Worker 代码在同一个仓库，但依赖生产 D1 和 secret。
+- 阿里云 License service 运行在 `pindoutool.cn` 服务器，使用 SQLite 授权库；Worker 代码仍在同一个仓库，作为 legacy fallback，依赖生产 D1 和 secret。
 
 ## 版本边界
 

@@ -2,16 +2,23 @@
 
 ## 当前阻塞
 
-- 官方社区 `0.1.6` 自动审查 failed；本地已准备 `0.1.7` 修复，但公开发布需要主人确认。
-- 官方社区表单曾拒绝 `0.1.5`：旧 `manifest.id` 为 `xuezha985-wechat-publisher`，包含数字；本地已改为 `kenengba-wechat-publisher`。
+- `LIC-001` 正在处理：官方社区版插件 Pro 授权校验在部分用户网络下报 `net::ERR_CONNECTION_TIMED_OUT`。
+  - 当前判断不是授权码批次缺失、D1 未写入、卡密已绑定或 `manifest.id` 变化导致。
+  - 阻塞点原本在用户网络 / DNS 到 `workers.dev` 授权域名的访问链路。
+  - 服务器侧修复已完成：阿里云主授权入口为 `https://pindoutool.cn/wechat-publisher-license/v1/licenses/verify`。
+  - 本地 `0.1.8` 已准备，但公开发布、GitHub Release 和官方社区更新仍需主人明确批准。
+- `LIC-002` 待处理：后续新发卡不能只写 Cloudflare D1，必须同步阿里云 SQLite 主授权库。
+- 无当前上架阻塞：`0.1.7` 官方 review 已 completed，公开页已 live。
+- Obsidian 客户端内置插件搜索暂未命中，按官方索引 / 客户端缓存延迟观察。
+- 官方社区表单曾拒绝 `0.1.5`：旧 `manifest.id` 为 `xuezha985-wechat-publisher`，包含数字；本地已改为 `kenengba-wechat-publisher`，`0.1.7` 已上架。
 - 本机 `git push` 到 GitHub HTTPS 失败，本轮远端发布通过 GitHub API 完成；本地 `origin/main` 可能仍显示旧跟踪状态。
 - 完整 `git diff --check` 仍会报告生成的 `main.js:25` trailing whitespace；源码 / 文档排除 `main.js` 后已通过。
-- 干净 Obsidian vault 手动 smoke test 尚未执行；如官方 review 或主人要求，需要另开当前任务。
+- 干净 Obsidian vault 手动 smoke test 尚未执行；如主人要求，需要另开任务。
 
 ## 操作前需要批准
 
 - 删除或移动文件 / 目录。
-- 再次 push、改 tag、覆盖 Release asset、创建 `0.1.7` GitHub Release 或修改已发布 Release。
+- 再次 push、改 tag、覆盖 Release asset、创建新的 GitHub Release 或修改已发布 Release。
 - 修改已发布 GitHub Release。
 - 提交新的 `obsidian-releases` PR 或通过官方入口提审。
 - Deploy Cloudflare Worker。
